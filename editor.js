@@ -16,6 +16,28 @@ const allCharacters = {
   }
 };
 
+// --- 自動でキャラクターカードを1回だけ生成する処理 ---
+const grid = document.getElementById('character-grid');
+grid.innerHTML = ""; // 念のため中身をリセット
+
+Object.keys(allCharacters).forEach(id => {
+  const char = allCharacters[id];
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.onclick = () => openDetail(id);
+
+  card.innerHTML = `
+    <div class="card-img-container">
+      <img class="card-img" src="${char.image}" alt="${char.name}" oncontextmenu="return false;" ondragstart="return false;">
+    </div>
+    <div class="card-info">
+      <h2 class="card-name">${char.name}</h2>
+      <span class="card-tag"># ${char.tag}</span>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
 // --- 詳細画面を開く処理 ---
 function openDetail(id) {
   const char = allCharacters[id];
@@ -40,20 +62,21 @@ function openDetail(id) {
 
   const overlay = document.getElementById('detail-overlay');
   overlay.classList.add('active');
-  document.body.style.overflow = 'hidden'; // 背景のスクロールをロック
+  document.body.style.overflow = 'hidden';
 }
 
 // --- 詳細画面を閉じる処理 ---
 function closeDetail() {
   const overlay = document.getElementById('detail-overlay');
   overlay.classList.remove('active');
-  document.body.style.overflow = ''; // スクロールロックを解除
+  document.body.style.overflow = '';
 }
 
-// ESCキーが押されたときにも詳細画面を閉じる
+// ESCキーで閉じる
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeDetail();
   }
 });
+
 
