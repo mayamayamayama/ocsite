@@ -19,31 +19,6 @@
       overflow-x: hidden;
     }
 
-    /* --- ページ遷移用の黒い幕（トランジション用） --- */
-    #page-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #0d0d0d;
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 1; /* 初期状態は真っ黒 */
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* ページ読み込み完了後に幕を明ける */
-    body.loaded #page-overlay {
-      opacity: 0;
-    }
-
-    /* 遷移時に幕を閉じる */
-    body.is-exiting #page-overlay {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
     /* --- ふわっと現れるアニメーションの定義 --- */
     @keyframes fadeInSlide {
       from {
@@ -127,6 +102,7 @@
       object-position: center 20%;
       transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       
+      /* 長押し保存やドラッグをガード */
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
@@ -172,8 +148,55 @@
 </head>
 <body>
 
-  <!-- ページ遷移時のオーバーレイ膜 -->
-  <div id
+  <header>
+    <h1>OC ARCHIVE</h1>
+    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+  </header>
+
+  <main class="character-grid" id="character-grid"></main>
+
+  <footer>
+    &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+  </footer>
+
+  <script>
+    const characters = [
+      {
+        id: "Barnard",
+        name: "Barnard",
+        tag: "Male / Human",
+        image: "Barnard.png",
+      },
+      {
+        id: "Mele",
+        name: "Mele",
+        tag: "Female / Human",
+        image: "mele.png",
+      }
+    ];
+
+    const grid = document.getElementById('character-grid');
+
+    characters.forEach(char => {
+      const card = document.createElement('a');
+      card.className = 'card';
+      card.href = `detail.html?id=${char.id}`;
+
+      card.innerHTML = `
+        <div class="card-img-container">
+          <img class="card-img" src="${char.image}" alt="${char.name}" oncontextmenu="return false;" ondragstart="return false;">
+        </div>
+        <div class="card-info">
+          <h2 class="card-name">${char.name}</h2>
+          <span class="card-tag"># ${char.tag}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
 
 
 
