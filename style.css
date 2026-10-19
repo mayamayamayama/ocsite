@@ -1,19 +1,19 @@
-/* --- 基本設定 --- */
-* {
-  box-sizing: border-box;
-}
-
 body {
   background-color: #0d0d0d;
   color: #e0e0e0;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-height: 100vh;
+  box-sizing: border-box;
+  /* 横スクロールを防ぐ */
+  overflow-x: hidden;
 }
 
-/* --- アニメーション定義 --- */
+/* --- ふわっと現れるアニメーションの定義 --- */
 @keyframes fadeInSlide {
   from {
     opacity: 0;
@@ -25,51 +25,11 @@ body {
   }
 }
 
-/* --- コラージュエリア --- */
-#hero-section {
-  position: relative;
-  width: 100vw;
-  height: 80vh;
-  background: radial-gradient(circle at center, #151515 0%, #0d0d0d 100%);
-  overflow: hidden;
-}
-
-.collage-item {
-  position: absolute;
-  cursor: grab;
-  user-select: none;
-  max-width: 320px;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-  transition: filter 0.2s;
-}
-
-.collage-item img {
-  width: 100%;
-  display: block;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.collage-item:active {
-  cursor: grabbing;
-  filter: drop-shadow(0 15px 30px rgba(255,255,255,0.2));
-  z-index: 999 !important;
-}
-
-/* --- ノイズグラデーション境界 --- */
-#noise-transition {
-  width: 100vw;
-  height: 200px;
-  background: linear-gradient(to bottom, transparent, #0d0d0d);
-  position: relative;
-}
-
-/* --- インデックス・ヘッダー --- */
 header {
-  margin-top: 20px;
+  margin-top: 40px;
   margin-bottom: 40px;
   text-align: center;
+  /* 読み込み時にふわっと出る */
   animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -80,7 +40,6 @@ h1 {
   margin: 0;
   border-bottom: 1px solid #333;
   padding-bottom: 10px;
-  display: inline-block;
 }
 
 .subtitle {
@@ -90,15 +49,12 @@ h1 {
   letter-spacing: 0.1em;
 }
 
-/* --- キャラクターグリッド & カード --- */
 .character-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 25px;
   width: 100%;
   max-width: 900px;
-  margin: 0 auto;
-  padding: 0 20px;
 }
 
 .card {
@@ -107,13 +63,17 @@ h1 {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none;
   color: inherit;
   display: block;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
+
+  /* 読み込み時に時間差でふわっと出る */
   opacity: 0;
   animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* 1番目のカードは少し早く、2番目は少し遅れて出現する演出 */
 .card:nth-child(1) { animation-delay: 0.2s; }
 .card:nth-child(2) { animation-delay: 0.35s; }
 
@@ -136,11 +96,14 @@ h1 {
   object-fit: cover;
   object-position: center 20%;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* 長押し保存やドラッグをガード */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
+/* ホバーしたときに画像がゆっくりズームするおしゃれアニメーション */
 .card:hover .card-img {
   transform: scale(1.05);
 }
@@ -166,31 +129,27 @@ h1 {
   margin-top: 5px;
 }
 
-footer {
-  padding: 60px 0 20px 0;
-  font-size: 0.7rem;
-  color: #444;
-  text-align: center;
-}
-
-/* --- シームレス詳細画面（オーバーレイ） --- */
+/* --- 詳細画面（オーバーレイ）のスタイル --- */
 #detail-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(13, 13, 13, 0.95);
-  backdrop-filter: blur(10px);
+  background-color: rgba(13, 13, 13, 0.92);
+  backdrop-filter: blur(8px);
   z-index: 1000;
-  overflow-y: auto;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
+  align-items: flex-start;
+  padding: 20px;
   box-sizing: border-box;
+  overflow-y: auto;
+
+  /* 初期状態は非表示（フェード用） */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 #detail-overlay.active {
@@ -198,29 +157,27 @@ footer {
   pointer-events: auto;
 }
 
-.detail-container {
+.container {
   max-width: 800px;
   width: 100%;
-  transform: translateY(30px);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 30px;
+  margin-bottom: 50px;
 }
 
-#detail-overlay.active .detail-container {
-  transform: translateY(0);
-}
-
-#close-detail-btn {
+.back-btn {
   background: none;
   border: none;
+  display: inline-block;
   color: #888;
+  text-decoration: none;
   font-size: 0.85rem;
-  cursor: pointer;
   margin-bottom: 25px;
+  cursor: pointer;
   transition: color 0.2s;
   padding: 0;
 }
 
-#close-detail-btn:hover {
+.back-btn:hover {
   color: #fff;
 }
 
@@ -309,34 +266,11 @@ footer {
   margin: 0;
 }
 
-/* --- コラージュ調整パネル --- */
-#control-panel {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(10, 10, 10, 0.9);
-  border: 1px solid #333;
-  padding: 12px;
-  z-index: 2000;
-  border-radius: 6px;
-  font-size: 0.8rem;
-}
-
-.panel-msg {
-  color: #888;
-  margin-bottom: 8px;
-}
-
-#control-panel button {
-  background: #222;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 6px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  width: 100%;
-}
-
-#control-panel button:hover {
-  background: #333;
+footer {
+  margin-top: auto;
+  padding-top: 60px;
+  padding-bottom: 20px;
+  font-size: 0.7rem;
+  color: #444;
+  text-align: center;
 }
