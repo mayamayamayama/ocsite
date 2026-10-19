@@ -4,19 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
-  <!-- デザイン（style.css）を読み込み -->
+  <!-- デザイン（style.css）と、追加の演出（effects.css）を読み込み -->
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="effects.css">
 </head>
 <body>
 
+  <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
+  <canvas id="dot-bg" aria-hidden="true"></canvas>
+
   <!-- ==========================================
-       ビュー1：キャラクター一覧画面
+       ビュー1：入場画面 ＋ キャラクター一覧画面
        ========================================== -->
   <div id="index-screen" class="view active">
-    <header>
+
+    <!-- 入場画面（あとでコラージュに差し替える場所） -->
+    <section class="hero">
       <h1>OC ARCHIVE</h1>
       <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
-    </header>
+    </section>
+
+    <!-- ノイズのグラデーション（effects.js が描きます） -->
+    <canvas id="noise-divider" aria-hidden="true"></canvas>
 
     <main class="character-grid" id="character-grid"></main>
 
@@ -26,7 +35,7 @@
   </div>
 
   <!-- ==========================================
-       ビュー2：詳細画面（同じHTML内に同居しているのでカクつかない）
+       ビュー2：詳細画面
        ========================================== -->
   <div id="detail-screen" class="view">
     <div class="container">
@@ -38,8 +47,8 @@
     </footer>
   </div>
 
-  <!-- スクリプト（editor.js）を読み込み -->
+  <!-- スクリプト：キャラクターデータ（editor.js）と、演出（effects.js） -->
   <script src="editor.js"></script>
+  <script src="effects.js"></script>
 </body>
 </html>
-
