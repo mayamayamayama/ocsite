@@ -69,10 +69,7 @@
       height: 280px;
       object-fit: cover;
       background-color: #222;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #555;
+      display: block;
     }
 
     .card-info {
@@ -167,8 +164,36 @@
     .modal-desc {
       line-height: 1.8;
       color: #ccc;
-      white-space: pre-wrap; /* 改行を反映 */
+      white-space: pre-wrap;
       font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    /* Prompt（プロンプト表示エリア） */
+    .modal-prompt-section {
+      background-color: #0a0a0a;
+      border: 1px solid #262626;
+      border-radius: 6px;
+      padding: 12px 15px;
+      margin-top: 15px;
+    }
+
+    .prompt-label {
+      font-size: 0.7rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .prompt-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      color: #8ab4f8;
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin: 0;
     }
 
     footer {
@@ -186,7 +211,6 @@
     <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
   </header>
 
-  <!-- ここにキャラクターカードが自動生成されます -->
   <main class="character-grid" id="character-grid"></main>
 
   <!-- ポップアップ（詳細画面） -->
@@ -196,6 +220,12 @@
       <h2 class="modal-title" id="modal-title">キャラ名</h2>
       <span class="modal-tag" id="modal-tag">#TAG</span>
       <div class="modal-desc" id="modal-desc">説明文</div>
+      
+      <!-- PROMPTを表示する枠（データにある場合のみ表示） -->
+      <div class="modal-prompt-section" id="modal-prompt-box">
+        <span class="prompt-label">Prompt / Tags</span>
+        <p class="prompt-text" id="modal-prompt"></p>
+      </div>
     </div>
   </div>
 
@@ -206,25 +236,28 @@
   <script>
     /* ========================================================
        ★ここにキャラクターのデータをどんどん追加できます！
+       「prompt: "..."」を追加しました！
     ======================================================== */
     const characters = [
       {
         id: "001",
         name: "メレ",
         tag: "BRAIN WORLD / MEMORY",
-        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=MELE", // 後で画像URLに変更OK
-        description: "ここにメレの詳細テキストや設定、ストーリーを書くことができます。\n改行を入れるとそのまま表示されます！"
+        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=MELE", // または "mele.png"
+        description: "ここにメレの詳細テキストや設定、ストーリーを書くことができます。",
+        prompt: "1boy, solo, white hair, glowing eyes, brain world, dark atmosphere"
       },
       {
         id: "002",
         name: "狼鬼",
         tag: "WOLF / NINJA",
-        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=ROUKI",
-        description: "ここに狼鬼の詳細プロファイルを書くことができます。\n技や生い立ちなど、好きなだけ長文を入力可能です。"
+        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=ROUKI", // または "rouki.png"
+        description: "ここに狼鬼の詳細プロファイルを書くことができます。",
+        prompt: "1boy, wolf ears, wolf tail, ninja costume, dark background"
       }
     ];
 
-    /* --- 以下はカードとポップアップを自動作成する処理 --- */
+    /* --- カードとポップアップの生成処理 --- */
     const grid = document.getElementById('character-grid');
 
     characters.forEach(char => {
@@ -246,6 +279,15 @@
       document.getElementById('modal-title').innerText = char.name;
       document.getElementById('modal-tag').innerText = "# " + char.tag;
       document.getElementById('modal-desc').innerText = char.description;
+      
+      const promptBox = document.getElementById('modal-prompt-box');
+      if (char.prompt && char.prompt.trim() !== "") {
+        document.getElementById('modal-prompt').innerText = char.prompt;
+        promptBox.style.display = "block";
+      } else {
+        promptBox.style.display = "none"; // promptが無い場合は枠ごと隠す
+      }
+
       document.getElementById('modal-overlay').classList.add('active');
     }
 
