@@ -4,45 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
+  <!-- デザイン（style.css）を読み込み -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>OC ARCHIVE</h1>
-    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
-  </header>
+  <!-- ==========================================
+       ビュー1：キャラクター一覧画面
+       ========================================== -->
+  <div id="index-view" class="view active">
+    <header>
+      <h1>OC ARCHIVE</h1>
+      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+    </header>
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OC ARCHIVE</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <main class="character-grid" id="character-grid"></main>
 
-  <header>
-    <h1>OC ARCHIVE</h1>
-    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
-  </header>
-
-  <!-- ▼ ここを「中身が空のグリッド」にする！ (JSが自動でBarnardとMeleを1回だけ生成します) -->
-  <main class="character-grid" id="character-grid"></main>
-
-  <footer>
-    &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
-  </footer>
-
-  <!-- 詳細画面オーバーレイ -->
-  <div id="detail-overlay" onclick="closeDetail(event)">
-    <div class="container" onclick="event.stopPropagation()">
-      <button class="back-btn" onclick="closeDetail()">&larr; BACK TO INDEX</button>
-      <div class="profile-box" id="profile-box"></div>
-    </div>
+    <footer>
+      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+    </footer>
   </div>
 
+  <!-- ==========================================
+       ビュー2：詳細画面（同じHTML内に同居しているのでカクつかない）
+       ========================================== -->
+  <div id="detail-view" class="view">
+    <div class="container">
+      <button class="back-btn" id="back-btn">&larr; BACK TO INDEX</button>
+      <div class="profile-box" id="profile-box"></div>
+    </div>
+    <footer>
+      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+    </footer>
+  </div>
+
+  <!-- スクリプト（editor.js）を読み込み -->
   <script src="editor.js"></script>
 </body>
 </html>
+
