@@ -27,12 +27,15 @@ body {
   z-index: 1;
 }
 
-/* 入場画面：あとでコラージュに差し替える場所。背景色は effects.js の TOP と同じ色にする */
+/* 入場画面：コラージュを置く場所（今は仮の明るいグレー）。
+   下の240pxはノイズが重なるので、文字はその上に収める */
 .hero {
+  box-sizing: border-box;
   width: 100vw;
   height: 80vh;
   height: 80svh;
   min-height: 420px;
+  padding-bottom: 240px;
   flex-shrink: 0;
   background: #e8e8e8;
   display: flex;
@@ -52,15 +55,19 @@ body {
   color: #555;
 }
 
-/* ノイズのグラデーション：小さく描いて拡大するので、ざらざら感が出る */
+/* ノイズ：入場画面の下の端に重なって、黒い粒が下に向かって増えていく */
 #noise-divider {
   display: block;
+  position: relative;
+  z-index: 2;
   width: 100vw;
-  height: 180px;
+  height: 240px;
+  margin-top: -240px;
   flex-shrink: 0;
-  image-rendering: pixelated;
+  pointer-events: none;
 }
 
 .character-grid {
   margin-top: 20px;
 }
+
