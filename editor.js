@@ -4,7 +4,7 @@ const characters = {
     name: "Barnard",
     tag: "Male / Human",
     image: "Barnard.png",
-    description: "Age:38/Height:188\nBirthday:08/29\nHobbys:音楽制作,映画鑑賞"\nInformation:アメリカ人。豪放磊落な性格で、常に生き当たりばったりだが大抵のことは上手くいく。\n高校生のころに酔狂で作った音楽を配信した結果、世界的にそれが有名になり若くして巨額の富を得た。\n様々な事務所やレーベルからスカウトがあったが、本人は全て辞退し、好きに旅しながら音楽を作っている。\n顔は公開していないため、なりすましが頻発しているが本人は気にしていない。\n誰にでも明るく接するが、裏を返せばそこまで他人に興味がない。",
+    description: "Age:38/Height:188\nBirthday:08/29\nHobbys:音楽制作,映画鑑賞\nInformation:アメリカ人。豪放磊落な性格で、常に生き当たりばったりだが大抵のことは上手くいく。\n高校生のころに酔狂で作った音楽を配信した結果、世界的にそれが有名になり若くして巨額の富を得た。\n様々な事務所やレーベルからスカウトがあったが、本人は全て辞退し、好きに旅しながら音楽を作っている。\n顔は公開していないため、なりすましが頻発しているが本人は気にしていない。\n誰にでも明るく接するが、裏を返せばそこまで他人に興味がない。",
     prompt: "boy, 1man,handsome,short blonde hair, slightly messy hair,blue eyes, sunglasses,white hoodie,baseball cap, headphones, watch,thick beard,goatee, dog tags,heavy stubble beard, scruffy chin beard, an incognito actor, cargo pants, ,sneakers,muscular, cool,black oversized jacket, layered distressed streetwear, multiple belts, silver chains, fingerless gloves, metallic accessories,dark Y2K punk aesthetic,bulky frame,An outfit with a well-balanced color scheme that avoids looking too dark,dark yellow and black backpack,A rugged, masculine face,smile,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure"
   },
   "Mele": {
@@ -21,8 +21,6 @@ const characters = {
     description: "Age:21/Height:196\nBirthday:12/28\nHobbys:散歩,服屋巡り"\nInformation:生まれつき力が強く、凶暴なイメージの黒豹獣人に加え人相も悪かったことが災いしてやがて一匹狼になっていった。\n親にも恵まれなかったため、自分一人でなんでもできるようになる必要があった。\n他人という存在自体にうっすら敵対心を持っている。",
     prompt: "boy, 1 furry man,handsome,black panther furry,sunglasses,baseball cap,watch,dog tags,grey Cargo jogger pants, very very muscular, cool,very oversized worn-out red Basketball jersey, jacket ::,tie a jacket around your waist,layered distressed streetwear, multiple leather belts, golden chains, fingerless black gloves, metallic accessories,dark Y2K punk aesthetic,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure,A face that looks, if only slightly, as if the person is in a bad mood,side eyes,calm,An annoyed face,Baring its fangs and acting in a threatening manner,A single scratch on the right eye,golden eyes,Rolling up one's sleeves,Smartphone,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A gold ring ornament on the tail,Brown work boots, not smile"
   }
-};
-
 };
 
 // 一覧カードの描画
