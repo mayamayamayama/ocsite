@@ -18,8 +18,7 @@ const characters = {
     name: "Deseo",
     tag: "Male / Non-human",
     image: "deseo.png",
-    description: "Age:21/Height:196\nBirthday:12/28\nHobbys:散歩,服屋巡り\nInformation:安定出力難易度高めです。ケモノモードよりもアニメモードのほうが私の場合安定して出力できました。
-リアルな動物のように描写される場合、ネガティブプロンプトに「realistic」等を入力してください。",
+    description: "Age:21/Height:196\nBirthday:12/28\nHobbys:散歩,服屋巡り\nInformation:安定出力難易度高めです。ケモノモードよりもアニメモードのほうが私の場合安定して出力できました。\nリアルな動物のように描写される場合、ネガティブプロンプトに「realistic」等を入力してください。",
     prompt: "boy, 1 furry man,handsome,black panther furry,sunglasses,baseball cap,watch,dog tags,grey Cargo jogger pants, very very muscular, cool,very oversized worn-out red Basketball jersey, jacket ::,tie a jacket around your waist,layered distressed streetwear, multiple leather belts, golden chains, fingerless black gloves, metallic accessories,dark Y2K punk aesthetic,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure,A face that looks, if only slightly, as if the person is in a bad mood,side eyes,calm,An annoyed face,Baring its fangs and acting in a threatening manner,A single scratch on the right eye,golden eyes,Rolling up one's sleeves,Smartphone,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A gold ring ornament on the tail,Brown work boots, not smile"
   }
 };
