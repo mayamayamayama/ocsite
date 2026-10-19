@@ -1,0 +1,66 @@
+/* effects.css — style.css の後に読み込まれて、上書き・追加をします */
+
+/* 入場画面を画面の端までぴったり広げるため、上の余白をなくす */
+body {
+  padding-top: 0;
+}
+
+/* 詳細画面は元の余白を保つ */
+#detail-screen .container {
+  margin-top: 50px;
+}
+
+/* 点の背景（画面に固定して、一番奥に置く） */
+#dot-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 中身は点の背景より手前に */
+.view {
+  position: relative;
+  z-index: 1;
+}
+
+/* 入場画面：あとでコラージュに差し替える場所。背景色は effects.js の TOP と同じ色にする */
+.hero {
+  width: 100vw;
+  height: 80vh;
+  height: 80svh;
+  min-height: 420px;
+  flex-shrink: 0;
+  background: #e8e8e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 10vw, 4.5rem);
+  color: #0d0d0d;
+  border-bottom-color: #9a9a9a;
+}
+
+.hero .subtitle {
+  color: #555;
+}
+
+/* ノイズのグラデーション：小さく描いて拡大するので、ざらざら感が出る */
+#noise-divider {
+  display: block;
+  width: 100vw;
+  height: 180px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.character-grid {
+  margin-top: 20px;
+}
