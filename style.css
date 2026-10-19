@@ -9,27 +9,34 @@ body {
   align-items: center;
   min-height: 100vh;
   box-sizing: border-box;
-  /* 横スクロールを防ぐ */
   overflow-x: hidden;
 }
 
-/* --- ふわっと現れるアニメーションの定義 --- */
+/* --- 画面切り替えのアニメーション --- */
+.view {
+  width: 100%;
+  max-width: 900px;
+  display: none; /* デフォルトは非表示 */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.view.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 1; /* activeがつくとフワッと現れる */
+}
+
 @keyframes fadeInSlide {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 header {
   margin-top: 40px;
   margin-bottom: 40px;
   text-align: center;
-  /* 読み込み時にふわっと出る */
   animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -54,7 +61,6 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 25px;
   width: 100%;
-  max-width: 900px;
 }
 
 .card {
@@ -63,17 +69,13 @@ h1 {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  text-decoration: none;
   color: inherit;
   display: block;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
-
-  /* 読み込み時に時間差でふわっと出る */
   opacity: 0;
   animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 1番目のカードは少し早く、2番目は少し遅れて出現する演出 */
 .card:nth-child(1) { animation-delay: 0.2s; }
 .card:nth-child(2) { animation-delay: 0.35s; }
 
@@ -96,14 +98,11 @@ h1 {
   object-fit: cover;
   object-position: center 20%;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* 長押し保存やドラッグをガード */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* ホバーしたときに画像がゆっくりズームするおしゃれアニメーション */
 .card:hover .card-img {
   transform: scale(1.05);
 }
@@ -129,36 +128,8 @@ h1 {
   margin-top: 5px;
 }
 
-/* --- 詳細画面（オーバーレイ）のスタイル --- */
-#detail-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(13, 13, 13, 0.92);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-
-  /* 初期状態は非表示（フェード用） */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-#detail-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
+/* --- 詳細画面のスタイル --- */
 .container {
-  max-width: 800px;
   width: 100%;
   margin-top: 30px;
   margin-bottom: 50px;
@@ -169,7 +140,6 @@ h1 {
   border: none;
   display: inline-block;
   color: #888;
-  text-decoration: none;
   font-size: 0.85rem;
   margin-bottom: 25px;
   cursor: pointer;
@@ -273,4 +243,6 @@ footer {
   font-size: 0.7rem;
   color: #444;
   text-align: center;
+  width: 100%;
 }
+
