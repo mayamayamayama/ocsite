@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
   <style>
-    /* 全体の基本デザイン */
     body {
       background-color: #0d0d0d;
       color: #e0e0e0;
@@ -16,6 +15,7 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
 
     header {
@@ -40,11 +40,10 @@
       letter-spacing: 0.1em;
     }
 
-    /* キャラクター一覧 */
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 25px;
       width: 100%;
       max-width: 900px;
     }
@@ -55,6 +54,9 @@
       border-radius: 8px;
       overflow: hidden;
       cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -64,12 +66,21 @@
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
     }
 
+    /* 画像が切れないように全体を表示する設定 */
+    .card-img-container {
+      width: 100%;
+      height: 320px;
+      background-color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
     .card-img {
       width: 100%;
-      height: 280px;
-      object-fit: cover;
-      background-color: #222;
-      display: block;
+      height: 100%;
+      object-fit: contain; /* 見切れずに全体が収まるようにする */
     }
 
     .card-info {
@@ -93,109 +104,6 @@
       margin-top: 5px;
     }
 
-    /* ポップアップ（詳細モーダル）のデザイン */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-content {
-      background: #141414;
-      border: 1px solid #333;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 30px;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 1.8rem;
-      cursor: pointer;
-    }
-
-    .close-btn:hover {
-      color: #fff;
-    }
-
-    .modal-title {
-      font-size: 1.8rem;
-      color: #fff;
-      margin-top: 0;
-      border-bottom: 1px solid #333;
-      padding-bottom: 10px;
-    }
-
-    .modal-tag {
-      color: #e63946;
-      font-size: 0.85rem;
-      margin-bottom: 15px;
-      display: block;
-    }
-
-    .modal-desc {
-      line-height: 1.8;
-      color: #ccc;
-      white-space: pre-wrap;
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
-
-    /* Prompt（プロンプト表示エリア） */
-    .modal-prompt-section {
-      background-color: #0a0a0a;
-      border: 1px solid #262626;
-      border-radius: 6px;
-      padding: 12px 15px;
-      margin-top: 15px;
-    }
-
-    .prompt-label {
-      font-size: 0.7rem;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 5px;
-      display: block;
-    }
-
-    .prompt-text {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.85rem;
-      color: #8ab4f8;
-      word-break: break-all;
-      white-space: pre-wrap;
-      margin: 0;
-    }
-
     footer {
       margin-top: auto;
       padding-top: 40px;
@@ -213,60 +121,42 @@
 
   <main class="character-grid" id="character-grid"></main>
 
-  <!-- ポップアップ（詳細画面） -->
-  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <button class="close-btn" onclick="closeModal()">×</button>
-      <h2 class="modal-title" id="modal-title">キャラ名</h2>
-      <span class="modal-tag" id="modal-tag">#TAG</span>
-      <div class="modal-desc" id="modal-desc">説明文</div>
-      
-      <!-- PROMPTを表示する枠（データにある場合のみ表示） -->
-      <div class="modal-prompt-section" id="modal-prompt-box">
-        <span class="prompt-label">Prompt / Tags</span>
-        <p class="prompt-text" id="modal-prompt"></p>
-      </div>
-    </div>
-  </div>
-
   <footer>
     &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
   </footer>
 
   <script>
     /* ========================================================
-       ★ここにキャラクターのデータをどんどん追加できます！
-       「prompt: "..."」を追加しました！
+       ★ キャラクターデータ一覧
+       detail.html?id=001 のように各専用ページへ飛ぶ仕組みです
     ======================================================== */
     const characters = [
       {
-        id: "001",
+        id: "mele",
         name: "メレ",
         tag: "BRAIN WORLD / MEMORY",
-        image: "mele.png", // または "mele.png"
-        description: "ここにメレの詳細テキストや設定、ストーリーを書くことができます。",
-        prompt: "1boy, solo, white hair, glowing eyes, brain world, dark atmosphere"
+        image: "mele.png", // あなたの画像ファイル名
       },
       {
-        id: "002",
+        id: "rouki",
         name: "狼鬼",
         tag: "WOLF / NINJA",
-        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=ROUKI", // または "rouki.png"
-        description: "ここに狼鬼の詳細プロファイルを書くことができます。",
-        prompt: "1boy, wolf ears, wolf tail, ninja costume, dark background"
+        image: "rouki.png", // 狼鬼の画像ファイル名（あれば）
       }
     ];
 
-    /* --- カードとポップアップの生成処理 --- */
     const grid = document.getElementById('character-grid');
 
     characters.forEach(char => {
-      const card = document.createElement('div');
+      const card = document.createElement('a');
       card.className = 'card';
-      card.onclick = () => openModal(char);
+      // クリックしたら詳細ページにIDと一緒に飛ぶ
+      card.href = `detail.html?id=${char.id}`;
 
       card.innerHTML = `
-        <img class="card-img" src="${char.image}" alt="${char.name}">
+        <div class="card-img-container">
+          <img class="card-img" src="${char.image}" alt="${char.name}">
+        </div>
         <div class="card-info">
           <h2 class="card-name">${char.name}</h2>
           <span class="card-tag"># ${char.tag}</span>
@@ -274,27 +164,8 @@
       `;
       grid.appendChild(card);
     });
-
-    function openModal(char) {
-      document.getElementById('modal-title').innerText = char.name;
-      document.getElementById('modal-tag').innerText = "# " + char.tag;
-      document.getElementById('modal-desc').innerText = char.description;
-      
-      const promptBox = document.getElementById('modal-prompt-box');
-      if (char.prompt && char.prompt.trim() !== "") {
-        document.getElementById('modal-prompt').innerText = char.prompt;
-        promptBox.style.display = "block";
-      } else {
-        promptBox.style.display = "none"; // promptが無い場合は枠ごと隠す
-      }
-
-      document.getElementById('modal-overlay').classList.add('active');
-    }
-
-    function closeModal(e) {
-      document.getElementById('modal-overlay').classList.remove('active');
-    }
   </script>
 
 </body>
 </html>
+
