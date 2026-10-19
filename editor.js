@@ -16,8 +16,10 @@ const characters = {
   }
 };
 
-// 一覧カードの自動生成
+// 一覧カードの描画
 const grid = document.getElementById('character-grid');
+grid.innerHTML = ""; // 初期化
+
 Object.keys(characters).forEach(id => {
   const char = characters[id];
   const card = document.createElement('div');
@@ -36,7 +38,7 @@ Object.keys(characters).forEach(id => {
   grid.appendChild(card);
 });
 
-// 画面切り替え関数
+// 詳細表示の切り替え処理
 function showDetail(id, pushHistory = true) {
   const char = characters[id];
   if (!char) return;
@@ -58,36 +60,37 @@ function showDetail(id, pushHistory = true) {
 
   document.title = `${char.name} - OC ARCHIVE`;
   
-  // ビューの切り替え（クラスの付け替えでフワッとアニメーション）
-  document.getElementById('index-view').classList.remove('active');
-  document.getElementById('detail-view').classList.add('active');
+  // HTML側のID名（index-screen / detail-screen）に合わせました！
+  document.getElementById('index-screen').classList.remove('active');
+  document.getElementById('detail-screen').classList.add('active');
   window.scrollTo(0, 0);
 
-  // ★ここがミソ：スマホの戻るボタンが効くように履歴に状態を残す
+  // スマホの「戻る」ボタンが効くように履歴を追加
   if (pushHistory) {
-    history.pushState({ view: 'detail', id: id }, '', `#${id}`);
+    history.pushState({ screen: 'detail', id: id }, '', `#${id}`);
   }
 }
 
+// 一覧表示の切り替え処理
 function showIndex(pushHistory = true) {
-  document.getElementById('detail-view').classList.remove('active');
-  document.getElementById('index-view').classList.add('active');
+  document.getElementById('detail-screen').classList.remove('active');
+  document.getElementById('index-screen').classList.add('active');
   document.title = "OC ARCHIVE";
   window.scrollTo(0, 0);
 
   if (pushHistory) {
-    history.pushState({ view: 'index' }, '', window.location.pathname);
+    history.pushState({ screen: 'index' }, '', window.location.pathname);
   }
 }
 
-// 戻るボタンのイベント
+// 「← BACK TO INDEX」ボタンが押されたとき
 document.getElementById('back-btn').onclick = () => {
-  history.back(); // スマホの戻るボタンと同じ動作をさせる
+  showIndex(true);
 };
 
-// ★スマホの「戻る」「進む」ボタンを押したときの連動
+// スマホの「戻る」「進む」ボタンが押されたときの処理
 window.onpopstate = (event) => {
-  if (event.state && event.state.view === 'detail') {
+  if (event.state && event.state.screen === 'detail') {
     showDetail(event.state.id, false);
   } else {
     showIndex(false);
