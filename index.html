@@ -3,122 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OC ARCHIVE // VIVID EDITION</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <title>OC ARCHIVE</title>
   <style>
-    :root {
-      --bg-color: #050508;
-      --card-bg: rgba(15, 15, 22, 0.65);
-      --border-color: rgba(255, 255, 255, 0.18);
-      --accent-color: #ff0055;
-      --text-main: #ffffff;
-      --text-sub: #a0a0b0;
-    }
-
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
+      background-color: #0d0d0d;
+      color: #e0e0e0;
       font-family: 'Helvetica Neue', Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-
-    #webgl-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    .site-wrapper {
-      position: relative;
-      z-index: 1;
-      padding: 40px 20px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       box-sizing: border-box;
+      /* 横スクロールを防ぐ */
+      overflow-x: hidden;
+    }
+
+    /* --- ふわっと現れるアニメーションの定義 --- */
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     header {
-      margin-top: 20px;
-      margin-bottom: 50px;
+      margin-top: 40px;
+      margin-bottom: 40px;
       text-align: center;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 24px 48px;
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      background: rgba(10, 10, 15, 0.4);
-      box-shadow: 0 0 40px rgba(255, 0, 85, 0.15);
+      /* 読み込み時にふわっと出る */
+      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     h1 {
-      font-size: 2.3rem;
-      letter-spacing: 0.35em;
-      color: #fff;
+      font-size: 2rem;
+      letter-spacing: 0.2em;
+      color: #ffffff;
       margin: 0;
-      text-transform: uppercase;
-      text-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
     }
 
     .subtitle {
-      font-size: 0.75rem;
-      color: #00ffff;
-      margin-top: 10px;
-      letter-spacing: 0.25em;
-      font-weight: bold;
-      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 8px;
+      letter-spacing: 0.1em;
     }
 
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 25px;
       width: 100%;
-      max-width: 1200px;
-    }
-
-    @media (min-width: 768px) {
-      .character-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
-      }
+      max-width: 900px;
     }
 
     .card {
-      background-color: var(--card-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
+      background-color: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
       overflow: hidden;
       cursor: pointer;
       text-decoration: none;
       color: inherit;
       display: block;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
+      
+      /* 読み込み時に時間差でふわっと出る */
+      opacity: 0;
+      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    /* 1番目のカードは少し早く、2番目は少し遅れて出現する演出 */
+    .card:nth-child(1) { animation-delay: 0.2s; }
+    .card:nth-child(2) { animation-delay: 0.35s; }
+    .card:nth-child(3) { animation-delay: 0.5s; }
+    .card:nth-child(4) { animation-delay: 0.65s; }
+
     .card:hover {
-      transform: translateY(-8px) scale(1.02);
-      border-color: #00ffff;
-      box-shadow: 0 12px 40px rgba(0, 255, 255, 0.25);
+      transform: translateY(-6px);
+      border-color: #666;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.03);
     }
 
     .card-img-container {
       width: 100%;
-      height: 280px;
-      background-color: #08080c;
+      height: 320px;
+      background-color: #111;
       overflow: hidden;
-      position: relative;
     }
 
     .card-img {
@@ -127,37 +105,37 @@
       object-fit: cover;
       object-position: center 20%;
       transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      
+      /* 長押し保存やドラッグをガード */
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
     }
 
+    /* ホバーしたときに画像がゆっくりズームするおしゃれアニメーション */
     .card:hover .card-img {
-      transform: scale(1.08);
+      transform: scale(1.05);
     }
 
     .card-info {
-      padding: 16px;
-      border-top: 1px solid var(--border-color);
-      background: rgba(5, 5, 8, 0.6);
+      padding: 15px;
     }
 
     .card-name {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: bold;
       color: #fff;
-      margin: 0 0 6px 0;
-      letter-spacing: 0.05em;
+      margin: 0 0 5px 0;
     }
 
     .card-tag {
       display: inline-block;
-      font-size: 0.68rem;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--text-sub);
+      font-size: 0.75rem;
+      background-color: #262626;
+      color: #aaa;
       padding: 3px 8px;
       border-radius: 4px;
-      letter-spacing: 0.05em;
+      margin-top: 5px;
     }
 
     footer {
@@ -165,28 +143,26 @@
       padding-top: 60px;
       padding-bottom: 20px;
       font-size: 0.7rem;
-      color: var(--text-sub);
-      letter-spacing: 0.1em;
+      color: #444;
       text-align: center;
+      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: 0.8s;
+      opacity: 0;
     }
   </style>
 </head>
 <body>
 
-  <div id="webgl-container"></div>
+  <header>
+    <h1>OC ARCHIVE</h1>
+    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+  </header>
 
-  <div class="site-wrapper">
-    <header>
-      <h1>OC ARCHIVE</h1>
-      <div class="subtitle">// VIVID NEON : SYSTEM ACTIVE</div>
-    </header>
+  <main class="character-grid" id="character-grid"></main>
 
-    <main class="character-grid" id="character-grid"></main>
-
-    <footer>
-      &copy; 2026 MY OC ARCHIVE. ALL RIGHTS RESERVED.
-    </footer>
-  </div>
+  <footer>
+    &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+  </footer>
 
   <script>
     const characters = [
@@ -221,81 +197,6 @@
         </div>
       `;
       grid.appendChild(card);
-    });
-
-    /* ========================================================
-       ★ ビビット＆ネオン仕様の Three.js 背景演出
-    ======================================================== */
-    const container = document.getElementById('webgl-container');
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 14;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-
-    // 環境光を少し明るくして全体を持ち上げる
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
-    scene.add(ambientLight);
-
-    // 強烈なビビットカラーのポイントライト（マゼンタ ＆ シアン）
-    const pointLight1 = new THREE.PointLight(0xff0055, 50, 60);
-    pointLight1.position.set(6, 6, 6);
-    scene.add(pointLight1);
-
-    const pointLight2 = new THREE.PointLight(0x00ffff, 50, 60);
-    pointLight2.position.set(-6, -6, 6);
-    scene.add(pointLight2);
-
-    // 形状を少しダイナミックにしてガラス＆メタリックの質感を向上
-    const geometry = new THREE.TorusKnotGeometry(3.2, 1.0, 128, 32);
-    const material = new THREE.MeshPhysicalMaterial({
-      color: 0x222233,
-      metalness: 0.95,
-      roughness: 0.1,
-      transmission: 0.8,
-      ior: 2.3,
-      reflectivity: 1.0
-    });
-
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
-
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    window.addEventListener('mousemove', (event) => {
-      mouseX = (event.clientX - window.innerWidth / 2) * 0.0025;
-      mouseY = (event.clientY - window.innerHeight / 2) * 0.0025;
-    });
-
-    const clock = new THREE.Clock();
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      const elapsedTime = clock.getElapsedTime();
-
-      targetX += (mouseX - targetX) * 0.05;
-      targetY += (mouseY - targetY) * 0.05;
-
-      mesh.rotation.x = elapsedTime * 0.25 + targetY;
-      mesh.rotation.y = elapsedTime * 0.35 + targetX;
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 
