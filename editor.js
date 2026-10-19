@@ -1,5 +1,5 @@
-// 各キャラクターの正確なプロフィールデータ
-const allCharacters = {
+// キャラクターデータ
+const characters = {
   "Barnard": {
     name: "Barnard",
     tag: "Male / Human",
@@ -16,15 +16,13 @@ const allCharacters = {
   }
 };
 
-// --- 自動でキャラクターカードを1回だけ生成する処理 ---
+// 一覧カードの自動生成
 const grid = document.getElementById('character-grid');
-grid.innerHTML = ""; // 念のため中身をリセット
-
-Object.keys(allCharacters).forEach(id => {
-  const char = allCharacters[id];
+Object.keys(characters).forEach(id => {
+  const char = characters[id];
   const card = document.createElement('div');
   card.className = 'card';
-  card.onclick = () => openDetail(id);
+  card.onclick = () => showDetail(id, true);
 
   card.innerHTML = `
     <div class="card-img-container">
@@ -38,9 +36,9 @@ Object.keys(allCharacters).forEach(id => {
   grid.appendChild(card);
 });
 
-// --- 詳細画面を開く処理 ---
-function openDetail(id) {
-  const char = allCharacters[id];
+// 画面切り替え関数
+function showDetail(id, pushHistory = true) {
+  const char = characters[id];
   if (!char) return;
 
   const profileBox = document.getElementById('profile-box');
@@ -51,32 +49,50 @@ function openDetail(id) {
     <div class="profile-info">
       <h1 class="profile-name">${char.name}</h1>
       <span class="profile-tag"># ${char.tag}</span>
-      
       <div class="section-title">Story / Profile</div>
       <div class="profile-desc">${char.description}</div>
-      
       <div class="section-title">Prompt / Tags</div>
       <pre class="prompt-box">${char.prompt}</pre>
     </div>
   `;
 
-  const overlay = document.getElementById('detail-overlay');
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
+  document.title = `${char.name} - OC ARCHIVE`;
+  
+  // ビューの切り替え（クラスの付け替えでフワッとアニメーション）
+  document.getElementById('index-view').classList.remove('active');
+  document.getElementById('detail-view').classList.add('active');
+  window.scrollTo(0, 0);
 
-// --- 詳細画面を閉じる処理 ---
-function closeDetail() {
-  const overlay = document.getElementById('detail-overlay');
-  overlay.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-// ESCキーで閉じる
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeDetail();
+  // ★ここがミソ：スマホの戻るボタンが効くように履歴に状態を残す
+  if (pushHistory) {
+    history.pushState({ view: 'detail', id: id }, '', `#${id}`);
   }
-});
+}
+
+function showIndex(pushHistory = true) {
+  document.getElementById('detail-view').classList.remove('active');
+  document.getElementById('index-view').classList.add('active');
+  document.title = "OC ARCHIVE";
+  window.scrollTo(0, 0);
+
+  if (pushHistory) {
+    history.pushState({ view: 'index' }, '', window.location.pathname);
+  }
+}
+
+// 戻るボタンのイベント
+document.getElementById('back-btn').onclick = () => {
+  history.back(); // スマホの戻るボタンと同じ動作をさせる
+};
+
+// ★スマホの「戻る」「進む」ボタンを押したときの連動
+window.onpopstate = (event) => {
+  if (event.state && event.state.view === 'detail') {
+    showDetail(event.state.id, false);
+  } else {
+    showIndex(false);
+  }
+};
+
 
 
