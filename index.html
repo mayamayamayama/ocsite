@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
   <style>
-    /* 全体の基本デザイン（ダークモード） */
+    /* 全体の基本デザイン */
     body {
       background-color: #0d0d0d;
       color: #e0e0e0;
@@ -40,38 +40,39 @@
       letter-spacing: 0.1em;
     }
 
-    /* キャラクター一覧のコンテナ */
+    /* キャラクター一覧 */
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
       width: 100%;
       max-width: 900px;
     }
 
-    /* キャラクターカードのデザイン */
     .card {
       background-color: #161616;
       border: 1px solid #2a2a2a;
       border-radius: 8px;
       overflow: hidden;
-      transition: transform 0.2s, border-color 0.2s;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
 
     .card:hover {
       transform: translateY(-4px);
-      border-color: #666;
+      border-color: #777;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
     }
 
-    .card-img-placeholder {
+    .card-img {
       width: 100%;
       height: 280px;
+      object-fit: cover;
       background-color: #222;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #555;
-      font-size: 0.9rem;
     }
 
     .card-info {
@@ -95,6 +96,81 @@
       margin-top: 5px;
     }
 
+    /* ポップアップ（詳細モーダル）のデザイン */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #fff;
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-top: 0;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    .modal-tag {
+      color: #e63946;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .modal-desc {
+      line-height: 1.8;
+      color: #ccc;
+      white-space: pre-wrap; /* 改行を反映 */
+      font-size: 0.95rem;
+    }
+
     footer {
       margin-top: auto;
       padding-top: 40px;
@@ -110,29 +186,73 @@
     <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
   </header>
 
-  <main class="character-grid">
-    <!-- サンプルキャラクター1 -->
-    <div class="card">
-      <div class="card-img-placeholder">IMAGE NO IMAGE</div>
-      <div class="card-info">
-        <h2 class="card-name">CHARACTER 01</h2>
-        <span class="card-tag">#TAG_NAME</span>
-      </div>
-    </div>
+  <!-- ここにキャラクターカードが自動生成されます -->
+  <main class="character-grid" id="character-grid"></main>
 
-    <!-- サンプルキャラクター2 -->
-    <div class="card">
-      <div class="card-img-placeholder">IMAGE NO IMAGE</div>
-      <div class="card-info">
-        <h2 class="card-name">CHARACTER 02</h2>
-        <span class="card-tag">#TAG_NAME</span>
-      </div>
+  <!-- ポップアップ（詳細画面） -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <h2 class="modal-title" id="modal-title">キャラ名</h2>
+      <span class="modal-tag" id="modal-tag">#TAG</span>
+      <div class="modal-desc" id="modal-desc">説明文</div>
     </div>
-  </main>
+  </div>
 
   <footer>
     &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
   </footer>
+
+  <script>
+    /* ========================================================
+       ★ここにキャラクターのデータをどんどん追加できます！
+    ======================================================== */
+    const characters = [
+      {
+        id: "001",
+        name: "メレ",
+        tag: "BRAIN WORLD / MEMORY",
+        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=MELE", // 後で画像URLに変更OK
+        description: "ここにメレの詳細テキストや設定、ストーリーを書くことができます。\n改行を入れるとそのまま表示されます！"
+      },
+      {
+        id: "002",
+        name: "狼鬼",
+        tag: "WOLF / NINJA",
+        image: "https://via.placeholder.com/400x500/1a1a1a/ffffff?text=ROUKI",
+        description: "ここに狼鬼の詳細プロファイルを書くことができます。\n技や生い立ちなど、好きなだけ長文を入力可能です。"
+      }
+    ];
+
+    /* --- 以下はカードとポップアップを自動作成する処理 --- */
+    const grid = document.getElementById('character-grid');
+
+    characters.forEach(char => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => openModal(char);
+
+      card.innerHTML = `
+        <img class="card-img" src="${char.image}" alt="${char.name}">
+        <div class="card-info">
+          <h2 class="card-name">${char.name}</h2>
+          <span class="card-tag"># ${char.tag}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    function openModal(char) {
+      document.getElementById('modal-title').innerText = char.name;
+      document.getElementById('modal-tag').innerText = "# " + char.tag;
+      document.getElementById('modal-desc').innerText = char.description;
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function closeModal(e) {
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+  </script>
 
 </body>
 </html>
