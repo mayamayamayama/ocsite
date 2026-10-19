@@ -13,29 +13,23 @@
     <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
   </header>
 
-  <main class="character-grid" id="character-grid">
-    <!-- Barnard -->
-    <div class="card" onclick="openDetail('Barnard')">
-      <div class="card-img-container">
-        <img class="card-img" src="Barnard.png" alt="Barnard" oncontextmenu="return false;" ondragstart="return false;">
-      </div>
-      <div class="card-info">
-        <h2 class="card-name">Barnard</h2>
-        <span class="card-tag"># Male / Human</span>
-      </div>
-    </div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OC ARCHIVE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <!-- Mele -->
-    <div class="card" onclick="openDetail('Mele')">
-      <div class="card-img-container">
-        <img class="card-img" src="mele.png" alt="Mele" oncontextmenu="return false;" ondragstart="return false;">
-      </div>
-      <div class="card-info">
-        <h2 class="card-name">Mele</h2>
-        <span class="card-tag"># Female / Human</span>
-      </div>
-    </div>
-  </main>
+  <header>
+    <h1>OC ARCHIVE</h1>
+    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+  </header>
+
+  <!-- ▼ ここを「中身が空のグリッド」にする！ (JSが自動でBarnardとMeleを1回だけ生成します) -->
+  <main class="character-grid" id="character-grid"></main>
 
   <footer>
     &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
@@ -52,7 +46,3 @@
   <script src="editor.js"></script>
 </body>
 </html>
-
-
-
-
