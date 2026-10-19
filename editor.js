@@ -1,4 +1,4 @@
-// --- キャラクターデータ（提供された情報をそのまま保持） ---
+// 各キャラクターの正確なプロフィールデータ
 const allCharacters = {
   "Barnard": {
     name: "Barnard",
@@ -16,39 +16,12 @@ const allCharacters = {
   }
 };
 
-// --- インデックスカードの動的生成 ---
-const grid = document.getElementById('character-grid');
-
-Object.keys(allCharacters).forEach(id => {
-  const char = allCharacters[id];
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.setAttribute('data-id', id);
-
-  card.innerHTML = `
-    <div class="card-img-container">
-      <img class="card-img" src="${char.image}" alt="${char.name}" oncontextmenu="return false;" ondragstart="return false;">
-    </div>
-    <div class="card-info">
-      <h2 class="card-name">${char.name}</h2>
-      <span class="card-tag"># ${char.tag}</span>
-    </div>
-  `;
-
-  // カードタップで滑らかに詳細オーバーレイを表示
-  card.addEventListener('click', () => openDetail(id));
-  grid.appendChild(card);
-});
-
-// --- 詳細画面の開閉処理 ---
-const overlay = document.getElementById('detail-overlay');
-const profileBox = document.getElementById('profile-box');
-const closeBtn = document.getElementById('close-detail-btn');
-
+// --- 詳細画面を開く処理 ---
 function openDetail(id) {
   const char = allCharacters[id];
   if (!char) return;
 
+  const profileBox = document.getElementById('profile-box');
   profileBox.innerHTML = `
     <div class="profile-img-container">
       <img class="profile-img" src="${char.image}" alt="${char.name}">
@@ -65,70 +38,22 @@ function openDetail(id) {
     </div>
   `;
 
+  const overlay = document.getElementById('detail-overlay');
   overlay.classList.add('active');
-  document.body.style.overflow = 'hidden'; // 背後のスクロールを固定
+  document.body.style.overflow = 'hidden'; // 背景のスクロールをロック
 }
 
-closeBtn.addEventListener('click', closeDetail);
-
+// --- 詳細画面を閉じる処理 ---
 function closeDetail() {
+  const overlay = document.getElementById('detail-overlay');
   overlay.classList.remove('active');
-  document.body.style.overflow = '';
+  document.body.style.overflow = ''; // スクロールロックを解除
 }
 
-// ESCキーでも詳細画面を閉じられるように設定
+// ESCキーが押されたときにも詳細画面を閉じる
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && overlay.classList.contains('active')) {
+  if (e.key === 'Escape') {
     closeDetail();
   }
 });
 
-// --- コラージュ素材のドラッグ＆ドロップ機能 ---
-const items = document.querySelectorAll('.collage-item');
-let activeItem = null;
-let startX, startY, initialX, initialY;
-
-items.forEach(item => {
-  item.addEventListener('mousedown', (e) => {
-    activeItem = item;
-    startX = e.clientX;
-    startY = e.clientY;
-
-    const rect = item.getBoundingClientRect();
-    const parentRect = document.getElementById('hero-section').getBoundingClientRect();
-
-    initialX = rect.left - parentRect.left;
-    initialY = rect.top - parentRect.top;
-
-    item.style.right = 'auto';
-    item.style.bottom = 'auto';
-    item.style.left = initialX + 'px';
-    item.style.top = initialY + 'px';
-
-    e.preventDefault();
-  });
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (!activeItem) return;
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-
-  activeItem.style.left = (initialX + dx) + 'px';
-  activeItem.style.top = (initialY + dy) + 'px';
-});
-
-document.addEventListener('mouseup', () => {
-  activeItem = null;
-});
-
-// 座標出力
-document.getElementById('export-btn').addEventListener('click', () => {
-  let output = "";
-  items.forEach((item) => {
-    const id = item.getAttribute('data-id');
-    output += `[${id}] -> top: ${item.style.top}, left: ${item.style.left}\n`;
-  });
-  alert("現在の配置座標:\n\n" + output);
-  console.log(output);
-});
