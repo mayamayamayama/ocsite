@@ -55,11 +55,12 @@
       }
     }
 
+    /* 角丸（border-radius: 8px）を追加 */
     .profile-img-container {
       flex: 1;
       background: #090909;
-      border-radius: 8px;
-      overflow: hidden;
+      border-radius: 8px; /* 枠の角丸 */
+      overflow: hidden;   /* はみ出た画像をしっかり切り抜く */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -70,6 +71,7 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      border-radius: 8px; /* 画像本体の角丸 */
     }
 
     .profile-info {
@@ -163,7 +165,6 @@
       }
     };
 
-    /* --- URLからIDを読み取って該当キャラを表示する処理 --- */
     const urlParams = new URLSearchParams(window.location.search);
     const charId = urlParams.get('id');
     const char = allCharacters[charId];
