@@ -12,20 +12,20 @@ body {
   overflow-x: hidden;
 }
 
-/* --- 画面切り替えのアニメーション --- */
+/* --- 画面切り替えの基本ルール --- */
 .view {
   width: 100%;
   max-width: 900px;
-  display: none; /* デフォルトは非表示 */
+  display: none !important; /* 強制的に両方とも消す */
   opacity: 0;
   transition: opacity 0.4s ease;
 }
 
 .view.active {
-  display: flex;
+  display: flex !important; /* activeがついた方だけ強制表示 */
   flex-direction: column;
   align-items: center;
-  opacity: 1; /* activeがつくとフワッと現れる */
+  opacity: 1;
 }
 
 @keyframes fadeInSlide {
@@ -245,4 +245,5 @@ footer {
   text-align: center;
   width: 100%;
 }
+
 
