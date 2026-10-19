@@ -1,6 +1,10 @@
 // effects.js — ノイズの区切り と 点の背景 を描きます
 
-// 「動きを減らす」設定の人には、動かさずに止めた絵だけ出す
+// ===== 動きのスイッチ（true：動く / false：止める） =====
+const DOTS_MOVE = true;       // 点の背景を流す
+const NOISE_FLICKER = false;  // ノイズをチラつかせる
+
+// 「動きを減らす」設定の人には、スイッチに関係なく止めた絵だけ出す
 const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
@@ -12,8 +16,8 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   const ctx = canvas.getContext('2d');
 
   // ここの数字を変えると見た目が変わります
-  const GAP = 44;             // 点と点の間隔（大きいほどまばら）
-  const SPEED = 14;           // 流れる速さ（大きいほど速い）
+  const GAP = 44;                 // 点と点の間隔（大きいほどまばら）
+  const SPEED = 10;               // 流れる速さ（大きいほど速い）
   const DOT_COLOR = '#2b2b2b';    // 小さい点の色
   const SQUARE_COLOR = '#777777'; // 目立つ四角の色
 
@@ -42,10 +46,11 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     ctx.clearRect(0, 0, w, h);
     const cols = Math.ceil(w / GAP) + 1;
     const cycle = cols * GAP; // 1周の長さ（画面の外で折り返すので、つなぎ目は見えない）
+    const moving = DOTS_MOVE && !REDUCE_MOTION;
 
     for (let r = 0; r < rows; r++) {
       const dir = r % 2 === 0 ? 1 : -1;       // 偶数段は右へ、奇数段は左へ
-      const move = REDUCE_MOTION ? 0 : (t / 1000) * SPEED * dir;
+      const move = moving ? (t / 1000) * SPEED * dir : 0;
       const offset = ((move % cycle) + cycle) % cycle;
       const y = r * GAP + GAP / 2;
       const shift = (r % 2) * (GAP / 2);      // 段ごとに半分ずらして、ジグザグに
@@ -71,29 +76,34 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 
   window.addEventListener('resize', resize);
   resize();
-  if (!REDUCE_MOTION) requestAnimationFrame(loop);
+  if (DOTS_MOVE && !REDUCE_MOTION) requestAnimationFrame(loop);
 })();
 
 
 // ===============================
-// 2. ノイズのグラデーション（上：入場画面の色 → 下：サイトの背景色）
+// 2. ノイズのグラデーション
+//    （透明 → 黒い粒がだんだん増えて、一番下は真っ黒）
 // ===============================
 (function () {
   const canvas = document.getElementById('noise-divider');
   const ctx = canvas.getContext('2d');
 
-  const PIXEL = 3;                // ざらざらの粗さ（大きいほど粗い）
-  const HEIGHT = 180;             // 高さ（effects.css の #noise-divider と同じ数字）
-  const TOP = [232, 232, 232];    // 上の色（effects.css の .hero の背景色と同じにする）
-  const BOTTOM = [13, 13, 13];    // 下の色（サイトの背景色 #0d0d0d）
-  const FLICKER = true;           // true：ざらざらがゆっくりチラつく / false：止める
+  const GRAIN = 1;               // ざらざらの粗さ（1が一番細かい。大きいほど粗い）
+  const HEIGHT = 240;            // 高さ（effects.css の #noise-divider の height と同じ数字）
+  const DARK = [13, 13, 13];     // 黒い粒の色（サイトの背景色 #0d0d0d）
 
+  let lastWidth = 0;
   let w, h, img;
   let visible = false;
 
   function build() {
-    w = Math.ceil(window.innerWidth / PIXEL);
-    h = Math.ceil(HEIGHT / PIXEL);
+    // スマホでスクロール中に画面の高さだけ変わったときは作り直さない（チラつき防止）
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+
+    const dpr = window.devicePixelRatio || 1;
+    w = Math.ceil((lastWidth * dpr) / GRAIN);
+    h = Math.ceil((HEIGHT * dpr) / GRAIN);
     canvas.width = w;
     canvas.height = h;
     img = ctx.createImageData(w, h);
@@ -103,14 +113,14 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   function paint() {
     const d = img.data;
     for (let y = 0; y < h; y++) {
-      const p = y / (h - 1); // 上が0、下が1。下に行くほど「暗い点」が増える
+      const t = y / (h - 1);          // 上が0、下が1
+      const p = t * t * (3 - 2 * t);  // 上はまばら、下に向かって一気に黒へ
       for (let x = 0; x < w; x++) {
-        const c = Math.random() < p ? BOTTOM : TOP;
         const i = (y * w + x) * 4;
-        d[i] = c[0];
-        d[i + 1] = c[1];
-        d[i + 2] = c[2];
-        d[i + 3] = 255;
+        d[i] = DARK[0];
+        d[i + 1] = DARK[1];
+        d[i + 2] = DARK[2];
+        d[i + 3] = Math.random() < p ? 255 : 0; // 黒い粒 or 透明
       }
     }
     ctx.putImageData(img, 0, 0);
@@ -132,5 +142,6 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 
   window.addEventListener('resize', build);
   build();
-  if (FLICKER && !REDUCE_MOTION) requestAnimationFrame(loop);
+  if (NOISE_FLICKER && !REDUCE_MOTION) requestAnimationFrame(loop);
 })();
+
