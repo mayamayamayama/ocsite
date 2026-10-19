@@ -28,13 +28,14 @@ body {
 }
 
 /* 入場画面：コラージュを置く場所（今は仮の明るいグレー）。
-   下の240pxはノイズが重なるので、文字はその上に収める */
+   高さ＝画面1つ分＋240px。下の240pxにノイズが重なるので、
+   最初の画面にはノイズが見えず、スクロールして初めて現れる */
 .hero {
   box-sizing: border-box;
   width: 100vw;
-  height: 80vh;
-  height: 80svh;
-  min-height: 420px;
+  height: calc(100vh + 240px);
+  height: calc(100svh + 240px);
+  min-height: 660px;
   padding-bottom: 240px;
   flex-shrink: 0;
   background: #e8e8e8;
