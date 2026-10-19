@@ -89,8 +89,24 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   const ctx = canvas.getContext('2d');
 
   const GRAIN = 1;               // ざらざらの粗さ（1が一番細かい。大きいほど粗い）
-  const HEIGHT = 240;            // 高さ（effects.css の #noise-divider の height と同じ数字）
+  const HEIGHT = 240;            // ノイズの高さ。変えると入場画面の長さも自動で合う
   const DARK = [13, 13, 13];     // 黒い粒の色（サイトの背景色 #0d0d0d）
+
+  // 入場画面を「画面1つ分＋ノイズの高さ」にして、ノイズの部分は最初の画面の外に置く
+  // （effects.css が古いままでも崩れないように、ここでも指定しておく）
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.style.boxSizing = 'border-box';
+    hero.style.minHeight = (HEIGHT + 420) + 'px';
+    hero.style.height = 'calc(100vh + ' + HEIGHT + 'px)';
+    hero.style.height = 'calc(100svh + ' + HEIGHT + 'px)';
+    hero.style.paddingBottom = HEIGHT + 'px';
+  }
+  canvas.style.position = 'relative';
+  canvas.style.zIndex = '2';
+  canvas.style.height = HEIGHT + 'px';
+  canvas.style.marginTop = (-HEIGHT) + 'px';
+  canvas.style.pointerEvents = 'none';
 
   let lastWidth = 0;
   let w, h, img;
@@ -144,4 +160,5 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   build();
   if (NOISE_FLICKER && !REDUCE_MOTION) requestAnimationFrame(loop);
 })();
+
 
