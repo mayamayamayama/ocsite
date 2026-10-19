@@ -8,64 +8,47 @@
 </head>
 <body>
 
-  <!-- ==========================================
-       メインビュー（コラージュ ＋ インデックス）
-       ========================================== -->
-  <div id="main-view">
+  <header>
+    <h1>OC ARCHIVE</h1>
+    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+  </header>
 
-    <!-- 1. 最上部：手動配置コラージュエリア -->
-    <section id="hero-section">
-      <!-- 手持ちのコラージュ用画像（deseo.png等） -->
-      <div class="collage-item" data-id="deseo" style="top: 15%; left: 10%; z-index: 2;">
-        <img src="deseo.png" alt="deseo" oncontextmenu="return false;" ondragstart="return false;">
+  <main class="character-grid" id="character-grid">
+    <!-- Barnard -->
+    <div class="card" onclick="openDetail('Barnard')">
+      <div class="card-img-container">
+        <img class="card-img" src="Barnard.png" alt="Barnard" oncontextmenu="return false;" ondragstart="return false;">
       </div>
-      <!-- ※パーツが増えたらここに同じ形式で追加できます -->
-    </section>
-
-    <!-- 2. 境界線：ノイズグラデーションエリア -->
-    <div id="noise-transition">
-      <div class="noise-overlay"></div>
+      <div class="card-info">
+        <h2 class="card-name">Barnard</h2>
+        <span class="card-tag"># Male / Human</span>
+      </div>
     </div>
 
-    <!-- 3. キャラクター一覧エリア -->
-    <header>
-      <h1>OC ARCHIVE</h1>
-      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
-    </header>
-
-    <main class="character-grid" id="character-grid">
-      <!-- JavaScriptで動的にカードが生成されます -->
-    </main>
-
-    <footer>
-      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
-    </footer>
-
-  </div>
-
-
-  <!-- ==========================================
-       詳細オーバーレイ（カードタップでシームレス表示）
-       ========================================== -->
-  <div id="detail-overlay" class="hidden">
-    <div class="detail-container">
-      <button id="close-detail-btn">&larr; BACK TO INDEX</button>
-      <div class="profile-box" id="profile-box">
-        <!-- JSで選択したキャラクターのデータを描画 -->
+    <!-- Mele -->
+    <div class="card" onclick="openDetail('Mele')">
+      <div class="card-img-container">
+        <img class="card-img" src="mele.png" alt="Mele" oncontextmenu="return false;" ondragstart="return false;">
       </div>
+      <div class="card-info">
+        <h2 class="card-name">Mele</h2>
+        <span class="card-tag"># Female / Human</span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+  </footer>
+
+  <!-- 詳細画面オーバーレイ -->
+  <div id="detail-overlay" onclick="closeDetail(event)">
+    <div class="container" onclick="event.stopPropagation()">
+      <button class="back-btn" onclick="closeDetail()">&larr; BACK TO INDEX</button>
+      <div class="profile-box" id="profile-box"></div>
     </div>
   </div>
 
-
-  <!-- ==========================================
-       コラージュ調整用コントロールパネル
-       ========================================== -->
-  <div id="control-panel">
-    <div class="panel-msg">💡 パーツをドラッグして位置を調整できます</div>
-    <button id="export-btn">現在の座標を出力する</button>
-  </div>
-
-  <!-- JavaScript読み込み -->
   <script src="editor.js"></script>
 </body>
 </html>
