@@ -4,202 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
-  <style>
-    body {
-      background-color: #0d0d0d;
-      color: #e0e0e0;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-      /* 横スクロールを防ぐ */
-      overflow-x: hidden;
-    }
-
-    /* --- ふわっと現れるアニメーションの定義 --- */
-    @keyframes fadeInSlide {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    header {
-      margin-top: 40px;
-      margin-bottom: 40px;
-      text-align: center;
-      /* 読み込み時にふわっと出る */
-      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    h1 {
-      font-size: 2rem;
-      letter-spacing: 0.2em;
-      color: #ffffff;
-      margin: 0;
-      border-bottom: 1px solid #333;
-      padding-bottom: 10px;
-    }
-
-    .subtitle {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 8px;
-      letter-spacing: 0.1em;
-    }
-
-    .character-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 25px;
-      width: 100%;
-      max-width: 900px;
-    }
-
-    .card {
-      background-color: #161616;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
-      
-      /* 読み込み時に時間差でふわっと出る */
-      opacity: 0;
-      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* 1番目のカードは少し早く、2番目は少し遅れて出現する演出 */
-    .card:nth-child(1) { animation-delay: 0.2s; }
-    .card:nth-child(2) { animation-delay: 0.35s; }
-    .card:nth-child(3) { animation-delay: 0.5s; }
-    .card:nth-child(4) { animation-delay: 0.65s; }
-
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: #666;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.03);
-    }
-
-    .card-img-container {
-      width: 100%;
-      height: 320px;
-      background-color: #111;
-      overflow: hidden;
-    }
-
-    .card-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 20%;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      
-      /* 長押し保存やドラッグをガード */
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    /* ホバーしたときに画像がゆっくりズームするおしゃれアニメーション */
-    .card:hover .card-img {
-      transform: scale(1.05);
-    }
-
-    .card-info {
-      padding: 15px;
-    }
-
-    .card-name {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #fff;
-      margin: 0 0 5px 0;
-    }
-
-    .card-tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      background-color: #262626;
-      color: #aaa;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-
-    footer {
-      margin-top: auto;
-      padding-top: 60px;
-      padding-bottom: 20px;
-      font-size: 0.7rem;
-      color: #444;
-      text-align: center;
-      animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      animation-delay: 0.8s;
-      opacity: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>OC ARCHIVE</h1>
-    <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
-  </header>
+  <!-- ==========================================
+       メインビュー（コラージュ ＋ インデックス）
+       ========================================== -->
+  <div id="main-view">
 
-  <main class="character-grid" id="character-grid"></main>
+    <!-- 1. 最上部：手動配置コラージュエリア -->
+    <section id="hero-section">
+      <!-- 手持ちのコラージュ用画像（deseo.png等） -->
+      <div class="collage-item" data-id="deseo" style="top: 15%; left: 10%; z-index: 2;">
+        <img src="deseo.png" alt="deseo" oncontextmenu="return false;" ondragstart="return false;">
+      </div>
+      <!-- ※パーツが増えたらここに同じ形式で追加できます -->
+    </section>
 
-  <footer>
-    &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
-  </footer>
+    <!-- 2. 境界線：ノイズグラデーションエリア -->
+    <div id="noise-transition">
+      <div class="noise-overlay"></div>
+    </div>
 
-  <script>
-    const characters = [
-      {
-        id: "Barnard",
-        name: "Barnard",
-        tag: "Male / Human",
-        image: "Barnard.png",
-      },
-      {
-        id: "Mele",
-        name: "Mele",
-        tag: "Female / Human",
-        image: "mele.png",
-      }
-    ];
+    <!-- 3. キャラクター一覧エリア -->
+    <header>
+      <h1>OC ARCHIVE</h1>
+      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+    </header>
 
-    const grid = document.getElementById('character-grid');
+    <main class="character-grid" id="character-grid">
+      <!-- JavaScriptで動的にカードが生成されます -->
+    </main>
 
-    characters.forEach(char => {
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = `detail.html?id=${char.id}`;
+    <footer>
+      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+    </footer>
 
-      card.innerHTML = `
-        <div class="card-img-container">
-          <img class="card-img" src="${char.image}" alt="${char.name}" oncontextmenu="return false;" ondragstart="return false;">
-        </div>
-        <div class="card-info">
-          <h2 class="card-name">${char.name}</h2>
-          <span class="card-tag"># ${char.tag}</span>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  </script>
+  </div>
 
+
+  <!-- ==========================================
+       詳細オーバーレイ（カードタップでシームレス表示）
+       ========================================== -->
+  <div id="detail-overlay" class="hidden">
+    <div class="detail-container">
+      <button id="close-detail-btn">&larr; BACK TO INDEX</button>
+      <div class="profile-box" id="profile-box">
+        <!-- JSで選択したキャラクターのデータを描画 -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       コラージュ調整用コントロールパネル
+       ========================================== -->
+  <div id="control-panel">
+    <div class="panel-msg">💡 パーツをドラッグして位置を調整できます</div>
+    <button id="export-btn">現在の座標を出力する</button>
+  </div>
+
+  <!-- JavaScript読み込み -->
+  <script src="editor.js"></script>
 </body>
 </html>
 
