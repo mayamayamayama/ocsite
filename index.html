@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -66,21 +66,19 @@
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
     }
 
-    /* 画像が切れないように全体を表示する設定 */
     .card-img-container {
       width: 100%;
       height: 320px;
       background-color: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
+    /* ★ここがポイント！ */
     .card-img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* 見切れずに全体が収まるようにする */
+      object-fit: cover; /* カードいっぱいにトリミング表示 */
+      object-position: center 20%; /* 切り抜く中心位置（例：上から20%の位置＝顔まわりをフォーカス） */
     }
 
     .card-info {
@@ -105,7 +103,7 @@
     }
 
     footer {
-      margin-top: auto;
+      main-top: auto;
       padding-top: 40px;
       font-size: 0.7rem;
       color: #444;
@@ -126,22 +124,18 @@
   </footer>
 
   <script>
-    /* ========================================================
-       ★ キャラクターデータ一覧
-       detail.html?id=001 のように各専用ページへ飛ぶ仕組みです
-    ======================================================== */
     const characters = [
       {
         id: "mele",
         name: "メレ",
         tag: "BRAIN WORLD / MEMORY",
-        image: "mele.png", // あなたの画像ファイル名
+        image: "mele.png",
       },
       {
         id: "rouki",
         name: "狼鬼",
         tag: "WOLF / NINJA",
-        image: "rouki.png", // 狼鬼の画像ファイル名（あれば）
+        image: "rouki.png",
       }
     ];
 
@@ -150,7 +144,6 @@
     characters.forEach(char => {
       const card = document.createElement('a');
       card.className = 'card';
-      // クリックしたら詳細ページにIDと一緒に飛ぶ
       card.href = `detail.html?id=${char.id}`;
 
       card.innerHTML = `
@@ -168,4 +161,5 @@
 
 </body>
 </html>
+
 
