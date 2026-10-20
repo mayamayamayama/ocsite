@@ -211,11 +211,11 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   const P = window.OC_POINTER;
 
   // ここの数字を変えると見た目が変わります
-  const SEED = 7;             // 数字を変えると、別の形の渦になる
+  const SEED = 1;             // 数字を変えると、別の形の渦になる
   const STROKES = 120;        // 筋の数
   const SPEED = 0.04;         // 回る速さ（大きいほど速い）
   const REVERSE = 0.35;       // 逆向きに回る筋の割合（0：全部同じ向き / 0.5：半分ずつ）
-  const SPEED_RANGE = [0.25, 2];  // 筋ごとの速さの幅（[遅い側, 速い側]）
+  const SPEED_RANGE = [0.25, 4];  // 筋ごとの速さの幅（[遅い側, 速い側]）
   const FOLLOW_AMOUNT = 36;   // 追従で動く量（px。大きいほど大きく動く）
   const WAVE = 1;             // 波のうねり具合（0で波なし。大きいほどぐにゃぐにゃ）
   const BASE = '#14162a';     // 背景の色
