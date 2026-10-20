@@ -217,14 +217,14 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   const SPEED_RANGE = [0.6, 1.6]; // 波ごとの速さの幅（[遅い側, 速い側]）
   const BAND_SPEED = 0.55;    // 背景の色の帯が広がる速さ（上の速さに対する割合）
   const BANDS = 7;            // 背景の色の帯の数
-  const TWIST = 0.3;         // ほんの少しねじれる量（0でまっすぐ広がる）
+  const TWIST = 3.0;         // ほんの少しねじれる量（0でまっすぐ広がる）
   const FOLLOW_AMOUNT = 50;   // 追従で動く量（px。大きいほど大きく動く）
   const WAVE = 1;             // 波のうねり具合（0で波なし。大きいほどぐにゃぐにゃ）
   const BASE = '#14003a';     // 一番奥の色
   // 背景の色の帯（深くて鮮やかな色）
-  const BAND_COLORS = ['#3A3B3C', '#F3F3F3'];
+  const BAND_COLORS = ['#1B3B36', '#4A4E69','#F3E5AB','#1E3D59','#0A192F'];
   // 細い波としずくの色（蛍光色）
-  const STROKE_COLORS = ['#3A3B3C', '#F3F3F3'];
+  const STROKE_COLORS = ['#64DFDF', '#52B788','#F8F9FA','#FFEA00','#48CAE4'];
 
   // 入場画面を暗くして、タイトルを白くする（effects.css が古いままでも崩れないように、ここで指定）
   hero.style.background = BASE;
