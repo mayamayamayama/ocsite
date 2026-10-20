@@ -3,7 +3,7 @@
 // ===== 動きのスイッチ（true：動く / false：止める） =====
 const DOTS_MOVE = true;       // 点の背景を流す
 const NOISE_FLICKER = false;  // ノイズをチラつかせる
-const SWIRL_MOVE = true;       // 入場画面の渦を回す
+const SWIRL_MOVE = true;       // 入場画面の波動を動かす
 const FOLLOW = true;           // マウス・指・スマホの傾きに追従する
 const TILT = true;             // スマホの傾きにも追従する（FOLLOWがtrueのとき）
 
@@ -202,8 +202,7 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
 
 
 // ===============================
-// 4. 入場画面の背景：液体のような渦
-//    （とろっとした色の筋が渦を巻いて、マウスや指に追従して揺れる）
+// 4. 入場画面の背景：中心から広がる波動（ビビットな色の波が、液体のようにうねりながら外へ広がる）
 // ===============================
 (function () {
   const hero = document.querySelector('.hero');
@@ -211,25 +210,30 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   const P = window.OC_POINTER;
 
   // ここの数字を変えると見た目が変わります
-  const SEED = 1;             // 数字を変えると、別の形の渦になる
-  const STROKES = 120;        // 筋の数
-  const SPEED = 0.04;         // 回る速さ（大きいほど速い）
-  const REVERSE = 0.35;       // 逆向きに回る筋の割合（0：全部同じ向き / 0.5：半分ずつ）
-  const SPEED_RANGE = [0.25, 4];  // 筋ごとの速さの幅（[遅い側, 速い側]）
+  const SEED = 7;             // 数字を変えると、別の形の波になる
+  const STROKES = 110;        // 細い波の数
+  const DOTS = 36;            // 小さいしずくの数
+  const SPEED = 90;           // 外へ広がる速さ（大きいほど速い）
+  const SPEED_RANGE = [0.6, 1.6]; // 波ごとの速さの幅（[遅い側, 速い側]）
+  const BAND_SPEED = 0.55;    // 背景の色の帯が広がる速さ（上の速さに対する割合）
+  const BANDS = 7;            // 背景の色の帯の数
+  const TWIST = 0.05;         // ほんの少しねじれる量（0でまっすぐ広がる）
   const FOLLOW_AMOUNT = 36;   // 追従で動く量（px。大きいほど大きく動く）
   const WAVE = 1;             // 波のうねり具合（0で波なし。大きいほどぐにゃぐにゃ）
-  const BASE = '#14162a';     // 背景の色
-  // 色（同じ色を2回書くと、その色が増える）
-  const COLORS = ['#3ddc65', '#3ddc65', '#a9d6ea', '#a9d6ea', '#d9edf5', '#f39a4c', '#f27a8c', '#f6e24b', '#2f6fd6'];
+  const BASE = '#14003a';     // 一番奥の色
+  // 背景の色の帯（深くて鮮やかな色）
+  const BAND_COLORS = ['#14003a', '#6a11cb', '#d4147f', '#0f3bd1', '#00a3a3', '#ff5a1f', '#2a0a6e'];
+  // 細い波としずくの色（蛍光色）
+  const STROKE_COLORS = ['#00f5ff', '#c6ff00', '#ff2bd6', '#ffe600', '#ffffff', '#ff7a00', '#39ff14'];
 
   // 入場画面を暗くして、タイトルを白くする（effects.css が古いままでも崩れないように、ここで指定）
   hero.style.background = BASE;
   hero.style.position = 'relative';
   hero.style.overflow = 'hidden';
   const h1 = hero.querySelector('h1'), sub = hero.querySelector('.subtitle');
-  [h1, sub].forEach((el) => { if (el) { el.style.position = 'relative'; el.style.zIndex = '1'; el.style.textShadow = '0 2px 18px rgba(0,0,0,.45)'; } });
+  [h1, sub].forEach((el) => { if (el) { el.style.position = 'relative'; el.style.zIndex = '1'; el.style.textShadow = '0 2px 18px rgba(0,0,0,.55)'; } });
   if (h1) { h1.style.color = '#ffffff'; h1.style.borderBottomColor = 'rgba(255,255,255,.5)'; }
-  if (sub) sub.style.color = '#e6e6e6';
+  if (sub) sub.style.color = '#f0f0f0';
 
   const cv = document.createElement('canvas');
   cv.setAttribute('aria-hidden', 'true');
@@ -237,7 +241,7 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   hero.prepend(cv);
   const ctx = cv.getContext('2d');
 
-  // 毎回同じ形になる乱数（SEEDが同じなら、同じ渦）
+  // 毎回同じ形になる乱数（SEEDが同じなら、同じ波）
   function rng(seed) {
     let a = seed >>> 0;
     return () => {
@@ -248,10 +252,13 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
     };
   }
 
+  const TAU = Math.PI * 2, GOLDEN = 2.39996;
   const MOVING = SWIRL_MOVE && !REDUCE_MOTION;
-  const N = 26, M = 2 * (N + 1);              // 1本の筋を、N個の区間のなめらかな曲線で描く
+  const mod = (x, n) => ((x % n) + n) % n;
+  const N = 26, M = 2 * (N + 1);              // 1本の波を、N個の区間のなめらかな曲線で描く
   const buf = new Float32Array(M * 2), cl = new Float32Array((N + 1) * 4);
-  let W = 0, H = 0, cx, cy, rmax, strokes, dots, visible = true;
+  const MB = 48, bx = new Float32Array(MB), by = new Float32Array(MB);
+  let W = 0, H = 0, cx, cy, rmax, scale, strokes, dots, visible = true;
 
   function setup() {
     const rect = hero.getBoundingClientRect();
@@ -262,48 +269,54 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const pad = parseFloat(getComputedStyle(hero).paddingBottom) || 0;  // ノイズが重なる分
-    cx = W / 2; cy = (H - pad) / 2;                                      // 渦の中心は、最初の画面の真ん中
+    cx = W / 2; cy = (H - pad) / 2;                                      // 波の中心は、最初の画面の真ん中
     rmax = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) * 1.05;
-    const k = rmax / 400, rand = rng(SEED);
+    scale = rmax / 400;
+    const k = scale, rand = rng(SEED), pickColor = () => STROKE_COLORS[Math.floor(rand() * STROKE_COLORS.length)];
 
-    strokes = Array.from({ length: STROKES }, () => {
-      const r = rmax * (0.04 + 0.96 * Math.pow(rand(), 0.85));
-      const len = (60 + 200 * Math.pow(rand(), 1.5)) * k;
-      return { r, a0: rand() * Math.PI * 2, da: Math.min(len / r, 2.2), w: (11 + 30 * rand()) * k,
-               drift: 0.08 + 0.25 * rand(), color: COLORS[Math.floor(rand() * COLORS.length)] };
-    });
-    dots = Array.from({ length: 28 }, () => ({
-      r: rmax * (0.1 + 0.9 * rand()), a0: rand() * Math.PI * 2, rad: (3 + 10 * rand()) * k,
-      color: COLORS[Math.floor(rand() * COLORS.length)] }));
-
-    // 回る速さと向き
-    const rand2 = rng(SEED + 100);
-    const pick = () => (SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * rand2()) * (rand2() < REVERSE ? -1 : 1);
-    strokes.forEach((s) => { s.mul = pick(); });
-    dots.forEach((d) => { d.mul = pick(); });
-
-    // 波のうねり方と、追従の大きさ（筋ごとに少しずつ違う）
-    const rand3 = rng(SEED + 200);
-    strokes.forEach((s) => {
-      s.amp = Math.min((3 + 9 * rand3()) * k, s.r * 0.18);        // 波の高さ（中心に近い筋は小さめ）
-      s.fq = 0.6 + 1.6 * rand3();                                  // 筋の上の波の数
-      s.ph = rand3() * Math.PI * 2;                                // 波の位置
-      s.wv = (0.4 + rand3()) * (rand3() < 0.5 ? -1 : 1);           // 波の進む速さ
-      s.f = (0.3 + 1.0 * (1 - s.r / rmax)) * (0.8 + 0.4 * rand3()); // 渦の中心に近いほど、大きく追従
-    });
-    dots.forEach((d) => { d.f = 0.3 + 1.0 * (1 - d.r / rmax); });
+    strokes = Array.from({ length: STROKES }, () => ({
+      r0: rand() * rmax, a0: rand() * TAU, da: 0.6 + 2.6 * Math.pow(rand(), 1.2),
+      w: (4 + 10 * rand()) * k, drift: (rand() - 0.5) * 0.12, color: pickColor(),
+      mul: SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * rand(), flip: rand() < 0.5,
+      amp: (2 + 6 * rand()) * k,                                  // 波の高さ
+      fq: 0.6 + 1.6 * rand(),                                      // 波の数
+      ph: rand() * TAU,                                            // 波の位置
+      wv: (1.2 + 1.6 * rand()) * (rand() < 0.5 ? -1 : 1),          // 波の進む速さ
+      fj: 0.8 + 0.4 * rand(),                                      // 追従の大きさのばらつき
+      tw: (rand() < 0.5 ? -1 : 1) * (0.5 + rand())                 // ねじれの向き
+    }));
+    dots = Array.from({ length: DOTS }, () => ({
+      r0: rand() * rmax, a0: rand() * TAU, rad: (2 + 6 * rand()) * k, color: pickColor(),
+      mul: SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * rand(), fj: 0.8 + 0.4 * rand()
+    }));
     draw(performance.now());
   }
 
-  // 1本の筋（点の並び）を、なめらかな曲線でぬりつぶす
-  function fillRibbon(ox, oy, ws, shift, color) {
+  // 背景の「色の帯」の輪郭（ゆらゆら揺れる丸）の道すじを作る
+  function blob(x, y, R, A, ph, t) {
+    for (let i = 0; i < MB; i++) {
+      const th = (i / MB) * TAU;
+      const rad = Math.max(R + A * (Math.sin(3 * th + ph + t * 1.1) + 0.6 * Math.sin(5 * th - ph * 1.3 - t * 1.7)), 0);
+      bx[i] = x + rad * Math.cos(th); by[i] = y + rad * Math.sin(th);
+    }
+    ctx.beginPath();
+    ctx.moveTo((bx[0] + bx[MB - 1]) / 2, (by[0] + by[MB - 1]) / 2);
+    for (let i = 0; i < MB; i++) {
+      const j = (i + 1) % MB;
+      ctx.quadraticCurveTo(bx[i], by[i], (bx[i] + bx[j]) / 2, (by[i] + by[j]) / 2);
+    }
+    ctx.closePath();
+  }
+
+  // 1本の細い波（点の並び）を、なめらかな曲線でぬりつぶす
+  function fillRibbon(ox, oy, color) {
     let n = 0;
     for (let j = 0; j <= N; j++) {
-      const o = j * 4, rr = Math.max(cl[o + 2] + cl[o + 3] * (0.5 * ws + shift), 0.5);
+      const o = j * 4, rr = Math.max(cl[o + 2] + cl[o + 3] * 0.5, 0.5);
       buf[n++] = ox + rr * cl[o]; buf[n++] = oy + rr * cl[o + 1];
     }
     for (let j = N; j >= 0; j--) {
-      const o = j * 4, rr = Math.max(cl[o + 2] + cl[o + 3] * (-0.5 * ws + shift), 0.5);
+      const o = j * 4, rr = Math.max(cl[o + 2] - cl[o + 3] * 0.5, 0.5);
       buf[n++] = ox + rr * cl[o]; buf[n++] = oy + rr * cl[o + 1];
     }
     ctx.fillStyle = color; ctx.beginPath();
@@ -318,32 +331,52 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   function draw(ms) {
     if (!W) return;
     const t = MOVING ? ms / 1000 : 0;
-    const spin = (r) => SPEED / (0.35 + r / rmax);          // 中心に近いほど速く回る
     const boost = Math.hypot(P.x, P.y);                     // 追従して動いているほど、波が大きくなる
-    ctx.clearRect(0, 0, W, H);
+    const v = SPEED * scale;
 
+    // --- 背景：色の帯が、中心から外へ広がる（中心に近い帯ほど、大きく追従して擬似3Dに） ---
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = BASE; ctx.fillRect(0, 0, W, H);
+    const bw = rmax / BANDS, run = (t * v * BAND_SPEED) / bw, n = Math.floor(run), phase = run - n;
+    for (let kk = BANDS + 1; kk >= 0; kk--) {
+      const R = (kk + phase) * bw, id = kk - n, f = 0.3 + 1.0 * (1 - Math.min(R / rmax, 1));
+      blob(cx + P.x * FOLLOW_AMOUNT * 1.2 * f, cy + P.y * FOLLOW_AMOUNT * 1.2 * f,
+           R, bw * 0.12 * WAVE * (1 + 0.8 * boost), id * 1.7, t);
+      ctx.fillStyle = BAND_COLORS[mod(id, BAND_COLORS.length)]; ctx.fill();
+    }
+
+    // --- 細い波：中心で生まれて、外へ広がりながら太くなり、端で消える ---
     for (const s of strokes) {
-      const ang = s.a0 + t * spin(s.r) * s.mul;
-      const amp = s.amp * WAVE * (1 + 0.8 * boost);
+      const x = s.r0 + v * s.mul * t, c = Math.floor(x / rmax), rt = x - c * rmax;
+      const fade = Math.min(1, rt / (0.1 * rmax)) * Math.min(1, (rmax - rt) / (0.25 * rmax));
+      if (fade < 0.02) continue;
+      const ang = s.a0 + c * GOLDEN + t * TWIST * s.tw;
+      const amp = s.amp * WAVE * (1 + 0.8 * boost) * (0.4 + 0.6 * rt / rmax);
       const ph = s.ph + t * s.wv + P.x * 2.2 + P.y * 1.6;   // マウスを動かすと、波が流れる
+      const wk = 0.45 + 0.9 * (rt / rmax);                  // 外へ行くほど太く
       for (let j = 0; j <= N; j++) {
         const u = j / N, a = ang + u * s.da, o = j * 4;
-        const R = s.r * (1 + s.drift * (u - 0.5)) + amp * Math.sin(u * s.fq * 6.2832 + ph);
-        // しずくの形：進む側がふくらんで、後ろへ細くなる
-        const uu = s.mul >= 0 ? u : 1 - u;
-        const wd = s.w * Math.pow(Math.abs(Math.sin(Math.PI * Math.pow(uu, 0.55))), 0.8) * (1 + 0.25 * Math.sin(u * 7 + ph * 1.3));
+        const R = rt * (1 + s.drift * (u - 0.5)) + amp * Math.sin(u * s.fq * TAU + ph);
+        const uu = s.flip ? 1 - u : u;                      // しずくの形：片側がふくらんで、反対へ細くなる
+        const wd = s.w * wk * Math.pow(Math.abs(Math.sin(Math.PI * Math.pow(uu, 0.55))), 0.8) * (1 + 0.25 * Math.sin(u * 7 + ph * 1.3));
         cl[o] = Math.cos(a); cl[o + 1] = Math.sin(a); cl[o + 2] = R; cl[o + 3] = wd;
       }
-      const ox = cx + P.x * FOLLOW_AMOUNT * s.f, oy = cy + P.y * FOLLOW_AMOUNT * s.f;
-      fillRibbon(ox, oy, 1, 0, s.color);
-      fillRibbon(ox, oy, 0.28, 0.2, 'rgba(255,255,255,0.16)');   // つやのハイライト
+      const f = (0.3 + 1.0 * (1 - rt / rmax)) * s.fj;
+      ctx.globalAlpha = fade;
+      fillRibbon(cx + P.x * FOLLOW_AMOUNT * f, cy + P.y * FOLLOW_AMOUNT * f, s.color);
     }
+
+    // --- 小さなしずく ---
     for (const d of dots) {
-      const a = d.a0 + t * spin(d.r) * d.mul;
-      const x = cx + P.x * FOLLOW_AMOUNT * d.f + d.r * Math.cos(a), y = cy + P.y * FOLLOW_AMOUNT * d.f + d.r * Math.sin(a);
-      ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(x, y, d.rad, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(x - d.rad * 0.3, y - d.rad * 0.3, d.rad * 0.35, 0, Math.PI * 2); ctx.fill();
+      const x = d.r0 + v * d.mul * t, c = Math.floor(x / rmax), rt = x - c * rmax;
+      const fade = Math.min(1, rt / (0.1 * rmax)) * Math.min(1, (rmax - rt) / (0.25 * rmax));
+      if (fade < 0.02) continue;
+      const a = d.a0 + c * GOLDEN, f = (0.3 + 1.0 * (1 - rt / rmax)) * d.fj;
+      ctx.globalAlpha = fade; ctx.fillStyle = d.color; ctx.beginPath();
+      ctx.arc(cx + P.x * FOLLOW_AMOUNT * f + rt * Math.cos(a), cy + P.y * FOLLOW_AMOUNT * f + rt * Math.sin(a), d.rad * (0.5 + rt / rmax), 0, TAU);
+      ctx.fill();
     }
+    ctx.globalAlpha = 1;
   }
 
   // 詳細画面から戻ったときなど、大きさが変わったときだけ作り直す
