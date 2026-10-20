@@ -174,6 +174,8 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   const SEED = 7;          // 数字を変えると、別の形の渦になる
   const STROKES = 120;     // 筋の数
   const SPEED = 0.04;      // 回る速さ（大きいほど速い）
+  const REVERSE = 0.35;           // 逆向きに回る筋の割合（0：全部同じ向き / 0.5：半分ずつ）
+  const SPEED_RANGE = [0.25, 2];  // 筋ごとの速さの幅（[遅い側, 速い側]。幅を広げるほどバラバラ）
   const BASE = '#14162a';  // 背景の色
   // 色（同じ色を2回書くと、その色が増える）
   const COLORS = ['#3ddc65', '#3ddc65', '#a9d6ea', '#a9d6ea', '#d9edf5', '#f39a4c', '#f27a8c', '#f6e24b', '#2f6fd6'];
@@ -228,6 +230,10 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     dots = Array.from({ length: 28 }, () => ({
       r: rmax * (0.1 + 0.9 * rand()), a0: rand() * Math.PI * 2, rad: (3 + 10 * rand()) * k,
       color: COLORS[Math.floor(rand() * COLORS.length)] }));
+    const rand2 = rng(SEED + 100);
+    const pick = () => (SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * rand2()) * (rand2() < REVERSE ? -1 : 1);
+    strokes.forEach((s) => { s.mul = pick(); });
+    dots.forEach((d) => { d.mul = pick(); });
     draw(performance.now());
   }
 
@@ -239,7 +245,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 
     const N = 14;
     for (const s of strokes) {
-      const rot = s.a0 + t * spin(s.r);
+      const rot = s.a0 + t * spin(s.r) * s.mul;
       ctx.fillStyle = s.color; ctx.beginPath();
       for (let pass = 0; pass < 2; pass++) {
         for (let j = 0; j <= N; j++) {
@@ -252,7 +258,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
       ctx.closePath(); ctx.fill();
     }
     for (const d of dots) {
-      const a = d.a0 + t * spin(d.r);
+      const a = d.a0 + t * spin(d.r) * d.mul;
       ctx.fillStyle = d.color; ctx.beginPath();
       ctx.arc(cx + d.r * Math.cos(a), cy + d.r * Math.sin(a), d.rad, 0, Math.PI * 2); ctx.fill();
     }
@@ -270,5 +276,3 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   setup();
   if (SWIRL_MOVE && !REDUCE_MOTION) requestAnimationFrame(loop);
 })();
-
-
