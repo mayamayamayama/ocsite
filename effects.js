@@ -222,9 +222,9 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   const WAVE = 1;             // 波のうねり具合（0で波なし。大きいほどぐにゃぐにゃ）
   const BASE = '#14003a';     // 一番奥の色
   // 背景の色の帯（深くて鮮やかな色）
-  const BAND_COLORS = ['#14003a', '#6a11cb', '#d4147f', '#0f3bd1', '#00a3a3', '#ff5a1f', '#2a0a6e'];
+  const BAND_COLORS = ['#3A3B3C', '#F3F3F3'];
   // 細い波としずくの色（蛍光色）
-  const STROKE_COLORS = ['#ff3300', '#00ccff', '#ffd900', '#1eff1e', '#ffffff', '#9966ff', '#ff00cc'];
+  const STROKE_COLORS = ['#3A3B3C', '#F3F3F3'];
 
   // 入場画面を暗くして、タイトルを白くする（effects.css が古いままでも崩れないように、ここで指定）
   hero.style.background = BASE;
