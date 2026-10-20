@@ -4,6 +4,8 @@
 const DOTS_MOVE = true;       // 点の背景を流す
 const NOISE_FLICKER = false;  // ノイズをチラつかせる
 const SWIRL_MOVE = true;       // 入場画面の渦を回す
+const FOLLOW = true;           // マウス・指・スマホの傾きに追従する
+const TILT = true;             // スマホの傾きにも追従する（FOLLOWがtrueのとき）
 
 // 「動きを減らす」設定の人には、スイッチに関係なく止めた絵だけ出す
 const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -164,19 +166,59 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 
 
 // ===============================
-// 3. 入場画面の背景：渦（筆のような色の筋が、渦を巻いてゆっくり回る）
+// 3. マウス・指・スマホの傾きに追従する動き（渦とコラージュで共通で使います）
+//    window.OC_POINTER.x / .y が、-1〜1 のなめらかな値になります
+// ===============================
+window.OC_POINTER = { x: 0, y: 0, moving: false };
+(function () {
+  if (!FOLLOW || REDUCE_MOTION) return;
+  const P = window.OC_POINTER, target = { x: 0, y: 0 };
+  let touching = false;
+  const clamp = (v) => Math.max(-1, Math.min(1, v));
+  const reset = () => { target.x = 0; target.y = 0; };
+
+  window.addEventListener('pointermove', (e) => {
+    touching = e.pointerType !== 'mouse';
+    target.x = clamp((e.clientX / window.innerWidth - 0.5) * 2);
+    target.y = clamp((e.clientY / window.innerHeight - 0.5) * 2);
+  });
+  ['pointerup', 'pointercancel'].forEach((ev) =>
+    window.addEventListener(ev, (e) => { if (e.pointerType !== 'mouse') { touching = false; reset(); } }));
+  document.documentElement.addEventListener('mouseleave', reset);
+
+  if (TILT) window.addEventListener('deviceorientation', (e) => {
+    if (touching || e.gamma == null || e.beta == null) return;
+    target.x = clamp(e.gamma / 25);
+    target.y = clamp((e.beta - 40) / 25);
+  });
+
+  (function tick() {
+    const dx = target.x - P.x, dy = target.y - P.y;
+    P.x += dx * 0.07; P.y += dy * 0.07;               // 0.07を小さくすると、ゆっくり追いかける
+    P.moving = Math.abs(dx) + Math.abs(dy) > 0.002;
+    requestAnimationFrame(tick);
+  })();
+})();
+
+
+// ===============================
+// 4. 入場画面の背景：液体のような渦
+//    （とろっとした色の筋が渦を巻いて、マウスや指に追従して揺れる）
 // ===============================
 (function () {
   const hero = document.querySelector('.hero');
   if (!hero) return;
+  const P = window.OC_POINTER;
 
   // ここの数字を変えると見た目が変わります
-  const SEED = 7;          // 数字を変えると、別の形の渦になる
-  const STROKES = 120;     // 筋の数
-  const SPEED = 0.04;      // 回る速さ（大きいほど速い）
-  const REVERSE = 0.35;           // 逆向きに回る筋の割合（0：全部同じ向き / 0.5：半分ずつ）
-  const SPEED_RANGE = [0.25, 2];  // 筋ごとの速さの幅（[遅い側, 速い側]。幅を広げるほどバラバラ）
-  const BASE = '#14162a';  // 背景の色
+  const SEED = 7;             // 数字を変えると、別の形の渦になる
+  const STROKES = 120;        // 筋の数
+  const SPEED = 0.04;         // 回る速さ（大きいほど速い）
+  const REVERSE = 0.35;       // 逆向きに回る筋の割合（0：全部同じ向き / 0.5：半分ずつ）
+  const SPEED_RANGE = [0.25, 2];  // 筋ごとの速さの幅（[遅い側, 速い側]）
+  const FOLLOW_AMOUNT = 36;   // 追従で動く量（px。大きいほど大きく動く）
+  const WAVE = 1;             // 波のうねり具合（0で波なし。大きいほどぐにゃぐにゃ）
+  const BASE = '#14162a';     // 背景の色
   // 色（同じ色を2回書くと、その色が増える）
   const COLORS = ['#3ddc65', '#3ddc65', '#a9d6ea', '#a9d6ea', '#d9edf5', '#f39a4c', '#f27a8c', '#f6e24b', '#2f6fd6'];
 
@@ -206,6 +248,9 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     };
   }
 
+  const MOVING = SWIRL_MOVE && !REDUCE_MOTION;
+  const N = 26, M = 2 * (N + 1);              // 1本の筋を、N個の区間のなめらかな曲線で描く
+  const buf = new Float32Array(M * 2), cl = new Float32Array((N + 1) * 4);
   let W = 0, H = 0, cx, cy, rmax, strokes, dots, visible = true;
 
   function setup() {
@@ -224,43 +269,80 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     strokes = Array.from({ length: STROKES }, () => {
       const r = rmax * (0.04 + 0.96 * Math.pow(rand(), 0.85));
       const len = (60 + 200 * Math.pow(rand(), 1.5)) * k;
-      return { r, a0: rand() * Math.PI * 2, da: Math.min(len / r, 2.2), w: (6 + 16 * rand()) * k,
+      return { r, a0: rand() * Math.PI * 2, da: Math.min(len / r, 2.2), w: (11 + 30 * rand()) * k,
                drift: 0.08 + 0.25 * rand(), color: COLORS[Math.floor(rand() * COLORS.length)] };
     });
     dots = Array.from({ length: 28 }, () => ({
       r: rmax * (0.1 + 0.9 * rand()), a0: rand() * Math.PI * 2, rad: (3 + 10 * rand()) * k,
       color: COLORS[Math.floor(rand() * COLORS.length)] }));
+
+    // 回る速さと向き
     const rand2 = rng(SEED + 100);
     const pick = () => (SPEED_RANGE[0] + (SPEED_RANGE[1] - SPEED_RANGE[0]) * rand2()) * (rand2() < REVERSE ? -1 : 1);
     strokes.forEach((s) => { s.mul = pick(); });
     dots.forEach((d) => { d.mul = pick(); });
+
+    // 波のうねり方と、追従の大きさ（筋ごとに少しずつ違う）
+    const rand3 = rng(SEED + 200);
+    strokes.forEach((s) => {
+      s.amp = Math.min((3 + 9 * rand3()) * k, s.r * 0.18);        // 波の高さ（中心に近い筋は小さめ）
+      s.fq = 0.6 + 1.6 * rand3();                                  // 筋の上の波の数
+      s.ph = rand3() * Math.PI * 2;                                // 波の位置
+      s.wv = (0.4 + rand3()) * (rand3() < 0.5 ? -1 : 1);           // 波の進む速さ
+      s.f = (0.3 + 1.0 * (1 - s.r / rmax)) * (0.8 + 0.4 * rand3()); // 渦の中心に近いほど、大きく追従
+    });
+    dots.forEach((d) => { d.f = 0.3 + 1.0 * (1 - d.r / rmax); });
     draw(performance.now());
+  }
+
+  // 1本の筋（点の並び）を、なめらかな曲線でぬりつぶす
+  function fillRibbon(ox, oy, ws, shift, color) {
+    let n = 0;
+    for (let j = 0; j <= N; j++) {
+      const o = j * 4, rr = Math.max(cl[o + 2] + cl[o + 3] * (0.5 * ws + shift), 0.5);
+      buf[n++] = ox + rr * cl[o]; buf[n++] = oy + rr * cl[o + 1];
+    }
+    for (let j = N; j >= 0; j--) {
+      const o = j * 4, rr = Math.max(cl[o + 2] + cl[o + 3] * (-0.5 * ws + shift), 0.5);
+      buf[n++] = ox + rr * cl[o]; buf[n++] = oy + rr * cl[o + 1];
+    }
+    ctx.fillStyle = color; ctx.beginPath();
+    ctx.moveTo((buf[0] + buf[(M - 1) * 2]) / 2, (buf[1] + buf[(M - 1) * 2 + 1]) / 2);
+    for (let i = 0; i < M; i++) {
+      const a = i * 2, b = ((i + 1) % M) * 2;
+      ctx.quadraticCurveTo(buf[a], buf[a + 1], (buf[a] + buf[b]) / 2, (buf[a + 1] + buf[b + 1]) / 2);
+    }
+    ctx.closePath(); ctx.fill();
   }
 
   function draw(ms) {
     if (!W) return;
-    const t = SWIRL_MOVE && !REDUCE_MOTION ? ms / 1000 : 0;
-    const spin = (r) => SPEED / (0.35 + r / rmax);   // 中心に近いほど速く回る
+    const t = MOVING ? ms / 1000 : 0;
+    const spin = (r) => SPEED / (0.35 + r / rmax);          // 中心に近いほど速く回る
+    const boost = Math.hypot(P.x, P.y);                     // 追従して動いているほど、波が大きくなる
     ctx.clearRect(0, 0, W, H);
 
-    const N = 14;
     for (const s of strokes) {
-      const rot = s.a0 + t * spin(s.r) * s.mul;
-      ctx.fillStyle = s.color; ctx.beginPath();
-      for (let pass = 0; pass < 2; pass++) {
-        for (let j = 0; j <= N; j++) {
-          const u = (pass ? N - j : j) / N, a = rot + u * s.da, R = s.r * (1 + s.drift * (u - 0.5));
-          const tp = Math.min(Math.pow(Math.abs(Math.sin(Math.PI * u)), 0.6) * s.w / 2, R * 0.8); // 両端が細い筆の形
-          const rr = R + (pass ? -tp : tp);
-          ctx.lineTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a));
-        }
+      const ang = s.a0 + t * spin(s.r) * s.mul;
+      const amp = s.amp * WAVE * (1 + 0.8 * boost);
+      const ph = s.ph + t * s.wv + P.x * 2.2 + P.y * 1.6;   // マウスを動かすと、波が流れる
+      for (let j = 0; j <= N; j++) {
+        const u = j / N, a = ang + u * s.da, o = j * 4;
+        const R = s.r * (1 + s.drift * (u - 0.5)) + amp * Math.sin(u * s.fq * 6.2832 + ph);
+        // しずくの形：進む側がふくらんで、後ろへ細くなる
+        const uu = s.mul >= 0 ? u : 1 - u;
+        const wd = s.w * Math.pow(Math.abs(Math.sin(Math.PI * Math.pow(uu, 0.55))), 0.8) * (1 + 0.25 * Math.sin(u * 7 + ph * 1.3));
+        cl[o] = Math.cos(a); cl[o + 1] = Math.sin(a); cl[o + 2] = R; cl[o + 3] = wd;
       }
-      ctx.closePath(); ctx.fill();
+      const ox = cx + P.x * FOLLOW_AMOUNT * s.f, oy = cy + P.y * FOLLOW_AMOUNT * s.f;
+      fillRibbon(ox, oy, 1, 0, s.color);
+      fillRibbon(ox, oy, 0.28, 0.2, 'rgba(255,255,255,0.16)');   // つやのハイライト
     }
     for (const d of dots) {
       const a = d.a0 + t * spin(d.r) * d.mul;
-      ctx.fillStyle = d.color; ctx.beginPath();
-      ctx.arc(cx + d.r * Math.cos(a), cy + d.r * Math.sin(a), d.rad, 0, Math.PI * 2); ctx.fill();
+      const x = cx + P.x * FOLLOW_AMOUNT * d.f + d.r * Math.cos(a), y = cy + P.y * FOLLOW_AMOUNT * d.f + d.r * Math.sin(a);
+      ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(x, y, d.rad, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(x - d.rad * 0.3, y - d.rad * 0.3, d.rad * 0.35, 0, Math.PI * 2); ctx.fill();
     }
   }
 
@@ -270,9 +352,9 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1) setup();
   }).observe(hero);
 
-  // 画面に見えているときだけ動かす（電池を節約）
+  // 画面に見えているときだけ描く（電池を節約）。動くものがなければ、描き直さない
   new IntersectionObserver((e) => { visible = e[0].isIntersecting; }).observe(hero);
-  function loop(ms) { if (visible) draw(ms); requestAnimationFrame(loop); }
+  function loop(ms) { if (visible && (MOVING || P.moving)) draw(ms); requestAnimationFrame(loop); }
   setup();
-  if (SWIRL_MOVE && !REDUCE_MOTION) requestAnimationFrame(loop);
+  if (!REDUCE_MOTION) requestAnimationFrame(loop);
 })();
