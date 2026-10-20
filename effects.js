@@ -224,7 +224,7 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   // 背景の色の帯（深くて鮮やかな色）
   const BAND_COLORS = ['#14003a', '#6a11cb', '#d4147f', '#0f3bd1', '#00a3a3', '#ff5a1f', '#2a0a6e'];
   // 細い波としずくの色（蛍光色）
-  const STROKE_COLORS = ['#00f5ff', '#c6ff00', '#ff2bd6', '#00ff00', '#ffffff', '#ff7a00', '#6600ff'];
+  const STROKE_COLORS = ['#ff3300', '#00ccff', '#ffd900', '#1eff1e', '#ffffff', '#9966ff', '#ff00cc'];
 
   // 入場画面を暗くして、タイトルを白くする（effects.css が古いままでも崩れないように、ここで指定）
   hero.style.background = BASE;
