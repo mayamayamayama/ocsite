@@ -213,7 +213,7 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   const SEED = 7;             // 数字を変えると、別の形の波になる
   const STROKES = 110;        // 細い波の数
   const DOTS = 36;            // 小さいしずくの数
-  const SPEED = 90;           // 外へ広がる速さ（大きいほど速い）
+  const SPEED = 50;           // 外へ広がる速さ（大きいほど速い）
   const SPEED_RANGE = [0.6, 1.6]; // 波ごとの速さの幅（[遅い側, 速い側]）
   const BAND_SPEED = 0.55;    // 背景の色の帯が広がる速さ（上の速さに対する割合）
   const BANDS = 7;            // 背景の色の帯の数
@@ -224,7 +224,7 @@ window.OC_POINTER = { x: 0, y: 0, moving: false };
   // 背景の色の帯（深くて鮮やかな色）
   const BAND_COLORS = ['#14003a', '#6a11cb', '#d4147f', '#0f3bd1', '#00a3a3', '#ff5a1f', '#2a0a6e'];
   // 細い波としずくの色（蛍光色）
-  const STROKE_COLORS = ['#00f5ff', '#c6ff00', '#ff2bd6', '#ffe600', '#ffffff', '#ff7a00', '#39ff14'];
+  const STROKE_COLORS = ['#00f5ff', '#c6ff00', '#ff2bd6', '#00ff00', '#ffffff', '#ff7a00', '#6600ff'];
 
   // 入場画面を暗くして、タイトルを白くする（effects.css が古いままでも崩れないように、ここで指定）
   hero.style.background = BASE;
