@@ -1,12 +1,56 @@
 // site.js — 画面の見た目と動き（editor.js のあとに読み込まれます）
 // キャラクターのデータ（characters）は editor.js のものをそのまま使います。ここでは書き換えません。
+//
+// 表情違いの絵（マウスを乗せたときに差し替わる絵）：
+//   「Barnard.png」の表情違いは「Barnard_hover.png」という名前でアップロードするだけで、自動で使われます。
+//   名前を変えたいときは、editor.js のキャラクターに  hover: "好きな名前.png"  を足してください。
 
 (function () {
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
   const ids = Object.keys(characters);
-  const pad = (n) => String(n).padStart(2, '0');
+  const pad = (n, l = 2) => String(n).padStart(l, '0');
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  // 絵の台紙の色（[板の色, 丸の色]）。キャラクターの順番に使われます
+  const TONES = [['#efe7d2', '#f2b134'], ['#e9e4f5', '#ff6f91'], ['#e0efe9', '#35c9b0'], ['#f1e4dd', '#ff5a36'], ['#e4e9f5', '#5b8cff']];
+
+  // ---------- 飾りの部品（同じ言葉からは、いつも同じ形が出ます） ----------
+  function hash(str) { let h = 2166136261; for (const ch of String(str)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function rnd(seed) {
+    let a = hash(seed) || 1;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), a | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  const hex = (seed, len) => { const r = rnd(seed); let o = ''; while (o.length < len) o += Math.floor(r() * 16).toString(16); return o.toUpperCase(); };
+  function barcode(seed, w = 96, h = 22) {
+    const r = rnd(seed); let x = 0, bars = '';
+    while (x < w) { const bw = 1 + Math.floor(r() * 3), gap = 1 + Math.floor(r() * 3); bars += `<rect x="${x}" y="0" width="${bw}" height="${h}"/>`; x += bw + gap; }
+    return `<svg class="barcode" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true" fill="currentColor">${bars}</svg>`;
+  }
+  // 散らばる小さな文字（ときどき1文字だけ変わる）
+  function scatter(el, seed, count) {
+    if (!el) return;
+    const r = rnd(seed);
+    el.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.textContent = LETTERS[Math.floor(r() * 26)];
+      s.style.left = r() * 96 + '%'; s.style.top = r() * 92 + '%';
+      if (r() < 0.3) s.className = 'hot';
+      el.appendChild(s);
+    }
+    if (REDUCE) return;
+    const timer = setInterval(() => {
+      if (!el.isConnected) { clearInterval(timer); return; }
+      el.children[Math.floor(Math.random() * el.children.length)].textContent = LETTERS[Math.floor(Math.random() * 26)];
+    }, 1100);
+  }
+  // 円に沿って並ぶ文字
+  function ring(text, cls) {
+    const id = 'rp' + Math.random().toString(36).slice(2, 7);
+    return `<svg class="ring ${cls}" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="${id}" d="M100,100 m-84,0 a84,84 0 1,1 168,0 a84,84 0 1,1 -168,0"/></defs><text><textPath href="#${id}" textLength="526" lengthAdjust="spacing">${text}</textPath></text></svg>`;
+  }
 
   // ---------- 文字を1文字ずつ包む（せり上がるアニメ用） ----------
   function split(el) {
@@ -17,13 +61,11 @@
     el.textContent = '';
     [...text].forEach((c, i) => {
       const outer = document.createElement('span');
-      outer.className = 'ch';
-      outer.setAttribute('aria-hidden', 'true');
+      outer.className = 'ch'; outer.setAttribute('aria-hidden', 'true');
       const inner = document.createElement('span');
       inner.textContent = c === ' ' ? '\u00a0' : c;
       inner.style.setProperty('--i', i);
-      outer.appendChild(inner);
-      el.appendChild(outer);
+      outer.appendChild(inner); el.appendChild(outer);
     });
   }
 
@@ -75,6 +117,13 @@
     });
     return rows;
   }
+  const pills = (tag) => String(tag).split('/').map((s) => s.trim()).filter(Boolean).map((s) => `<i>${esc(s)}</i>`).join('');
+  function spec(c) {
+    const rows = parseDesc(c.description), g = (k) => (rows.find((r) => r[0] === k) || ['', ''])[1];
+    return [g('Age') && `${g('Age')}Y`, g('Height') && `${g('Height')}CM`].filter(Boolean).join(' / ');
+  }
+  const hoverSrc = (c) => c.hover || c.image.replace(/(\.[A-Za-z0-9]+)$/, '_hover$1');
+  const toneStyle = (i) => `--t1:${TONES[i % TONES.length][0]};--t2:${TONES[i % TONES.length][1]}`;
 
   async function copyText(text, btn) {
     try { await navigator.clipboard.writeText(text); }
@@ -89,6 +138,18 @@
     setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
   }
 
+  // ---------- 画面の四隅の飾り ----------
+  const hud = { clock: $('#hud-clock'), scroll: $('#hud-scroll'), sec: $('#hud-sec'), xy: $('#hud-xy') };
+  const tickClock = () => { const d = new Date(); hud.clock.textContent = [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => pad(n)).join(':'); };
+  setInterval(tickClock, 1000); tickClock();
+  const onScroll = () => { const max = document.documentElement.scrollHeight - window.innerHeight; hud.scroll.textContent = pad(Math.round(max > 0 ? (window.scrollY / max) * 100 : 0), 3); };
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  window.addEventListener('pointermove', (e) => { hud.xy.textContent = `X ${pad(Math.round(e.clientX), 4)} Y ${pad(Math.round(e.clientY), 4)}`; }, { passive: true });
+
+  // ---------- 絵を保存されにくくする（完全には防げませんが、ふつうの保存操作はできなくします） ----------
+  document.addEventListener('contextmenu', (e) => { if (e.target.closest('.plate')) e.preventDefault(); });
+  document.addEventListener('dragstart', (e) => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+
   // ---------- 詳細画面 ----------
   function renderDetail(id) {
     const c = characters[id], i = ids.indexOf(id);
@@ -98,12 +159,21 @@
 
     $('#profile-box').innerHTML = `
       <div class="d-head is-in">
-        <span class="d-no mono">${pad(i + 1)} / ${pad(ids.length)}</span>
+        <div class="scatter" id="scatter-head" aria-hidden="true"></div>
+        <div class="d-no-row mono"><span class="d-no">${pad(i + 1)} / ${pad(ids.length)}</span><span>ID OC-${pad(i + 1, 3)} / ${hex(id, 6)}</span></div>
         <h1 class="d-name">${esc(c.name)}</h1>
-        <span class="d-tag mono"># ${esc(c.tag)}</span>
+        <div class="pills">${pills(c.tag)}</div>
       </div>
       <div class="d-body">
-        <figure class="d-media"><img src="${esc(c.image)}" alt="${esc(c.name)}"></figure>
+        <figure class="d-media" style="${toneStyle(i)}">
+          <div class="plate d-plate">
+            <img src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
+            <i class="mk tl"></i><i class="mk br"></i><span class="cross"></span>
+            <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">&copy; OC ARCHIVE</span>
+            <div class="shield"></div>
+          </div>
+          <figcaption class="mono"><span>FIG. ${pad(i + 1)} — ${esc(c.name)}</span>${barcode(id)}</figcaption>
+        </figure>
         <div class="d-info">
           <section><h3 class="sec mono">Profile</h3>${rows}</section>
           <section>
@@ -118,10 +188,12 @@
       </nav>`;
 
     split($('.d-name'));
+    scatter($('#scatter-head'), 'head' + id, 22);
     $('.copy').onclick = (e) => copyText(c.prompt, e.currentTarget);
     document.querySelectorAll('.d-nav a').forEach((a) => {
       a.onclick = (e) => { e.preventDefault(); window.showDetail(a.dataset.id, true); };
     });
+    hud.sec.textContent = `FILE ${pad(i + 1)}`;
   }
 
   function openDetail(id) {
@@ -138,6 +210,7 @@
     $('#detail-screen').classList.remove('active');
     $('#index-screen').classList.add('active');
     document.title = 'OC ARCHIVE';
+    hud.sec.textContent = 'INDEX';
     window.scrollTo(0, 0);
   }
 
@@ -161,26 +234,49 @@
     const a = document.createElement('a');
     a.className = 'card';
     a.href = `#${id}`;
-    a.style.setProperty('--n', i % 3);
+    a.style.cssText = `--n:${i % 3};${toneStyle(i)}`;
     a.innerHTML = `
-      <div class="card-media">
-        <img src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false" oncontextmenu="return false;">
-        <span class="card-no mono">${pad(i + 1)}</span>
-      </div>
+      <div class="card-media"><div class="plate">
+        <img class="img-a" src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
+        <span class="cross"></span>
+        <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">FIG.${pad(i + 1)}</span>
+        <div class="shield"></div>
+      </div></div>
       <div class="card-meta">
+        <div class="cm-top"><span class="cm-label mono">Character</span><span class="cm-no">${pad(i + 1)}</span></div>
+        <div class="pills">${pills(c.tag)}</div>
         <h3 class="card-name" data-text="${esc(c.name)}">${esc(c.name)}</h3>
-        <span class="card-tag mono"># ${esc(c.tag)}</span>
-        <span class="card-arrow" aria-hidden="true">&nearr;</span>
+        <span class="card-spec mono">${esc(spec(c))}</span>
+        <span class="card-view mono" aria-hidden="true">VIEW</span>
       </div>`;
     a.addEventListener('click', (e) => { e.preventDefault(); window.showDetail(id, true); });
     a.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') scramble($('.card-name', a), c.name, 500); });
     grid.appendChild(a);
     reveal(a);
+
+    // 表情違いの絵があれば（名前_hover.png）、マウスを乗せたときに差し替える
+    const probe = new Image();
+    probe.onload = () => {
+      const b = document.createElement('img');
+      b.className = 'img-b'; b.src = probe.src; b.alt = ''; b.draggable = false;
+      $('.plate', a).insertBefore(b, $('.cross', a));
+      a.classList.add('has-alt');
+    };
+    probe.src = hoverSrc(c);
   });
 
-  // ---------- 見出しと入場画面の文字 ----------
+  // ---------- 見出しまわりの飾り ----------
   split($('#list-title'));
   reveal($('#list-head'));
+  $('#serial').textContent = `SER. ${hex('serial', 4)}`;
+  $('#hexline').textContent = `0x${hex('hexline', 8)}`;
+  scatter($('#scatter-band'), 'band', 34);
+  $('#rings').innerHTML = ring('OC ARCHIVE • YOU • OC ARCHIVE • YOU • OC ARCHIVE • YOU • ', 'a') + ring('CHARACTER • FILE • CHARACTER • FILE • CHARACTER • FILE • ', 'b');
+  const phrase = 'OC ARCHIVE * CHARACTER FILE * VOL.01 * 2026 * ';
+  $('#ticker').innerHTML = Array.from({ length: 12 }, () => `<span>${phrase}</span>`).join('');
+  $('#go-grid').addEventListener('click', (e) => { e.preventDefault(); grid.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' }); });
+
+  // ---------- 入場画面の文字 ----------
   const hero = $('.hero');
   split($('h1', hero));
   hero.style.setProperty('--base', '250ms');
