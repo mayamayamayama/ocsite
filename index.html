@@ -17,6 +17,15 @@
   <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
   <canvas id="dot-bg" aria-hidden="true"></canvas>
 
+  <!-- 画面の四隅に出る、飾りの文字と図形（site.js が動かします） -->
+  <div class="hud" aria-hidden="true">
+    <span class="hud-tl">OC ARCHIVE &copy;2026</span>
+    <span class="hud-tr" id="hud-clock">00:00:00</span>
+    <span class="hud-bl"><b id="hud-scroll">000</b>% / <b id="hud-sec">INDEX</b></span>
+    <span class="hud-br" id="hud-xy">X 0000 Y 0000</span>
+    <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+  </div>
+
   <!-- 画面を切り替えるときの幕（site.js が動かします） -->
   <div id="curtain" class="curtain" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i></div>
 
@@ -40,13 +49,29 @@
     <!-- ノイズのグラデーション（effects.js が描きます） -->
     <canvas id="noise-divider" aria-hidden="true"></canvas>
 
+    <!-- 流れる文字の帯 -->
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+
     <section class="list-head" id="list-head">
-      <p class="mono kicker">( 01 — INDEX )</p>
+      <p class="mono kicker"><span>( 01 — INDEX )</span><span class="shapes">&#9679; &#9632; &#9650; &#10010;</span><span id="serial">SER. 0000</span></p>
       <h2 class="big" id="list-title">CHARACTER</h2>
-      <p class="mono meta"><span><b id="count">00</b> ENTRIES</span><span class="rule"></span></p>
+      <p class="mono meta"><span><b id="count">00</b> ENTRIES</span><span class="rule"></span><span id="hexline">0x0000</span></p>
+    </section>
+
+    <!-- 飾りの帯：回る文字の輪、散らばる小さな文字 -->
+    <section class="deco-band">
+      <div class="scatter" id="scatter-band" aria-hidden="true"></div>
+      <div class="rings" id="rings" aria-hidden="true"></div>
+      <a class="bracket" id="go-grid" href="#character-grid">ファイルを開く &darr;</a>
     </section>
 
     <main class="character-grid" id="character-grid"></main>
+
+    <!-- 文字の積み重ね -->
+    <section class="stack" aria-hidden="true">
+      <div>OC'S CHARACTER</div><div>OC'S ILLUSTRATION</div><div>OC'S PROMPT</div>
+      <div>OC'S PROFILE</div><div>OC'S WORLD</div><div>OC'S STORY</div><div>OC'S ARCHIVE</div>
+    </section>
 
     <footer>
       &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
