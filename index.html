@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
+  <!-- 文字（Google Fonts）。読み込めなくても、ほかの文字で表示されます -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- デザイン（style.css）と、追加の演出（effects.css）を読み込み -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="effects.css">
@@ -13,19 +17,34 @@
   <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
   <canvas id="dot-bg" aria-hidden="true"></canvas>
 
+  <!-- 画面を切り替えるときの幕（site.js が動かします） -->
+  <div id="curtain" class="curtain" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i></div>
+
   <!-- ==========================================
        ビュー1：入場画面 ＋ キャラクター一覧画面
        ========================================== -->
   <div id="index-screen" class="view active">
 
-    <!-- 入場画面（あとでコラージュに差し替える場所） -->
+    <!-- 入場画面（メインビジュアル。effects.js が背景を描きます） -->
     <section class="hero">
+      <h1>OC ARCHIVE</h1>
+      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+    </section>
+
+    <!-- 一度キャラクターを開いて戻ったあとの、入場画面の代わりの空間 -->
+    <section class="hero-after" aria-hidden="true">
       <h1>OC ARCHIVE</h1>
       <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
     </section>
 
     <!-- ノイズのグラデーション（effects.js が描きます） -->
     <canvas id="noise-divider" aria-hidden="true"></canvas>
+
+    <section class="list-head" id="list-head">
+      <p class="mono kicker">( 01 — INDEX )</p>
+      <h2 class="big" id="list-title">CHARACTER</h2>
+      <p class="mono meta"><span><b id="count">00</b> ENTRIES</span><span class="rule"></span></p>
+    </section>
 
     <main class="character-grid" id="character-grid"></main>
 
@@ -39,16 +58,17 @@
        ========================================== -->
   <div id="detail-screen" class="view">
     <div class="container">
-      <button class="back-btn" id="back-btn">&larr; BACK TO INDEX</button>
-      <div class="profile-box" id="profile-box"></div>
+      <button class="back-btn" id="back-btn"><span>&larr;</span> INDEX</button>
+      <div id="profile-box"></div>
     </div>
     <footer>
       &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
     </footer>
   </div>
 
-  <!-- スクリプト：キャラクターデータ（editor.js）と、演出（effects.js） -->
+  <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 背景の演出（effects.js） -->
   <script src="editor.js"></script>
+  <script src="site.js"></script>
   <script src="effects.js"></script>
 </body>
 </html>
