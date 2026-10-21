@@ -5,7 +5,7 @@
   --ink: #ece9e1;
   --sub: #8a8780;
   --line: #262420;
-  --accent: #f3e5ab;
+  --accent: #d8ff00;
   --ease: cubic-bezier(.16, 1, .3, 1);
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -212,7 +212,7 @@ body.is-after .hero-after { display: flex; }
 }
 .card-tag { grid-column: 1; color: var(--sub); }
 .card-arrow {
-  grid-column: 2; grid-row: 1 / span 2;
+  grid-column: 2; grid-row: 1 / span 3;
   font-size: 1.6rem; line-height: 1; color: var(--sub);
   transition: transform .5s var(--ease), color .3s;
 }
@@ -254,7 +254,7 @@ body.in-detail #dot-bg { opacity: .3; }
   .d-media { position: sticky; top: 24px; }
 }
 .d-media {
-  margin: 0; background: #fff; overflow: hidden;
+  margin: 0;
   animation: clipUp 1.3s var(--ease) .15s both;
 }
 .d-media img { display: block; width: 100%; height: auto; }
@@ -325,3 +325,189 @@ body.in-detail #dot-bg { opacity: .3; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; transition-delay: 0ms !important; animation-delay: 0ms !important; }
 }
+
+
+/* =====================================================
+   追加：図形・飾りの文字・画像まわり
+   ===================================================== */
+
+/* 画像の「台紙」：色の板に、絵をなじませる（白い背景が板の色になる） */
+.plate {
+  position: relative; isolation: isolate; overflow: hidden;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(circle at 72% 30%, var(--t2) 0, var(--t2) 28%, transparent 28.4%),
+    var(--t1);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+}
+.plate img {
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.plate::after {          /* ざらざらの質感 */
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  mix-blend-mode: multiply; opacity: .35;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.shield { position: absolute; inset: 0; z-index: 4; }   /* 画像の上にかぶせる透明な板（保存されにくくする） */
+.cross {
+  position: absolute; left: 72%; top: 30%; width: 16px; height: 16px; margin: -8px 0 0 -8px; z-index: 3; pointer-events: none; opacity: .7;
+  background:
+    linear-gradient(#0d0d0d, #0d0d0d) center / 1px 100% no-repeat,
+    linear-gradient(#0d0d0d, #0d0d0d) center / 100% 1px no-repeat;
+}
+.mk { position: absolute; width: 14px; height: 14px; z-index: 3; pointer-events: none; opacity: .7; border: 0 solid #0d0d0d; }
+.mk.tl { top: 10px; left: 10px; border-top-width: 1px; border-left-width: 1px; }
+.mk.br { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
+.pl {
+  position: absolute; z-index: 3; pointer-events: none; opacity: .65; color: #0d0d0d;
+  font-family: var(--mono); font-size: .56rem; letter-spacing: .14em; text-transform: uppercase;
+}
+.pl.tr { top: 12px; right: 32px; }
+.pl.bl { bottom: 12px; left: 32px; }
+
+/* 一覧カードの追加 */
+.card-spec { grid-column: 1; color: var(--sub); opacity: .75; }
+.img-b { position: absolute; inset: 0; opacity: 0; transition: opacity .06s steps(1); }
+.img-a { transition: transform 1.6s var(--ease), opacity .06s steps(1); }
+.has-alt:hover .img-b { opacity: 1; }
+.has-alt:hover .img-a { opacity: 0; }
+@media (hover: none) {
+  .has-alt:active .img-b { opacity: 1; }
+  .has-alt:active .img-a { opacity: 0; }
+}
+.card-no { z-index: 3; }
+
+/* 詳細画面の追加 */
+.d-plate { height: auto; }
+.d-media img { position: relative; }
+.d-media figcaption {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 2px 0; color: var(--sub);
+}
+.d-no-row { display: flex; justify-content: space-between; gap: 12px; color: var(--sub); margin-bottom: 10px; }
+.d-no-row .d-no { margin: 0; }
+.barcode { display: block; color: var(--sub); flex: none; }
+
+/* 一覧の見出しまわり */
+.kicker { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.shapes { letter-spacing: .5em; }
+.meta #hexline { color: #4a4843; }
+
+/* 流れる文字の帯 */
+.ticker {
+  position: relative; z-index: 1;
+  width: 100vw; overflow: hidden; flex-shrink: 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding: 12px 0; background: var(--bg);
+}
+.ticker-track { display: flex; width: max-content; white-space: nowrap; animation: tick 46s linear infinite; }
+.ticker-track span {
+  font-size: clamp(1.8rem, 7vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; text-transform: uppercase;
+  color: transparent; -webkit-text-stroke: 1px #5c5a54; padding-right: .5em;
+}
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* 画面の四隅の飾り（どんな背景の上でも見えるよう、色を反転させて重ねる） */
+.hud {
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  mix-blend-mode: difference; color: #fff;
+  font-family: var(--mono); font-size: .56rem; letter-spacing: .14em; text-transform: uppercase;
+}
+.hud span { position: absolute; opacity: .75; }
+.hud b { font-weight: 400; }
+.hud-tl { top: 12px; left: 14px; }
+.hud-tr { top: 12px; right: 14px; }
+.hud-bl { bottom: 12px; left: 14px; }
+.hud-br { bottom: 12px; right: 14px; }
+.hud i { position: absolute; width: 12px; height: 12px; border: 0 solid #fff; opacity: .6; }
+.hud .c1 { top: 32px; left: 14px; border-top-width: 1px; border-left-width: 1px; }
+.hud .c2 { top: 32px; right: 14px; border-top-width: 1px; border-right-width: 1px; }
+.hud .c3 { bottom: 32px; left: 14px; border-bottom-width: 1px; border-left-width: 1px; }
+.hud .c4 { bottom: 32px; right: 14px; border-bottom-width: 1px; border-right-width: 1px; }
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
+
+
+/* =====================================================
+   追加：RYDEN風（ライム色・丸いボタン・カプセルのタグ・文字の輪・散らばる文字）
+   ===================================================== */
+
+/* カードの下の部分を、大きい番号・タグ・丸いボタンの形に */
+.card-meta { align-items: center; }
+.cm-top { grid-column: 1; display: flex; align-items: flex-end; gap: 12px; }
+.cm-label { color: var(--sub); padding-bottom: .5em; }
+.cm-no { font-size: clamp(2.6rem, 11vw, 3.6rem); line-height: .85; letter-spacing: -.04em; font-weight: 400; }
+.pills { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.pills i {
+  font-style: normal; font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 5px 12px; border: 1px solid var(--ink); border-radius: 999px;
+}
+.card-view {
+  grid-column: 2; grid-row: 1 / span 3; align-self: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: #0d0d0d;
+  font-size: .7rem; letter-spacing: .08em;
+  transition: transform .5s var(--ease);
+}
+.card:hover .card-view { transform: scale(1.15) rotate(-8deg); }
+.card-spec { grid-column: 1; }
+
+/* 飾りの帯 */
+.deco-band {
+  position: relative; width: 100%; overflow: hidden;
+  height: clamp(330px, 88vw, 440px); margin: 6px 0 56px;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.rings { position: absolute; left: 50%; top: 40%; width: min(84%, 520px); aspect-ratio: 1.75 / 1; transform: translate(-50%, -50%); }
+.ring { position: absolute; top: 0; width: 57%; height: auto; overflow: visible; animation: spin 42s linear infinite; }
+.ring.a { left: 0; }
+.ring.b { left: 43%; animation-direction: reverse; animation-duration: 56s; }
+.ring text { fill: var(--accent); font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 散らばる小さな文字 */
+.scatter { position: absolute; inset: 0; pointer-events: none; }
+.scatter span {
+  position: absolute; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em;
+  color: rgba(236, 233, 225, .38);
+}
+.scatter span.hot { color: var(--accent); opacity: .85; }
+
+/* 角に斜めの線がある枠（RYDENの「つながる」のような形） */
+.bracket {
+  position: absolute; right: 0; bottom: 14px;
+  padding: 18px 40px 10px 14px;
+  color: var(--accent); text-decoration: none; font-weight: 700; font-size: .95rem; letter-spacing: .02em;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M0 99.5 H72 L99.5 .5 H70 M99.5 .5 V99.5' fill='none' stroke='%23d8ff00' stroke-width='1' vector-effect='non-scaling-stroke'/></svg>") no-repeat center / 100% 100%;
+  transition: padding .5s var(--ease);
+}
+.bracket:hover { padding-right: 56px; }
+
+/* 文字の積み重ね */
+.stack { width: 100%; padding: 100px 0 10px; text-align: center; }
+.stack div {
+  font-size: clamp(1.5rem, 7vw, 2.6rem); line-height: .94; font-weight: 700; letter-spacing: -.02em;
+  text-transform: uppercase; color: var(--accent); transition: color .3s, letter-spacing .5s var(--ease);
+}
+.stack div:hover { color: #fff; letter-spacing: .02em; }
+
+/* 流れる文字の帯：1つおきにライム色 */
+.ticker-track span:nth-child(even) { color: var(--accent); -webkit-text-stroke: 0; }
+
+/* 詳細画面の名前の部分を、ライム色の板にする */
+.d-head {
+  position: relative; overflow: hidden;
+  background: var(--accent); color: #0d0d0d;
+  padding: 18px 18px 26px; margin-bottom: 30px;
+  clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 0 100%);
+}
+.d-head .d-no-row { color: #0d0d0d; opacity: .7; position: relative; }
+.d-head .d-name { color: #0d0d0d; position: relative; }
+.d-head .pills { margin-top: 16px; position: relative; }
+.d-head .pills i { border-color: #0d0d0d; color: #0d0d0d; }
+.d-head .scatter span { color: rgba(13, 13, 13, .45); }
+.d-head .scatter span.hot { color: #0d0d0d; opacity: .9; }
