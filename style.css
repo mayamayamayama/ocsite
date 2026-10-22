@@ -10,7 +10,10 @@
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+a, button { outline: none; }
+.card { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.card:focus-visible { outline: 1px solid var(--accent); outline-offset: 6px; }
 
 body {
   margin: 0;
@@ -96,8 +99,6 @@ footer {
 @keyframes clipUp { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 
 /* --- 入場画面の文字 --- */
-.hero .subtitle { opacity: 0; }
-.hero.is-in .subtitle { animation: up 1s var(--ease) .9s both; }
 
 /* 一度キャラクターを開いて戻ったあとは、入場画面の代わりにこの空間を出す（あとでキャラクターの世界に差し替える場所） */
 .hero-after {
@@ -109,7 +110,7 @@ footer {
   min-height: 480px;
   padding-bottom: 240px;
   flex-shrink: 0;
-  background: #e9e6dc;
+  background: #f3e7d0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -117,7 +118,6 @@ footer {
 }
 .hero-after h1 { font-size: clamp(2.2rem, 10vw, 4.5rem); color: #0d0d0d; border-bottom-color: #9a9a9a; }
 .hero-after .subtitle { color: #555; }
-body.is-after .hero { display: none !important; }
 body.is-after .hero-after { display: flex; }
 
 /* --- 「CHARACTER」の見出し --- */
@@ -335,9 +335,7 @@ body.in-detail #dot-bg { opacity: .3; }
 .plate {
   position: relative; isolation: isolate; overflow: hidden;
   width: 100%; height: 100%;
-  background:
-    radial-gradient(circle at 72% 30%, var(--t2) 0, var(--t2) 28%, transparent 28.4%),
-    var(--t1);
+  background: var(--t1);
   clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
 }
 .plate img {
@@ -511,3 +509,32 @@ body.in-detail #dot-bg { opacity: .3; }
 .d-head .pills i { border-color: #0d0d0d; color: #0d0d0d; }
 .d-head .scatter span { color: rgba(13, 13, 13, .45); }
 .d-head .scatter span.hot { color: #0d0d0d; opacity: .9; }
+
+
+/* =====================================================
+   追加：タップの色の消去・動く図形・メインビジュアル・最後の文字
+   ===================================================== */
+
+/* スマホでタップしたときの青い色（ハイライト）を消す */
+a, button, .card, .back-btn, .reel, .hero-main { -webkit-tap-highlight-color: transparent; }
+.card { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; outline: none; }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+
+/* カードの丸い飾り（ボタンではなく、名前の文字がまわる輪） */
+.card-badge { grid-column: 2; grid-row: 1 / span 3; align-self: center; width: 64px; height: 64px; }
+.card-badge svg { width: 100%; height: 100%; overflow: visible; animation: spin 14s linear infinite; }
+.card:hover .card-badge svg { animation-duration: 4s; }
+.card-badge text { fill: var(--accent); font-family: var(--mono); font-size: 25px; font-weight: 700; letter-spacing: .04em; }
+.card-badge circle { fill: var(--accent); }
+
+/* 見出しの上の、動く小さな図形 */
+.anim-icons { display: inline-flex; align-items: center; gap: 16px; }
+.ai { position: relative; display: inline-block; width: 12px; height: 12px; color: var(--accent); }
+.ai.a1 { animation: spin 3s steps(4) infinite; }
+.ai.a1::before, .ai.a1::after { content: ""; position: absolute; background: currentColor; }
+.ai.a1::before { left: 5px; top: 0; width: 2px; height: 12px; }
+.ai.a1::after { left: 0; top: 5px; width: 12px; height: 2px; }
+.ai.a2 { border: 1px solid currentColor; border-radius: 50%; animation: pulse 1.8s ease-out infinite; }
+.ai.a3 { border: 1px solid currentColor; animation: flip 3.2s var(--ease) infinite; }
+.ai.a4 { display: inline-flex; align-items: flex-end; gap: 2px; }
+.ai.a4 b { display: block; width: 2px; heigh
