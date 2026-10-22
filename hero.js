@@ -6,6 +6,9 @@
   if (!hero) return;
   const cv = document.getElementById('hero-cv');
   const ctx = cv.getContext('2d');
+  // style.css が古いままでも暴走しないように、大事な指定はここでも行う（キャンバスは、ページの高さに影響させない）
+  hero.style.cssText += ';position:relative;box-sizing:border-box;overflow:hidden;width:100vw;height:calc(100vh + 240px);height:calc(100svh + 240px);min-height:660px;padding-bottom:240px;background:#f2e6d0';
+  cv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;display:block';
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ここの数字・色を変えると見た目が変わります
@@ -45,7 +48,7 @@
     ['half', .90, .14, .24, 'coral', .7, -.22],
     ['quarter', .02, .78, .26, 'teal', .6, 0],
     ['badge', .78, .36, .22, 'ink', 1, .45],
-    ['sparkle', .12, .10, .08, 'coral', .9, .2], ['sparkle', .66, .10, .06, 'ink', .8, -.3], ['sparkle', .56, .56, .07, 'mustard', 1, .25],
+    ['sparkle', .30, .052, .07, 'coral', .9, .2], ['sparkle', .60, .052, .05, 'ink', .8, -.3], ['sparkle', .56, .56, .07, 'mustard', 1, .25],
     ['sparkle', .20, .54, .05, 'ink', .6, .15], ['sparkle', .94, .54, .06, 'coral', 1, -.2], ['sparkle', .70, .60, .045, 'teal', .7, .3],
     ['plus', .06, .30, .035, 'ink', .5, .2], ['plus', .50, .06, .03, 'ink', .6, -.3], ['plus', .90, .30, .03, 'ink', .4, .2], ['plus', .62, .44, .03, 'coral', .7, .4],
     ['plus', .30, .62, .03, 'ink', .5, -.2], ['plus', .96, .84, .035, 'ink', .5, .3], ['plus', .08, .58, .028, 'teal', .6, .2],
@@ -59,10 +62,10 @@
   function build() {
     const rect = hero.getBoundingClientRect();
     W = rect.width; H = rect.height;
-    if (!W || !H) return;
+    if (!W || !H || H > 4000 || W > 5000) return;   // 異常に大きいときは動かさない（ページが重くなるのを防ぐ）
     const pb = parseFloat(getComputedStyle(hero).paddingBottom) || NOISE_H;
     FH = H - pb; S = Math.min(W, FH);
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(4e6 / (W * H)));   // 描く面積に上限
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const r = rng(11);
