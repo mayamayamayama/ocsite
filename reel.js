@@ -13,6 +13,7 @@
   const AUTO = true;       // false で、自動で切り替わらなくなる（タップだけで進む）
 
   const pad = (n) => String(n).padStart(2, '0');
+  reel.style.cssText += ';position:relative;overflow:hidden';
   const scenes = [...reel.querySelectorAll('.rs')], N = scenes.length;
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -50,7 +51,7 @@
     reel.querySelectorAll('[data-fit]').forEach((el) => {
       const target = W * parseFloat(el.dataset.fit);
       const items = el.classList.contains('rs-multi') ? [...el.children] : [el];
-      items.forEach((it) => { it.style.fontSize = '100px'; const w = it.offsetWidth || it.scrollWidth; if (w) it.style.fontSize = (100 * target / w) + 'px'; });
+      items.forEach((it) => { it.style.fontSize = '100px'; const w = it.offsetWidth || it.scrollWidth; if (w) it.style.fontSize = Math.min(700, 100 * target / w) + 'px'; });
     });
     reel.querySelectorAll('.rs').forEach((sc) => {
       const g = sc.querySelector('.rs-giant'), c = sc.querySelector('.rs-cols');
