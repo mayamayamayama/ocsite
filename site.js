@@ -14,7 +14,7 @@
   const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
   // 絵の台紙の色（[板の色, 丸の色]）。キャラクターの順番に使われます
-  const TONES = [['#efe7d2', '#f2b134'], ['#e9e4f5', '#ff6f91'], ['#e0efe9', '#35c9b0'], ['#f1e4dd', '#ff5a36'], ['#e4e9f5', '#5b8cff']];
+  const TONES = [['#f2eee4', '#f2b134'], ['#eeeaf3', '#ff6f91'], ['#e9f0ec', '#35c9b0'], ['#f3ebe6', '#ff5a36'], ['#eaeef5', '#5b8cff']];
 
   // ---------- 飾りの部品（同じ言葉からは、いつも同じ形が出ます） ----------
   function hash(str) { let h = 2166136261; for (const ch of String(str)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -50,6 +50,13 @@
   function ring(text, cls) {
     const id = 'rp' + Math.random().toString(36).slice(2, 7);
     return `<svg class="ring ${cls}" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="${id}" d="M100,100 m-84,0 a84,84 0 1,1 168,0 a84,84 0 1,1 -168,0"/></defs><text><textPath href="#${id}" textLength="526" lengthAdjust="spacing">${text}</textPath></text></svg>`;
+  }
+
+  // カードの角の、名前がまわる小さな輪
+  function miniRing(name) {
+    const id = 'rm' + Math.random().toString(36).slice(2, 7), unit = `${name.toUpperCase()} • `;
+    const t = unit.repeat(Math.max(1, Math.round(30 / unit.length)));
+    return `<svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="${id}" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/></defs><text><textPath href="#${id}" textLength="500" lengthAdjust="spacing">${esc(t)}</textPath></text><circle cx="100" cy="100" r="9"/></svg>`;
   }
 
   // ---------- 文字を1文字ずつ包む（せり上がるアニメ用） ----------
@@ -168,7 +175,7 @@
         <figure class="d-media" style="${toneStyle(i)}">
           <div class="plate d-plate">
             <img src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
-            <i class="mk tl"></i><i class="mk br"></i><span class="cross"></span>
+            <i class="mk tl"></i><i class="mk br"></i><i class="scan"></i>
             <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">&copy; OC ARCHIVE</span>
             <div class="shield"></div>
           </div>
@@ -238,7 +245,7 @@
     a.innerHTML = `
       <div class="card-media"><div class="plate">
         <img class="img-a" src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
-        <span class="cross"></span>
+        <i class="scan"></i>
         <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">FIG.${pad(i + 1)}</span>
         <div class="shield"></div>
       </div></div>
@@ -247,7 +254,7 @@
         <div class="pills">${pills(c.tag)}</div>
         <h3 class="card-name" data-text="${esc(c.name)}">${esc(c.name)}</h3>
         <span class="card-spec mono">${esc(spec(c))}</span>
-        <span class="card-view mono" aria-hidden="true">VIEW</span>
+        <span class="card-badge" aria-hidden="true">${miniRing(c.name)}</span>
       </div>`;
     a.addEventListener('click', (e) => { e.preventDefault(); window.showDetail(id, true); });
     a.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') scramble($('.card-name', a), c.name, 500); });
@@ -259,7 +266,7 @@
     probe.onload = () => {
       const b = document.createElement('img');
       b.className = 'img-b'; b.src = probe.src; b.alt = ''; b.draggable = false;
-      $('.plate', a).insertBefore(b, $('.cross', a));
+      $('.plate', a).insertBefore(b, $('.scan', a));
       a.classList.add('has-alt');
     };
     probe.src = hoverSrc(c);
@@ -276,11 +283,22 @@
   $('#ticker').innerHTML = Array.from({ length: 12 }, () => `<span>${phrase}</span>`).join('');
   $('#go-grid').addEventListener('click', (e) => { e.preventDefault(); grid.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' }); });
 
-  // ---------- 入場画面の文字 ----------
-  const hero = $('.hero');
-  split($('h1', hero));
-  hero.style.setProperty('--base', '250ms');
-  setTimeout(() => hero.classList.add('is-in'), 150);
+  // ---------- マウスについてくる線と輪（パソコンのみ） ----------
+  (function () {
+    const hud = $('.hud'), hx = $('#hud-x'), hy = $('#hud-y'), hr = $('#hud-ring');
+    if (REDUCE) return;
+    let tx = -100, ty = -100, cx = -100, cy = -100;
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') { hud.classList.remove('mouse-on'); return; }
+      hud.classList.add('mouse-on'); tx = e.clientX; ty = e.clientY;
+    }, { passive: true });
+    document.documentElement.addEventListener('mouseleave', () => hud.classList.remove('mouse-on'));
+    (function loop() {
+      cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
+      hx.style.transform = `translateX(${cx}px)`; hy.style.transform = `translateY(${cy}px)`; hr.style.transform = `translate(${cx}px,${cy}px)`;
+      requestAnimationFrame(loop);
+    })();
+  })();
 
   // ---------- URLの末尾（#名前）でキャラクターを直接開いた場合 ----------
   const first = decodeURIComponent(location.hash.slice(1));
