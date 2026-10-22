@@ -24,6 +24,7 @@
     <span class="hud-bl"><b id="hud-scroll">000</b>% / <b id="hud-sec">INDEX</b></span>
     <span class="hud-br" id="hud-xy">X 0000 Y 0000</span>
     <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+    <i class="hud-x" id="hud-x"></i><i class="hud-y" id="hud-y"></i><i class="hud-ring" id="hud-ring"></i>
   </div>
 
   <!-- 画面を切り替えるときの幕（site.js が動かします） -->
@@ -34,10 +35,13 @@
        ========================================== -->
   <div id="index-screen" class="view active">
 
-    <!-- 入場画面（メインビジュアル。effects.js が背景を描きます） -->
-    <section class="hero">
-      <h1>OC ARCHIVE</h1>
-      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+    <!-- 入場画面（メインビジュアル。hero.js が動かします） -->
+    <section class="hero-main" id="hero-main">
+      <canvas id="hero-cv" aria-hidden="true"></canvas>
+      <div class="hm-text">
+        <h1 class="hm-title" aria-label="OC ARCHIVE"><span class="hm-l1" data-t="OC"></span><span class="hm-l2" data-t="ARCHIVE"></span></h1>
+        <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+      </div>
     </section>
 
     <!-- 一度キャラクターを開いて戻ったあとの、入場画面の代わりの空間 -->
@@ -53,13 +57,16 @@
     <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
 
     <section class="list-head" id="list-head">
-      <p class="mono kicker"><span>( 01 — INDEX )</span><span class="shapes">&#9679; &#9632; &#9650; &#10010;</span><span id="serial">SER. 0000</span></p>
+      <p class="mono kicker"><span>( 01 — INDEX )</span><span class="anim-icons" aria-hidden="true"><i class="ai a1"></i><i class="ai a2"></i><i class="ai a3"></i><i class="ai a4"><b></b><b></b><b></b><b></b></i></span><span id="serial">SER. 0000</span></p>
       <h2 class="big" id="list-title">CHARACTER</h2>
       <p class="mono meta"><span><b id="count">00</b> ENTRIES</span><span class="rule"></span><span id="hexline">0x0000</span></p>
     </section>
 
-    <!-- 飾りの帯：回る文字の輪、散らばる小さな文字 -->
+    <!-- 飾りの帯：広がる波紋、回る文字の輪、散らばる小さな文字 -->
     <section class="deco-band">
+      <svg class="ripples" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <circle class="rp" cx="50" cy="40" r="2"/><circle class="rp" cx="50" cy="40" r="2" style="animation-delay:-2.3s"/><circle class="rp" cx="50" cy="40" r="2" style="animation-delay:-4.6s"/>
+      </svg>
       <div class="scatter" id="scatter-band" aria-hidden="true"></div>
       <div class="rings" id="rings" aria-hidden="true"></div>
       <a class="bracket" id="go-grid" href="#character-grid">ファイルを開く &darr;</a>
@@ -67,10 +74,24 @@
 
     <main class="character-grid" id="character-grid"></main>
 
-    <!-- 文字の積み重ね -->
-    <section class="stack" aria-hidden="true">
-      <div>OC'S CHARACTER</div><div>OC'S ILLUSTRATION</div><div>OC'S PROMPT</div>
-      <div>OC'S PROFILE</div><div>OC'S WORLD</div><div>OC'S STORY</div><div>OC'S ARCHIVE</div>
+    <!-- 最後の文字：場面が横にスライドして切り替わる（reel.js が動かします） -->
+    <section class="reel" id="reel" aria-hidden="true">
+      <div class="rs" data-i="0">
+        <p class="rs-small" data-sp="1.15">Your Characters, Our Archive.<br>We Are OC ARCHIVE.</p>
+        <div class="rs-giant" data-sp="1" data-fit="0.97"><b>OC'S</b></div>
+        <div class="rs-cols" data-sp="1.45" data-list="0"></div>
+      </div>
+      <div class="rs" data-i="1">
+        <p class="rs-small" data-sp="1.15">OC's Creative Birth.</p>
+        <div class="rs-giant" data-sp="1" data-fit="0.97"><b>WORLD</b></div>
+        <div class="rs-cols" data-sp="1.45" data-list="1"></div>
+      </div>
+      <div class="rs" data-i="2">
+        <div class="rs-multi" data-sp="1" data-fit="0.97"><div style="--n:0">OC ARCHIVE</div><div style="--n:1">OC ARCHIVE</div><div style="--n:2">OC ARCHIVE</div><div style="--n:3">OC ARCHIVE</div></div>
+        <i class="rs-line" data-sp="1"></i>
+        <div class="rs-thumbs" data-sp="1.7"></div>
+      </div>
+      <div class="reel-hud mono"><span id="reel-no">01 / 03</span><span class="reel-bar"><i id="reel-bar"></i></span><span>TAP &rarr;</span></div>
     </section>
 
     <footer>
@@ -91,9 +112,11 @@
     </footer>
   </div>
 
-  <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 背景の演出（effects.js） -->
+  <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 入場画面（hero.js）→ 最後の文字（reel.js）→ ノイズなどの演出（effects.js） -->
   <script src="editor.js"></script>
   <script src="site.js"></script>
+  <script src="hero.js"></script>
+  <script src="reel.js"></script>
   <script src="effects.js"></script>
 </body>
 </html>
