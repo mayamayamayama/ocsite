@@ -283,6 +283,16 @@
   $('#ticker').innerHTML = Array.from({ length: 12 }, () => `<span>${phrase}</span>`).join('');
   $('#go-grid').addEventListener('click', (e) => { e.preventDefault(); grid.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' }); });
 
+  // ---------- 明るい場所（入場画面など）の上では、飾りの文字を濃い色にする ----------
+  (function () {
+    const lit = new Set();
+    const lio = new IntersectionObserver((es) => {
+      es.forEach((e) => (e.isIntersecting ? lit.add(e.target) : lit.delete(e.target)));
+      document.body.classList.toggle('on-light', lit.size > 0);
+    }, { threshold: 0.5 });
+    ['#hero-main', '.hero-after'].forEach((s) => { const el = $(s); if (el) lio.observe(el); });
+  })();
+
   // ---------- マウスについてくる線と輪（パソコンのみ） ----------
   (function () {
     const hud = $('.hud'), hx = $('#hud-x'), hy = $('#hud-y'), hr = $('#hud-ring');
