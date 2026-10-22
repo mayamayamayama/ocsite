@@ -412,7 +412,7 @@ body.in-detail #dot-bg { opacity: .3; }
 /* 画面の四隅の飾り（どんな背景の上でも見えるよう、色を反転させて重ねる） */
 .hud {
   position: fixed; inset: 0; z-index: 40; pointer-events: none;
-  mix-blend-mode: difference; color: #fff;
+  color: #ece9e1; text-shadow: 0 0 6px rgba(0, 0, 0, .55);
   font-family: var(--mono); font-size: .56rem; letter-spacing: .14em; text-transform: uppercase;
 }
 .hud span { position: absolute; opacity: .75; }
@@ -421,7 +421,7 @@ body.in-detail #dot-bg { opacity: .3; }
 .hud-tr { top: 12px; right: 14px; }
 .hud-bl { bottom: 12px; left: 14px; }
 .hud-br { bottom: 12px; right: 14px; }
-.hud i { position: absolute; width: 12px; height: 12px; border: 0 solid #fff; opacity: .6; }
+.hud i { position: absolute; width: 12px; height: 12px; border: 0 solid currentColor; opacity: .6; }
 .hud .c1 { top: 32px; left: 14px; border-top-width: 1px; border-left-width: 1px; }
 .hud .c2 { top: 32px; right: 14px; border-top-width: 1px; border-right-width: 1px; }
 .hud .c3 { bottom: 32px; left: 14px; border-bottom-width: 1px; border-left-width: 1px; }
@@ -537,4 +537,4 @@ a, button, .card, .back-btn, .reel, .hero-main { -webkit-tap-highlight-color: tr
 .ai.a2 { border: 1px solid currentColor; border-radius: 50%; animation: pulse 1.8s ease-out infinite; }
 .ai.a3 { border: 1px solid currentColor; animation: flip 3.2s var(--ease) infinite; }
 .ai.a4 { display: inline-flex; align-items: flex-end; gap: 2px; }
-.ai.a4 b { display: block; width: 2px; heigh
+.ai.a4 b { display: 
