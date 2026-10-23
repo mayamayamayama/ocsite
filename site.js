@@ -317,3 +317,20 @@
     openDetail(first);
   }
 })();
+
+
+// ---------- 読み込めていないファイルがあるときの知らせ ----------
+(function () {
+  (window.OC_LOADED = window.OC_LOADED || []).push('site');
+  window.addEventListener('load', () => {
+    const css = getComputedStyle(document.documentElement), miss = [];
+    [['style.css', '--oc-css-style'], ['design.css', '--oc-css-design'], ['motion.css', '--oc-css-motion']].forEach(([n, k]) => { if (!css.getPropertyValue(k).trim()) miss.push(n); });
+    ['site', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
+    if (!miss.length) return;
+    document.body.classList.add('oc-broken');
+    const b = document.createElement('div');
+    b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#d8ff00;color:#000;font:12px/1.5 system-ui,sans-serif;padding:8px 10px;border-radius:6px';
+    b.textContent = '読み込めていない（または古い）ファイル：' + miss.join('、') + '　→ GitHubで置き換えを確認してね';
+    document.body.appendChild(b);
+  });
+})();
