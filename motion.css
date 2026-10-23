@@ -1,0 +1,126 @@
+/* motion.css — 入場画面・最後の文字・マウスの動き（design.css の次に読み込まれます） */
+
+/* =====================================================
+   追加：タップの色の消去・動く図形・メインビジュアル・最後の文字
+   ===================================================== */
+
+/* スマホでタップしたときの青い色（ハイライト）を消す */
+a, button, .card, .back-btn, .reel, .hero-main { -webkit-tap-highlight-color: transparent; }
+.card { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; outline: none; }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+
+/* カードの丸い飾り（ボタンではなく、名前の文字がまわる輪） */
+.card-badge { grid-column: 2; grid-row: 1 / span 3; align-self: center; width: 64px; height: 64px; }
+.card-badge svg { width: 100%; height: 100%; overflow: visible; animation: spin 14s linear infinite; }
+.card:hover .card-badge svg { animation-duration: 4s; }
+.card-badge text { fill: var(--accent); font-family: var(--mono); font-size: 25px; font-weight: 700; letter-spacing: .04em; }
+.card-badge circle { fill: var(--accent); }
+
+/* 見出しの上の、動く小さな図形 */
+.anim-icons { display: inline-flex; align-items: center; gap: 16px; }
+.ai { position: relative; display: inline-block; width: 12px; height: 12px; color: var(--accent); }
+.ai.a1 { animation: spin 3s steps(4) infinite; }
+.ai.a1::before, .ai.a1::after { content: ""; position: absolute; background: currentColor; }
+.ai.a1::before { left: 5px; top: 0; width: 2px; height: 12px; }
+.ai.a1::after { left: 0; top: 5px; width: 12px; height: 2px; }
+.ai.a2 { border: 1px solid currentColor; border-radius: 50%; animation: pulse 1.8s ease-out infinite; }
+.ai.a3 { border: 1px solid currentColor; animation: flip 3.2s var(--ease) infinite; }
+.ai.a4 { display: inline-flex; align-items: flex-end; gap: 2px; }
+.ai.a4 b { display: block; width: 2px; height: 100%; background: currentColor; transform-origin: bottom; animation: bar 1s ease-in-out infinite; }
+.ai.a4 b:nth-child(2) { animation-delay: -.25s; } .ai.a4 b:nth-child(3) { animation-delay: -.5s; } .ai.a4 b:nth-child(4) { animation-delay: -.75s; }
+@keyframes pulse { 0% { transform: scale(.35); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+@keyframes flip { 0%, 25% { transform: rotate(0) scale(1); } 60%, 100% { transform: rotate(180deg) scale(.55); } }
+@keyframes bar { 0%, 100% { transform: scaleY(.2); } 50% { transform: scaleY(1); } }
+
+/* 飾りの帯の、広がる波紋 */
+.ripples { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.rp { fill: none; stroke: var(--accent); stroke-width: 1; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; opacity: 0; animation: ripple 7s linear infinite; }
+@keyframes ripple { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(45); opacity: 0; } }
+
+/* 見出しの下の線：流れる点線 */
+.meta .rule {
+  background: repeating-linear-gradient(90deg, var(--sub) 0 6px, transparent 6px 12px);
+  height: 1px; opacity: .5; animation: dash 1.6s linear infinite;
+}
+@keyframes dash { to { background-position: 12px 0; } }
+
+/* 絵の上を走る線 */
+.scan { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .4; background: linear-gradient(#0d0d0d, #0d0d0d) top / 100% 1px no-repeat; animation: scan 6s var(--ease) infinite; will-change: transform; }
+@keyframes scan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(100% - 1px)); } }
+
+/* マウスについてくる線と輪（パソコンのみ） */
+.hud-x, .hud-y, .hud-ring { position: absolute; opacity: 0; transition: opacity .4s; }
+.hud-x { top: 0; bottom: 0; left: 0; width: 1px; background: currentColor; }
+.hud-y { left: 0; right: 0; top: 0; height: 1px; background: currentColor; }
+.hud-ring { left: -11px; top: -11px; width: 22px; height: 22px; border: 1px solid currentColor; border-radius: 50%; }
+.hud.mouse-on .hud-x, .hud.mouse-on .hud-y { opacity: .22; }
+.hud.mouse-on .hud-ring { opacity: .8; }
+
+/* 入場画面（メインビジュアル） */
+.hero-main {
+  position: relative; box-sizing: border-box;
+  width: 100vw; height: calc(100vh + 240px); height: calc(100svh + 240px); min-height: 660px;
+  padding-bottom: 240px; flex-shrink: 0;
+  background: #f2e6d0; color: #2b1d16; overflow: hidden; touch-action: pan-y;
+}
+#hero-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hm-text { position: absolute; left: 20px; right: 20px; bottom: calc(240px + 104px); pointer-events: none; }
+.hero-main .hm-title {
+  margin: 0; padding: 0; border: 0; color: #2b1d16; text-align: left;
+  font-size: clamp(3.4rem, 19vw, 12rem); line-height: .84; letter-spacing: -.045em; font-weight: 700;
+}
+.hm-l1, .hm-l2 { display: block; }
+.hero-main .subtitle { margin-top: 14px; color: #2b1d16; font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; opacity: 0; }
+.hero-main.is-in .subtitle { animation: up 1s var(--ease) .9s both; }
+body.is-after .hero-main { display: none !important; }
+
+/* 最後の文字：場面がスライドして切り替わる */
+.reel {
+  position: relative; width: 100vw; flex-shrink: 0; overflow: hidden;
+  height: clamp(560px, 76svh, 720px); margin-top: 90px;
+  background: #0a0a0a; color: var(--accent); touch-action: pan-y; cursor: pointer;
+  -webkit-user-select: none; user-select: none;
+  border-top: 1px solid #1d1d19; border-bottom: 1px solid #1d1d19;
+}
+.rs { position: absolute; inset: 0; visibility: hidden; }
+.rs.vis { visibility: visible; }
+.rs-small { position: absolute; left: 20px; top: 24px; margin: 0; font-weight: 700; font-size: clamp(.95rem, 3.8vw, 1.35rem); line-height: 1.1; letter-spacing: -.01em; }
+.rs-giant { position: absolute; left: 10px; top: 78px; font-weight: 700; line-height: .8; letter-spacing: -.05em; white-space: nowrap; text-transform: uppercase; }
+.rs-giant b {
+  display: inline-block; font-weight: 700; transform: scale(1.45); transform-origin: 0 0; opacity: 0;
+  transition: transform 1.2s var(--ease), opacity .5s;
+}
+.rs.on .rs-giant b { transform: none; opacity: 1; }
+.rs-cols { position: absolute; left: 20px; right: 20px; top: 300px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 8px; }
+.rs-cols .col { height: 13.2em; overflow: hidden; font-size: clamp(.6rem, 3vw, 1.05rem); -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); }
+.rs-cols .col-in { animation: colscroll var(--dur, 18s) linear infinite; }
+@keyframes colscroll { to { transform: translateY(-50%); } }
+.rs-cols span { display: block; white-space: nowrap; font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; opacity: 0; }
+.rs.on .rs-cols span { opacity: 1; transition: opacity .35s; transition-delay: calc(var(--n) * 38ms + 250ms); }
+.rs-multi { position: absolute; left: 10px; top: 70px; }
+.rs-multi div {
+  white-space: nowrap; font-weight: 700; text-transform: uppercase; letter-spacing: -.05em; line-height: .86;
+  transform-origin: 0 50%; opacity: 0; transform: scale(.55) translateY(-24px);
+}
+.rs.on .rs-multi div { opacity: 1; transform: none; transition: opacity .4s, transform .8s var(--ease); transition-delay: calc(var(--n) * 240ms + 200ms); }
+.rs-line { position: absolute; left: 20px; right: 20px; top: 0; height: 1px; background: var(--accent); transform-origin: left; }
+.rs-thumbs { position: absolute; left: 0; right: 0; bottom: 66px; height: 36%; }
+.th2 { position: absolute; width: min(26vw, 200px); aspect-ratio: 4 / 5; overflow: hidden; background: #fff; animation: floaty 5s ease-in-out infinite; }
+.th2 img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; pointer-events: none; -webkit-touch-callout: none; user-select: none; }
+@keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -14px; } }
+.reel-hud { position: absolute; left: 20px; right: 20px; bottom: 22px; display: flex; align-items: center; gap: 14px; }
+.reel-bar { flex: 1; position: relative; height: 1px; background: rgba(216, 255, 0, .25); }
+.reel-bar i { position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--accent); }
+
+/* 明るい場所の上では、画面の飾りの文字を濃い色にする */
+body.on-light .hud { color: #2b1d16; text-shadow: none; }
+
+/* 止まって見えないよう、いつも何かが動いている */
+.rs-small::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.th2 { animation: floaty 5s ease-in-out infinite, sway 7s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
+.reel::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .3; background: linear-gradient(var(--accent), var(--accent)) top / 100% 1px no-repeat; animation: reelscan 5s linear infinite; }
+@keyframes reelscan { from { transform: translateY(0); } to { transform: translateY(100%); } }
+.reel { max-width: 100vw; }
+:root { --oc-css-motion: 1; }
