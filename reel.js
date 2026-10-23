@@ -5,11 +5,14 @@
 (function () {
   const reel = document.getElementById('reel');
   if (!reel || typeof characters === 'undefined') return;
+  (window.OC_LOADED = window.OC_LOADED || []).push('reel');
+  const cssOK = !!getComputedStyle(document.documentElement).getPropertyValue('--oc-css-motion').trim();
+  if (!cssOK) { reel.style.display = 'none'; return; }   // motion.css が読み込めていないときは、動かさない
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ここの数字を変えると、動きが変わります
-  const DWELL = 3600;      // 1つの場面を見せる長さ（ミリ秒）
-  const MOVE_MS = 1100;    // 場面が切り替わる長さ（ミリ秒）
+  const DWELL = 2800;      // 1つの場面を見せる長さ（ミリ秒）
+  const MOVE_MS = 1000;    // 場面が切り替わる長さ（ミリ秒）
   const AUTO = true;       // false で、自動で切り替わらなくなる（タップだけで進む）
 
   const pad = (n) => String(n).padStart(2, '0');
@@ -29,9 +32,12 @@
   reel.querySelectorAll('.rs-cols').forEach((box) => {
     const cols = LISTS[Number(box.dataset.list)] || LISTS[0];
     cols.forEach((words, c) => {
-      const col = document.createElement('div');
-      words.forEach((w, i) => { const s = document.createElement('span'); s.textContent = `OC'S ${w}`; s.style.setProperty('--n', i + c * 2); col.appendChild(s); });
-      box.appendChild(col);
+      const col = document.createElement('div'); col.className = 'col';
+      const inner = document.createElement('div'); inner.className = 'col-in';
+      inner.style.setProperty('--dur', (15 + c * 4) + 's');
+      if (c === 1) inner.style.animationDirection = 'reverse';
+      [0, 1].forEach(() => words.forEach((w, i) => { const s = document.createElement('span'); s.textContent = `OC'S ${w}`; s.style.setProperty('--n', i + c * 2); inner.appendChild(s); }));
+      col.appendChild(inner); box.appendChild(col);   // 同じ列を2回ならべて、上へ流れ続けるようにする
     });
   });
 
@@ -73,7 +79,12 @@
       let d = (((i - p) % N) + N) % N; if (d > N / 2) d -= N;
       sc.classList.toggle('vis', Math.abs(d) < 1.6);
       sc.classList.toggle('on', visible && i === near);
-      layers[i].forEach(([el, sp]) => { el.style.transform = `translateX(${(d * W * sp).toFixed(1)}px)`; });
+      layers[i].forEach(([el, sp]) => {
+        const big = el.classList.contains('rs-giant') || el.classList.contains('rs-multi');
+        const wob = big && !REDUCE ? Math.sin(now / 900 + i) * W * 0.012 : 0;      // 大きな文字は、止まっているあいだもゆらゆら動く
+        el.style.transform = `translateX(${(d * W * sp + wob).toFixed(1)}px)`;
+        if (el.classList.contains('rs-multi') && !REDUCE) [...el.children].forEach((ch, k) => { ch.style.translate = `${(Math.sin(now / 700 + k * 1.1) * W * 0.014).toFixed(1)}px 0`; });
+      });
     });
     $no.textContent = `${pad(near + 1)} / ${pad(N)}`;
     const prog = anim || drag ? 1 : Math.min(1, (now - lastChange) / DWELL);
