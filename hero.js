@@ -4,6 +4,9 @@
 (function () {
   const hero = document.getElementById('hero-main');
   if (!hero) return;
+  (window.OC_LOADED = window.OC_LOADED || []).push('hero');
+  const cssOK = !!getComputedStyle(document.documentElement).getPropertyValue('--oc-css-motion').trim();
+  if (!cssOK) { hero.style.display = 'none'; document.body.classList.add('is-after'); return; }   // motion.css が読み込めていないときは、動かさない
   const cv = document.getElementById('hero-cv');
   const ctx = cv.getContext('2d');
   // style.css が古いままでも暴走しないように、大事な指定はここでも行う（キャンバスは、ページの高さに影響させない）
