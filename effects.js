@@ -1,3 +1,4 @@
+(window.OC_LOADED = window.OC_LOADED || []).push('effects');
 // effects.js — ノイズの区切り と 点の背景 を描きます
 
 // ===== 動きのスイッチ（true：動く / false：止める） =====
