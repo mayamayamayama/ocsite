@@ -44,9 +44,6 @@ a, button, .card, .back-btn, .reel, .hero-main { -webkit-tap-highlight-color: tr
 }
 @keyframes dash { to { background-position: 12px 0; } }
 
-/* 絵の上を走る線 */
-.scan { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .4; background: linear-gradient(#0d0d0d, #0d0d0d) top / 100% 1px no-repeat; animation: scan 6s var(--ease) infinite; will-change: transform; }
-@keyframes scan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(100% - 1px)); } }
 
 /* マウスについてくる線と輪（パソコンのみ） */
 .hud-x, .hud-y, .hud-ring { position: absolute; opacity: 0; transition: opacity .4s; }
@@ -118,9 +115,13 @@ body.on-light .hud { color: #2b1d16; text-shadow: none; }
 /* 止まって見えないよう、いつも何かが動いている */
 .rs-small::after { content: "_"; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-.th2 { animation: floaty 5s ease-in-out infinite, sway 7s ease-in-out infinite; }
 @keyframes sway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
 .reel::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .3; background: linear-gradient(var(--accent), var(--accent)) top / 100% 1px no-repeat; animation: reelscan 5s linear infinite; }
 @keyframes reelscan { from { transform: translateY(0); } to { transform: translateY(100%); } }
 .reel { max-width: 100vw; }
+/* ミニキャラ */
+.mini { position: absolute; height: auto; max-width: 150px; pointer-events: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  animation: minipop .6s var(--ease) both, hop 3.4s ease-in-out infinite, sway 6s ease-in-out infinite; }
+@keyframes minipop { from { scale: 0; } to { scale: 1; } }
+@keyframes hop { 0%, 100% { translate: 0 0; } 50% { translate: 0 -16px; } }
 :root { --oc-css-motion: 1; }
