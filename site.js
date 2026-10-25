@@ -5,6 +5,25 @@
 //   「Barnard.png」の表情違いは「Barnard_hover.png」という名前でアップロードするだけで、自動で使われます。
 //   名前を変えたいときは、editor.js のキャラクターに  hover: "好きな名前.png"  を足してください。
 
+// ---------- 読み込めていないファイルがあるときの知らせ（最初に登録しておくので、途中でエラーが出ても働きます） ----------
+(function () {
+  (window.OC_LOADED = window.OC_LOADED || []).push('site');
+  window.addEventListener('load', () => {
+    const css = getComputedStyle(document.documentElement), miss = [];
+    [['style.css', '--oc-css-style'], ['design.css', '--oc-css-design'], ['motion.css', '--oc-css-motion']].forEach(([n, k]) => { if (!css.getPropertyValue(k).trim()) miss.push(n); });
+    ['site', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
+    let dataOK = false;
+    try { dataOK = typeof characters === 'object' && !!characters && Object.keys(characters).length > 0; } catch (e) {}
+    if (!dataOK) miss.push('editor.js（キャラクターの書き間違いかも。カンマ「,」や「}」を確認）');
+    if (!miss.length) return;
+    document.body.classList.add('oc-broken');
+    const b = document.createElement('div');
+    b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#d8ff00;color:#000;font:12px/1.5 system-ui,sans-serif;padding:8px 10px;border-radius:6px';
+    b.textContent = '読み込めていない（または古い）ファイル：' + miss.join('、') + '　→ GitHubで置き換えを確認してね';
+    document.body.appendChild(b);
+  });
+})();
+
 (function () {
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
@@ -175,7 +194,7 @@
         <figure class="d-media" style="${toneStyle(i)}">
           <div class="plate d-plate">
             <img src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
-            <i class="mk tl"></i><i class="mk br"></i><i class="scan"></i>
+            <i class="mk tl"></i><i class="mk br"></i>
             <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">&copy; OC ARCHIVE</span>
             <div class="shield"></div>
           </div>
@@ -245,7 +264,6 @@
     a.innerHTML = `
       <div class="card-media"><div class="plate">
         <img class="img-a" src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
-        <i class="scan"></i>
         <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">FIG.${pad(i + 1)}</span>
         <div class="shield"></div>
       </div></div>
@@ -266,7 +284,7 @@
     probe.onload = () => {
       const b = document.createElement('img');
       b.className = 'img-b'; b.src = probe.src; b.alt = ''; b.draggable = false;
-      $('.plate', a).insertBefore(b, $('.scan', a));
+      $('.plate', a).insertBefore(b, $('.shield', a));
       a.classList.add('has-alt');
     };
     probe.src = hoverSrc(c);
@@ -316,21 +334,4 @@
     history.replaceState({ screen: 'detail', id: first }, '', `#${first}`);
     openDetail(first);
   }
-})();
-
-
-// ---------- 読み込めていないファイルがあるときの知らせ ----------
-(function () {
-  (window.OC_LOADED = window.OC_LOADED || []).push('site');
-  window.addEventListener('load', () => {
-    const css = getComputedStyle(document.documentElement), miss = [];
-    [['style.css', '--oc-css-style'], ['design.css', '--oc-css-design'], ['motion.css', '--oc-css-motion']].forEach(([n, k]) => { if (!css.getPropertyValue(k).trim()) miss.push(n); });
-    ['site', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
-    if (!miss.length) return;
-    document.body.classList.add('oc-broken');
-    const b = document.createElement('div');
-    b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#d8ff00;color:#000;font:12px/1.5 system-ui,sans-serif;padding:8px 10px;border-radius:6px';
-    b.textContent = '読み込めていない（または古い）ファイル：' + miss.join('、') + '　→ GitHubで置き換えを確認してね';
-    document.body.appendChild(b);
-  });
 })();
