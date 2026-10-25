@@ -270,3 +270,4 @@
   // ---------- 大きさを決める ----------
   function build() {
     const rect0 = hero.getBoundingClientRect();
+  // ---------- 変更 -------------
