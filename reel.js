@@ -41,14 +41,27 @@
     });
   });
 
-  // ---------- 浮かぶキャラクターの小さな絵 ----------
-  const ids = Object.keys(characters), thumbs = reel.querySelector('.rs-thumbs');
-  [[6, 0, 0], [36, 16, 1.2], [66, 4, 2.4]].forEach(([left, bottom, delay], k) => {
-    const d = document.createElement('div');
-    d.className = 'th2'; d.style.left = left + '%'; d.style.bottom = bottom + '%'; d.style.animationDelay = `-${delay}s`;
-    const im = new Image(); im.src = characters[ids[k % ids.length]].image; im.alt = ''; im.draggable = false;
-    d.appendChild(im); thumbs.appendChild(d);
-  });
+  // ---------- ミニキャラ（3種類を、毎回ランダムに出す） ----------
+  // 画像は mini1.png / mini2.png / mini3.png という名前でアップロードしてください。
+  // 名前や数を変えたいときは、下の MINIS を書き換えます。まだ画像がないときは、何も出ません。
+  const MINIS = ['mini1.png', 'mini2.png', 'mini3.png'];
+  const COUNT = 6;         // 一度に出すミニキャラの数
+  const thumbs = reel.querySelector('.rs-thumbs'), okMinis = [];
+  MINIS.forEach((src) => { const im = new Image(); im.onload = () => okMinis.push(src); im.src = src; });
+  function spawnMinis() {
+    thumbs.innerHTML = '';
+    if (!okMinis.length) return;
+    for (let i = 0; i < COUNT; i++) {
+      const el = new Image();
+      el.src = okMinis[Math.floor(Math.random() * okMinis.length)]; el.alt = ''; el.draggable = false; el.className = 'mini';
+      el.style.left = (3 + Math.random() * 80) + '%';
+      el.style.bottom = (Math.random() * 42) + '%';
+      el.style.width = (15 + Math.random() * 13) + 'vw';
+      el.style.animationDelay = `${(i * 0.12).toFixed(2)}s, -${(Math.random() * 4).toFixed(2)}s, -${(Math.random() * 6).toFixed(2)}s`;
+      el.style.animationDuration = `.6s, ${(2.6 + Math.random() * 2.4).toFixed(2)}s, ${(5 + Math.random() * 4).toFixed(2)}s`;
+      thumbs.appendChild(el);
+    }
+  }
 
   // ---------- 大きな文字を、画面の幅いっぱいに合わせる ----------
   let W = 0;
@@ -69,12 +82,14 @@
   }
 
   // ---------- 動かす ----------
-  let p = 0, anim = null, drag = null, visible = false, lastChange = performance.now(), fitted = false, lastW = 0;
+  let lastNear = -1, p = 0, anim = null, drag = null, visible = false, lastChange = performance.now(), fitted = false, lastW = 0;
   const layers = scenes.map((sc) => [...sc.querySelectorAll('[data-sp]')].map((el) => [el, parseFloat(el.dataset.sp)]));
   function goTo(target, now) { anim = { from: p, to: target, t0: now, dur: Math.max(450, MOVE_MS * Math.abs(target - p)) }; }
 
   function render(now) {
     const near = ((Math.round(p) % N) + N) % N;
+    if (visible && near === 2 && lastNear !== 2) spawnMinis();   // 3つ目の場面になるたびに、ミニキャラを出しなおす
+    lastNear = near;
     scenes.forEach((sc, i) => {
       let d = (((i - p) % N) + N) % N; if (d > N / 2) d -= N;
       sc.classList.toggle('vis', Math.abs(d) < 1.6);
