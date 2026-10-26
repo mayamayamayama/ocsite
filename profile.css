@@ -1,0 +1,122 @@
+/* profile.css — プロフィール画面（詳細画面）の文字の動き（profile.js と組みで使います） */
+
+/* ---------- 名前：1文字ずつ、3Dで起き上がる（画面の切り替えが開くころに始まる） ---------- */
+.d-head { --base: 420ms; }
+.d-head .d-name { perspective: 700px; }
+.d-head.is-in .d-name .ch > span { animation-name: lyFlip; animation-duration: .9s; transform-origin: 50% 100%; }
+@keyframes lyFlip {
+  from { transform: translateY(45%) rotateX(-100deg); opacity: 0; }
+  60% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+/* タグ：ぽんっと出る */
+.d-head .pills i { animation: lyPop .55s var(--ease) both; }
+.d-head .pills i:nth-child(1) { animation-delay: .8s; }
+.d-head .pills i:nth-child(2) { animation-delay: .9s; }
+.d-head .pills i:nth-child(3) { animation-delay: 1s; }
+.d-head .pills i:nth-child(4) { animation-delay: 1.1s; }
+@keyframes lyPop { from { transform: scale(.3) rotate(-10deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ---------- 言葉の帯（リリック） ---------- */
+.lyric { position: relative; height: clamp(104px, 27vw, 196px); margin: -12px 0 30px; border-bottom: 1px solid var(--line); overflow: hidden; }
+.ly-stage { position: absolute; left: 0; right: 0; top: 0; bottom: 26px; overflow: hidden; }
+.ly-w {
+  position: absolute; left: 0; bottom: -.08em; white-space: nowrap;
+  font-weight: 700; font-size: clamp(3.4rem, 19vw, 9.6rem); line-height: .9; letter-spacing: -.045em; text-transform: uppercase;
+  color: var(--ink); perspective: 500px;
+}
+.ly-w.lime { color: var(--accent); }
+.ly-w.acc { color: var(--hc, var(--accent)); }
+.ly-w.out { color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
+.ly-w .l { display: inline-block; }
+/* 言葉の影：差し色の縁取りが、少しずれて重なる（印刷のズレのような） */
+.ly-w::before {
+  content: attr(data-t); position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none;
+  color: transparent; -webkit-text-stroke: 1.2px var(--hc, var(--accent));
+  animation: lyEcho .9s var(--ease) .25s both;
+}
+@keyframes lyEcho { from { transform: none; opacity: 0; } to { transform: translate(.06em, -.07em); opacity: 1; } }
+
+/* 入ってくる動き（6種類） */
+.i-rise .l { animation: lyRise .7s var(--ease) both; animation-delay: calc(var(--n) * 35ms); }
+@keyframes lyRise { from { transform: translateY(108%); } to { transform: none; } }
+.i-flip .l { animation: lyFlip .8s var(--ease) both; animation-delay: calc(var(--n) * 45ms); transform-origin: 50% 100%; }
+.i-zoom { animation: lyZoom .8s var(--ease) both; transform-origin: 0 100%; }
+@keyframes lyZoom { from { transform: scale(2.6); opacity: 0; } 25% { opacity: 1; } to { transform: none; opacity: 1; } }
+.i-slide { animation: lySlide .7s var(--ease) both; }
+@keyframes lySlide { from { transform: translateX(70%) skewX(-28deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.i-wipe { animation: lyWipe .7s cubic-bezier(.7, 0, .2, 1) both; }
+@keyframes lyWipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 -2% 0 0); } }
+.i-wipe::after {
+  content: ""; position: absolute; top: 6%; bottom: 10%; width: 8px; margin-left: -8px; background: var(--hc, var(--accent));
+  animation: lyBar .7s cubic-bezier(.7, 0, .2, 1) both;
+}
+@keyframes lyBar { from { left: 0; } 85% { opacity: 1; } to { left: 100%; opacity: 0; } }
+.i-scram .l { animation: lyBlink .45s steps(3) both; }
+@keyframes lyBlink { 0% { opacity: 0; } 34% { opacity: 1; } 67% { opacity: .4; } 100% { opacity: 1; } }
+
+/* 出ていく動き（3種類） */
+.ly-w.x-up { animation: lyUp .55s cubic-bezier(.7, 0, .84, 0) forwards; }
+@keyframes lyUp { from { transform: none; } to { transform: translateY(-115%); } }
+.ly-w.x-drop .l { animation: lyDrop .5s cubic-bezier(.7, 0, .84, 0) forwards; animation-delay: calc(var(--n) * 25ms); }
+@keyframes lyDrop { from { transform: none; } to { transform: translateY(115%) rotate(10deg); } }
+.ly-w.x-cut { animation: lyCut .45s cubic-bezier(.7, 0, .2, 1) forwards; }
+@keyframes lyCut { from { clip-path: inset(0 -2% 0 0); } to { clip-path: inset(0 -2% 0 100%); } }
+
+/* 帯の下の、小さな情報 */
+.ly-hud {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+  display: flex; align-items: center; gap: 12px; color: var(--sub); font-size: .6rem;
+}
+.ly-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hc, var(--accent)); animation: lyDot 1s steps(2) infinite; }
+@keyframes lyDot { 50% { opacity: .15; } }
+.ly-bar { position: relative; flex: 1; height: 1px; background: var(--line); }
+.ly-bar b { position: absolute; left: 0; top: -1px; width: 0; height: 3px; background: var(--accent); transition: width .5s var(--ease); }
+
+/* ---------- プロフィールの行：見えたときに、言葉が1つずつせり上がる ---------- */
+.p-row { position: relative; }
+.p-row .w { display: inline-block; opacity: 0; transform: translateY(.7em); }
+.p-row.in .w { animation: lyWord .6s var(--ease) forwards; animation-delay: calc(var(--k) * 22ms + 160ms); }
+@keyframes lyWord { to { opacity: 1; transform: none; } }
+/* 項目の名前：黄緑の板がサッと通ったあとに出る */
+.p-row .p-key { position: relative; }
+.ly-on .p-row:not(.in) .p-key { color: transparent; }   /* profile.js が動いているときだけ */
+.p-row.in .p-key { animation: lyKey .6s steps(1) both; }
+@keyframes lyKey { 0% { color: transparent; } 50% { color: var(--sub); } }
+.p-row .p-key::after {
+  content: ""; position: absolute; left: 0; top: .1em; width: 100%; height: 1.25em;
+  background: var(--accent); transform: scaleX(0); transform-origin: left;
+}
+.p-row.in .p-key::after { animation: lySweep .6s cubic-bezier(.7, 0, .2, 1) both; }
+@keyframes lySweep {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  50.1% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+/* 行の下の線：キャラの差し色で引かれて、消える */
+.p-row::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: var(--hc, var(--accent)); transform: scaleX(0); transform-origin: left;
+}
+.p-row.in::after { animation: lyLine 1.6s var(--ease) both; }
+@keyframes lyLine { 0% { transform: scaleX(0); opacity: 1; } 45% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+/* ---------- プロンプト：上から光の線が走って現れる ---------- */
+.d-info > section { position: relative; }
+.prompt.ly-pre { clip-path: inset(0 0 100% 0); }
+.prompt.ly-pre.in { animation: lyScanIn 1.1s cubic-bezier(.6, 0, .2, 1) .1s both; }
+@keyframes lyScanIn { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+.ly-scan {
+  position: absolute; left: 0; right: 0; top: var(--pt, 0); height: 2px; pointer-events: none;
+  background: var(--accent); box-shadow: 0 0 14px var(--accent); opacity: 0;
+}
+.ly-scan.in { animation: lyScan 1.1s cubic-bezier(.6, 0, .2, 1) .1s both; }
+@keyframes lyScan { 0% { opacity: 1; transform: translateY(0); } 92% { opacity: 1; } 100% { opacity: 0; transform: translateY(var(--ph, 200px)); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .p-row .w, .p-row:not(.in) .p-key { opacity: 1; transform: none; color: inherit; }
+  .prompt.ly-pre { clip-path: none; }
+}
+
+:root { --oc-css-profile: 1; }
