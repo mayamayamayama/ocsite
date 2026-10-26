@@ -1,110 +1,147 @@
-// hero-scenes.js — 入場画面のループの「隊形」前半（1〜9）。
-// 24体の図形（0〜3 は画面からはみ出す巨大な図形）が、隊形から隊形へ、移動・変形・消失・発生しながら、1本の長いループを作ります。
-// （後半の 10〜17 は hero-scenes2.js にあります）
+// hero-scenes.js — 入場画面の「登場する物体の一覧」と、ショット 1〜4。
+// 3Dの空間に物体を置いて、カメラを動かして撮る、1本の長いループです。（ショット 5〜8 は hero-scenes2.js）
 //
-// 隊形の書き方：act(i, t, K) が、i番目の図形の「目標」を返します（null を返すと、その図形は消える）
-//   x, y   … 画面の中の位置（0〜1。0.5 が真ん中。0より小さい・1より大きいと、画面からはみ出す）
-//   s      … 大きさ（画面の短いほうの辺に対する割合。1で、短い辺と同じ大きさ）
-//   shape  … 形（circle / square / half / quarter / lens / tri / diamond / hex / cross / spark / burst / gear）
-//   fill   … 塗り方（solid / split / stripes / dots / grad / holo / bull / ring）
-//   c, c2  … 色（paper / ink / lime / red / blue / cyan / lilac / grey / white）
-//   sx, sy … 横・縦の伸び　rot … 回転　wob … ぐにゃぐにゃ（0〜1）　ext … 厚み（0〜1）　flip … コインのように回る（0〜1）
+// 位置 p:[横, 縦(上が＋), 奥行き(手前が＋)]　回転 r:[縦に倒す, 横に回す, ひねる]（ラジアン）　大きさ s
+// 平らな形の shape：circle / square / tri / diamond / half / quarter / lens / spark / sun / wedge
+// 色：cream / teal / orange / verm / navy / blue / pink / peach / cyan / white / black、または '#xxxxxx'
 (window.OC_LOADED = window.OC_LOADED || []).push('hero-scenes');
 
 window.OC_HERO_SCENES = function () {
-  const S = Math.sin, Co = Math.cos, TAU = Math.PI * 2, PI = Math.PI;
-  const ox = (v, K) => (v * K.M) / K.W, oy = (v, K) => (v * K.M) / K.FH;   // 画面の短い辺を1とした長さを、位置の割合に直す
+  const S = Math.sin, Co = Math.cos, PI = Math.PI, TAU = PI * 2;
   const cl = (x) => Math.max(0, Math.min(1, x)), io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-  const step = (t, sp) => { const v = t * sp, k = Math.floor(v); return k + io(cl((v - k - 0.45) / 0.55)); };   // 止まって、カクッと進む動き
-  const AC = { paper: ['ink', 'blue', 'red', 'cyan', 'lilac', 'grey'], ink: ['lime', 'paper', 'blue', 'red', 'cyan', 'lilac'] };
-  const col = (bg, k) => { const l = AC[bg]; return l[((k % l.length) + l.length) % l.length]; };
-  const SH = ['circle', 'square', 'half', 'quarter', 'lens', 'diamond', 'hex', 'tri', 'cross'];
-  const FL = ['solid', 'stripes', 'split', 'solid', 'dots', 'grad', 'solid', 'bull'];
+  const FLOOR = [-PI / 2, 0, 0];   // 床に寝かせる向き
 
-  return [
-    { // 1) 巨大な半円・帯・四分円・輪で組んだ構図
-      name: 'COMPOSE', bg: 'paper',
-      act: (i, t, K) => {
-        if (i === 0) return { x: 0.86, y: 0.8, s: 1.35, shape: 'half', rot: -PI / 2 + 0.08 * S(t * 0.9), c: 'ink', z: 0.1 };
-        if (i === 1) return { x: 0.3 + 0.08 * S(t * 1.1), y: 0.13, s: 0.5, shape: 'square', sx: 4.8, sy: 0.26, rot: -0.22 + 0.05 * S(t * 0.8), c: 'red', z: 0.2 };
-        if (i === 2) return { x: 0.06, y: 0.04, s: 1.05, shape: 'quarter', rot: 0.15 * S(t * 0.7), fill: 'stripes', c: 'blue', c2: 'paper', z: 0.15 };
-        if (i === 3) return { x: 0.6, y: 0.42, s: 0.95 + 0.05 * S(t * 2), shape: 'circle', fill: 'ring', c: 'ink', z: 0.3 };
-        if (i < 14) { const k = i - 4; return { x: 0.06 + k * 0.1, y: 0.66 - k * 0.055 + 0.03 * S(t * 3 + k), s: 0.12, shape: 'lens', rot: t * 1.6 + k, fill: k % 2 ? 'solid' : 'stripes', c: col('paper', k), c2: 'paper', z: 0.6 }; }
-        const a = t * 1.1 + ((i - 14) * TAU) / 10;
-        return { x: 0.6 + ox(0.5 * Co(a), K), y: 0.42 + oy(0.5 * S(a), K), s: 0.055, shape: i % 2 ? 'square' : 'circle', rot: a * 2, c: i % 3 ? 'ink' : 'red', z: 0.8 };
+  // ===== 登場する物体の一覧（ここに書いた値が、ふだんの見た目） =====
+  const A = {
+    // 平面のポスター（ショット1・2）
+    pTeal: { type: 'flat', shape: 'square', sx: 2.6, sy: 0.65, c: 'teal' },
+    pOrSmall: { type: 'flat', shape: 'square', sx: 0.7, sy: 0.18, c: 'orange' },
+    pOrange: { type: 'flat', shape: 'square', sx: 2.2, sy: 0.7, c: 'orange' },
+    pDisc1: { type: 'flat', shape: 'circle', w: 0.55, c: 'white', split: 'verm' },
+    pNavy: { type: 'flat', shape: 'square', sx: 1.4, sy: 0.8, c: 'navy' },
+    pDisc2: { type: 'flat', shape: 'circle', w: 0.33, c: 'teal', split: 'white' },
+    pVerm: { type: 'flat', shape: 'square', sx: 1.8, sy: 0.4, c: 'verm' },
+    pHalf: { type: 'flat', shape: 'half', w: 0.42, c: 'orange' },
+    pDot: { type: 'flat', shape: 'circle', w: 0.32, c: 'teal' },
+    pFan: { type: 'lines', kind: 'burst', w: 2.4, n: 18, spread: 0.7, a0: 0, c: 'navy' },
+    pFan2: { type: 'lines', kind: 'burst', w: 0.9, n: 12, spread: 0.7, a0: PI, c: 'navy' },
+    // 正面の大きな丸のポスター（ショット6）
+    oRow: { type: 'lines', kind: 'dots', nx: 22, ny: 2, gap: 0.62, dot: 0.05, wave: 0.25, c: 'cream', alpha: 1 },
+    oBig: { type: 'flat', shape: 'circle', w: 3, g: ['white', '#a0a0a0'], ga: PI / 2, split: '#1b1b1b' },
+    oHolo: { type: 'flat', shape: 'square', sx: 0.42, sy: 2.2, holo: 1, ga: PI / 2 },
+    oBar1: { type: 'flat', shape: 'square', sx: 0.2, sy: 2.4, c: 'cream' },
+    oBar2: { type: 'flat', shape: 'square', sx: 0.28, sy: 2.4, c: 'verm' },
+    oBar3: { type: 'flat', shape: 'square', sx: 0.12, sy: 2.4, c: 'orange' },
+    oTri: { type: 'flat', shape: 'wedge', w: 1.1, c: 'verm' },
+    oDisc: { type: 'flat', shape: 'circle', w: 1.05, c: 'blue', split: 'peach' },
+    oSq: { type: 'flat', shape: 'square', w: 0.18, c: 'white' },
+    oCen: { type: 'flat', shape: 'circle', w: 0.2, c: 'white', split: 'verm' },
+    // 立体の物
+    coin1: { type: 'coin', w: 1.1, d: 0.25, c: 'orange' }, coin2: { type: 'coin', w: 1.1, d: 0.25, c: 'cream' }, coin3: { type: 'coin', w: 1.1, d: 0.25, c: 'verm' },
+    stk1: { type: 'coin', w: 1.2, d: 0.2, c: 'navy' }, stk2: { type: 'coin', w: 1.2, d: 0.2, c: 'verm' }, stk3: { type: 'coin', w: 1.2, d: 0.2, c: 'white' },
+    chrome: { type: 'sphere', w: 0.75 },
+    glass: { type: 'sphere', w: 1.7, glass: 1 },
+    ob1: { type: 'sphere', w: 0.16, g: ['white', 'orange'] }, ob2: { type: 'sphere', w: 0.13, g: ['white', 'cream'] }, ob3: { type: 'sphere', w: 0.15, g: ['white', 'verm'] },
+    blueBox: { type: 'box', bw: 1.1, bh: 2.6, bd: 0.3, c: 'blue', side: '#1d1dc0', top: '#5c5cff' },
+    slab1: { type: 'box', bw: 0.5, bh: 2.8, bd: 0.14, c: '#fff4f4' }, slab2: { type: 'box', bw: 0.5, bh: 2.8, bd: 0.14, c: '#fff4f4' },
+    slab3: { type: 'box', bw: 0.5, bh: 2.8, bd: 0.14, c: '#fff4f4' }, slab4: { type: 'box', bw: 0.5, bh: 2.8, bd: 0.14, c: '#fff4f4' },
+    holoSlab: { type: 'box', bw: 3.4, bh: 0.32, bd: 0.9, c: '#e8e8ff', holo: 1 },
+    chip: { type: 'box', bw: 0.9, bh: 0.18, bd: 0.5, c: 'white' },
+    spring: { type: 'lines', kind: 'spring', w: 0.65, L: 2.2, n: 12, c: 'cream' },
+    wave: { type: 'lines', kind: 'wave', w: 3.2, h: 2.4, n: 14, amp: 0.5, c: 'navy' },
+    frames: { type: 'lines', kind: 'frames', w: 6, h: 5, n: 3, c: 'navy', alpha: 0.75 },
+    burst: { type: 'lines', kind: 'burst', w: 0.85, n: 12, spread: TAU, a0: 0, c: 'navy' },
+    orbitRing: { type: 'lines', kind: 'ring', w: 4.2, c: 'navy', alpha: 0.45 },
+    rip1: { type: 'lines', kind: 'ring', w: 1, c: 'cream' }, rip2: { type: 'lines', kind: 'ring', w: 1, c: 'cream' }, rip3: { type: 'lines', kind: 'ring', w: 1, c: 'cream' },
+    floorDots: { type: 'lines', kind: 'dots', nx: 8, ny: 7, gap: 0.3, dot: 0.03, c: 'blue', alpha: 1 },
+    floorDisc: { type: 'flat', shape: 'circle', w: 1.6, c: 'verm' },
+    greyBar: { type: 'flat', shape: 'square', sx: 1.6, sy: 0.22, g: ['white', 'black'], ga: 0 },
+    spark: { type: 'flat', shape: 'spark', w: 0.55, c: 'teal' },
+    sun: { type: 'flat', shape: 'sun', w: 0.28, c: 'cream' },
+    aster: { type: 'aster', w: 0.7, g: ['cream', 'white', 'pink'] },
+    word: { type: 'text', str: 'キャラクター', c: 'navy' },
+    pink: { type: 'flat', shape: 'circle', w: 0.8, sx: 0.72, g: ['#ffd0dc', 'pink', 'blue'], ga: 0.8 },
+    glow1: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 }, glow2: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 },
+    glow3: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 }, glow4: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#fff4d6', alpha: 0.3 },
+    rod: { type: 'flat', shape: 'square', sx: 0.09, sy: 1.2, c: 'teal' },
+    stick: { type: 'flat', shape: 'square', sx: 0.09, sy: 1.5, c: 'orange' },
+    pill: { type: 'flat', shape: 'circle', w: 0.42, sx: 1.4, c: 'white' },
+    wallL: { type: 'flat', shape: 'square', sx: 6, sy: 7, c: '#ff7a4c', z: -50 },
+    floor: { type: 'flat', shape: 'square', sx: 9, sy: 6, c: '#d63f14', z: -60 },
+    wallHatch: { type: 'flat', shape: 'square', sx: 1.4, sy: 1.6, c: '#ff8a5e', stripes: '#ffb39a' },
+    tri1: { type: 'flat', shape: 'tri', w: 0.7, c: 'orange' }, tri2: { type: 'flat', shape: 'tri', w: 0.7, c: 'navy' }, tri3: { type: 'flat', shape: 'tri', w: 0.7, c: 'cream' }
+  };
+
+  // ===== ショット 1〜4 =====
+  const posterFlat = (t) => ({
+    pTeal: { p: [-0.4 + 0.25 * S(t * 0.8), 0.5, 0] }, pOrSmall: { p: [-2.3 + 0.25 * S(t * 0.8), 0.05, 0.02], sx: 0.5 + 0.25 * S(t * 1.6) ** 2 },
+    pOrange: { p: [2.6 + 0.2 * S(t * 0.7 + 1), 1.6, 0] }, pDisc1: { p: [4.0 + 0.2 * S(t * 0.7 + 1), 1.6, 0.03], sa: t * 1.1 },
+    pNavy: { p: [-3.1 + 0.2 * S(t * 0.9 + 2), -0.6, 0] }, pDisc2: { p: [-3.9 + 0.2 * S(t * 0.9 + 2), -0.6, 0.03], sa: -t * 1.4 },
+    pVerm: { p: [-2.4 + 0.25 * S(t * 0.6 + 3), -1.85, 0] }, pHalf: { p: [-0.6 + 0.25 * S(t * 0.6 + 3), -1.85, 0.02], r: [0, 0, -PI / 2] },
+    pDot: { p: [-1.2, 2.6 + 0.15 * S(t * 2), 0] },
+    pFan: { p: [2.25, 0.5, 0], w: 2.4 * (0.88 + 0.12 * S(t * 1.6)), spread: 0.55 + 0.25 * S(t * 1.1) }, pFan2: { p: [2.25, 0.5, 0] }
+  });
+  const shots = [
+    { // 1) 平面のポスター（真正面から見ると、ただの平らな絵）
+      name: 'POSTER', bg: 'cream',
+      cam: () => ({ yaw: 0, pitch: 0, dist: 40, zoom: 1, t: [0, 0.3, 0] }),
+      act: (t) => posterFlat(t)
+    },
+    { // 2) カメラが回り込むと、それぞれ違う奥行きに浮かぶ板だったと分かる
+      name: 'DEPTH', bg: 'cream', sel: 'pOrange',
+      cam: (tb) => ({ yaw: 0.75 + 0.12 * S(tb * 0.5), pitch: 0.3, dist: 9, zoom: 0.9, t: [0, -0.2, 0] }),
+      act: (t) => {
+        const o = posterFlat(t), z = { pTeal: 0, pOrSmall: 0.7, pOrange: -2.6, pDisc1: -2.2, pNavy: 2, pDisc2: 2.5, pVerm: 3.2, pHalf: 3.6, pDot: -1.2, pFan: -1, pFan2: -1 };
+        Object.keys(o).forEach((k) => { o[k].p = [o[k].p[0], o[k].p[1], z[k]]; o[k].r = [0, (k.length % 3 - 1) * 0.25, (o[k].r || [0, 0, 0])[2]]; });
+        o.frames = { p: [0, -2.6, 0], r: FLOOR, w: 8, h: 7 };
+        o.wave = { p: [1.6, -2.5, 1.2], r: FLOOR };
+        o.floorDisc = { p: [-1, -2.55, 0.6], r: FLOOR, w: 1.4 };
+        o.burst = { p: [3.1, 2.6, -2], r: [0, 0, t * 0.4] };
+        o.chrome = { p: [0.8, -2.0 + Math.abs(S(t * 2.4)) * 1.2, 2.4], w: 0.5 };
+        return o;
       }
     },
-    { // 2) 巨大な丸を帯が貫き、二重の輪が逆向きに回る
-      name: 'SPLIT', bg: 'paper',
-      act: (i, t, K) => {
-        if (i === 0) return { x: 0.5, y: 0.42, s: 1.1, shape: 'circle', fill: 'split', c: 'ink', c2: 'blue', rot: t * 0.8, z: 0.2 };
-        if (i === 1) return { x: 0.5, y: 0.42, s: 0.5, shape: 'square', sx: 0.22, sy: 5.5, rot: 0.35 + t * 0.35, c: 'red', z: 0.4 };
-        if (i === 2) return { x: 0.03, y: 0.97, s: 1.05, shape: 'quarter', rot: -PI / 2, c: 'blue', z: 0.1 };
-        if (i === 3) return { x: 0.5, y: 0.42, s: 1.42, shape: 'gear', fill: 'ring', c: 'ink', rot: -t * 0.4, z: 0.05 };
-        if (i < 16) { const k = i - 4, a = t * 0.7 + (k * TAU) / 12; return { x: 0.5 + ox(0.74 * Co(a), K), y: 0.42 + oy(0.74 * S(a), K), s: 0.1, shape: ['hex', 'square', 'diamond'][k % 3], rot: a * 1.5, fill: FL[k % FL.length], c: col('paper', k), c2: 'paper', z: 0.7 }; }
-        const k = i - 16, a = -t * 1.1 + (k * TAU) / 8;
-        return { x: 0.5 + ox(0.4 * Co(a), K), y: 0.42 + oy(0.4 * S(a), K), s: 0.06, shape: 'circle', c: ['lime', 'paper', 'cyan', 'red'][k % 4], z: 0.8 };
+    { // 3) 斜め上から見下ろす床（波線・円盤・回るコイン・虹色の板）
+      name: 'ISOMETRIC', bg: 'orange', sel: 'coin3',
+      cam: (tb) => ({ yaw: 0.78 + 0.1 * S(tb * 0.6), pitch: 0.62, dist: 14, zoom: 1.05, t: [0, -0.3, 0] }),
+      act: (t) => ({
+        frames: { p: [0, -1.2, 0], r: FLOOR, w: 6, h: 5 },
+        floorDisc: { p: [0.4, -1.18, 0.8], r: FLOOR, w: 1.7 * (1 + 0.04 * S(t * 2)) },
+        floorDots: { p: [-1.6, -1.15, -1.0], r: FLOOR },
+        wave: { p: [1.2, -1.1, -0.6], r: FLOOR, w: 3, h: 2.2, amp: 0.55 },
+        coin3: { p: [1.0, 0.3, 0.4], r: [0, t * 2.2, 0], w: 1.2, d: 0.22, c: 'navy', c2: 'navy' },
+        holoSlab: { p: [-0.8, 1.3, -0.8], r: [0.25, 0.5 + 0.2 * S(t * 0.8), 0] },
+        greyBar: { p: [-1.8, 0.7, 1.2], r: [0, 0.6, -0.4 + 0.1 * S(t)] },
+        chip: { p: [2.4 + 0.2 * S(t * 1.2), -0.85, 1.6] },
+        spark: { p: [-2.8, 2.1, -1], r: [0, t, 0] },
+        burst: { p: [1.8, 2.6, -1.6], r: [0, 0.4, t * 0.3] },
+        word: { p: [1.4, -1.15, 1.9], r: [-PI / 2, 0, -0.5], s: 0.55 },
+        glow1: { p: [2.3, 1.0, -2.2] }, glow2: { p: [2.3, 1.0, -1.95] }, glow3: { p: [2.3, 1.0, -1.7] }, glow4: { p: [2.3, 1.0, -1.45] },
+        pink: { p: [-0.1, 2.6 + 0.2 * S(t * 1.3), 0.4], r: [0, 0.4 + 0.3 * S(t), 0.3] }
+      })
+    },
+    { // 4) 部屋の中に浮かぶ物（白い板・銀の玉・ガラスの玉・ばね）
+      name: 'ROOM', bg: 'verm', sel: 'blueBox',
+      cam: (tb) => ({ yaw: -0.42 + 0.14 * S(tb * 0.45), pitch: 0.1, dist: 11, zoom: 1.1, t: [0.4, -0.2, 0] }),
+      act: (t) => {
+        const o = {
+          wallL: { p: [-4.5, 0, 0], r: [0, PI / 2, 0] }, floor: { p: [0, -3, 0], r: FLOOR },
+          wallHatch: { p: [-4.45, 0.6, -0.9], r: [0, PI / 2, 0] }, pink: { p: [-4.4, 0.6, -0.4], r: [0, PI / 2, 0], w: 0.7, sx: 0.85, g: ['#ffd0dc', 'pink', 'verm'] },
+          blueBox: { p: [-0.5, 0.2, -0.8] },
+          chrome: { p: [0.9, -2.25 + Math.abs(S(t * 2.4)) * 1.6, 0.9] },
+          glass: { p: [0.3, 0.1, 1.6] },
+          spring: { p: [-2.4, -2.2, 0.6], r: [0, PI / 2, 0] },
+          holoSlab: { p: [-0.9, -1.6, 1.4], r: [-0.3, 0.2, 0.05], bw: 3.2, bh: 0.08, bd: 0.6 },
+          rod: { p: [-0.1, 0.2, 0.4], r: [0, 0, 0.05] }, stick: { p: [-0.3, 0.6, 0.6], r: [0, 0, -0.9 + 0.1 * S(t)] },
+          aster: { p: [-1.8, -2.2, 1.8], r: [0, 0.3, t] }, sun: { p: [2.6, 0.8, 0.4], r: [0, 0, t] },
+          pill: { p: [2.2, 1.8 + 0.15 * S(t * 1.5), 0] }
+        };
+        [1, 2, 3, 4].forEach((k) => { const h = 2 + 1.2 * Math.abs(S(t * 1.8 + k * 1.3)); o['slab' + k] = { p: [0.9 + k * 0.72, -3 + h / 2, -1.2], bh: h }; });
+        return o;
       }
-    },
-    { // 3) 丸が画面いっぱいに広がって、背景が黒に
-      name: 'FLOOD', bg: 'paper', to: 'ink', beats: 0.8,
-      act: (i) => i === 0 ? { x: 0.5, y: 0.4, s: 4.6, shape: 'circle', c: 'ink', z: 9, dur: 1.25, ease: 'in', delay: 0.05 } : null
-    },
-    { // 4) 画面を横切る太い帯と、その上を走る形
-      name: 'BANDS', bg: 'ink',
-      act: (i, t) => {
-        if (i === 0) return { x: 0.5 + 0.14 * S(t * 1.3), y: 0.12, s: 0.5, shape: 'square', sx: 5, sy: 0.55, fill: 'stripes', c: 'lime', c2: 'ink', z: 0.2 };
-        if (i === 1) return { x: 0.5 - 0.16 * S(t * 1.1), y: 0.3, s: 0.5, shape: 'square', sx: 5, sy: 0.4, c: 'red', z: 0.25 };
-        if (i === 2) return { x: 0.5 + 0.18 * S(t * 1.5), y: 0.47, s: 0.5, shape: 'square', sx: 5, sy: 0.3, fill: 'grad', c: 'blue', c2: 'cyan', z: 0.3 };
-        if (i === 3) return { x: 0.88 + 0.04 * S(t * 2), y: 0.45, s: 0.5, shape: 'square', sx: 0.35, sy: 4, fill: 'holo', z: 0.35 };
-        const k = i - 4, b = k % 4, dir = b % 2 ? 1 : -1, x = ((((t * 0.3 * dir + k * 0.12) % 1.2) + 1.2) % 1.2) - 0.1;
-        return { x, y: [0.12, 0.3, 0.47, 0.64][b], s: 0.06 + 0.03 * (k % 2), shape: k % 2 ? 'square' : 'circle', rot: t * 3, c: ['ink', 'paper', 'paper', 'lime'][b], z: 0.6 };
-      }
-    },
-    { // 5) 画面を埋め尽くすマス目（カクッ、カクッと回る）
-      name: 'GRID', bg: 'ink',
-      act: (i, t, K) => {
-        if (i === 0) return { x: 0, y: 0, s: 1.2, shape: 'quarter', c: 'blue', z: 0.05 };
-        if (i === 1) return { x: 1, y: 1, s: 1.2, shape: 'quarter', rot: PI, c: 'red', z: 0.05 };
-        if (i < 4) return null;
-        const k = i - 4, cc = k % 4, r = Math.floor(k / 4), s = Math.min(0.2, (0.15 * K.FH) / K.M, (0.23 * K.W) / K.M);
-        return { x: 0.13 + cc * 0.25, y: 0.07 + r * 0.17, s, shape: ['square', 'circle', 'quarter', 'half'][(k + r) % 4], fill: FL[(k * 3) % FL.length],
-          c: col('ink', k + r), c2: col('ink', k + r + 2), rot: (step(t + (cc + r) * 0.13, 1.3) * PI) / 2 + (r % 2) * PI / 2, delay: (cc + r) * 0.04, z: 0.5 };
-      }
-    },
-    { // 6) 端からはみ出す巨大な丸と、逆向きの2本の波
-      name: 'WAVE', bg: 'ink',
-      act: (i, t) => {
-        if (i === 0) return { x: -0.06, y: 0.26, s: 1.05, shape: 'circle', c: 'lime', z: 0.1 };
-        if (i === 1) return { x: 1.06, y: 0.72, s: 0.9, shape: 'circle', fill: 'stripes', c: 'red', c2: 'ink', rot: t, z: 0.1 };
-        if (i === 2) return { x: 0.5, y: 0.45, s: 1.55, shape: 'circle', fill: 'ring', c: 'blue', z: 0.05 };
-        if (i === 3) return null;
-        const k = (i - 4) % 10, row = i < 14 ? 0 : 1, q = k / 9, ph = row ? PI : 0;
-        return { x: 0.03 + q * 0.94, y: (row ? 0.54 : 0.36) + 0.15 * S(q * TAU * 1.1 + t * 3 + ph), s: 0.07 + 0.06 * (0.5 + 0.5 * S(q * TAU * 2 + t * 2.4 + ph)),
-          shape: row ? 'square' : 'circle', rot: row ? t * 2 : 0, c: col('ink', k + row * 3), delay: k * 0.03, z: 0.6 };
-      }
-    },
-    { // 7) 大きく積み上がった塔と、まわりを回る火花
-      name: 'TOTEM', bg: 'ink',
-      act: (i, t, K) => {
-        if (i === 0) return { x: 0.5, y: 1.02, s: 1.45, shape: 'half', c: 'blue', z: 0.1 };
-        if (i === 1) return { x: 0.97, y: 0.03, s: 0.9, shape: 'quarter', rot: PI / 2, c: 'lime', fill: 'stripes', c2: 'ink', z: 0.1 };
-        if (i < 4) return null;
-        if (i < 10) {
-          const k = i - 4, L = [['half', 1.4, 1, 'stripes', 'lime'], ['square', 2.4, 0.5, 'solid', 'red'], ['circle', 1.7, 0.7, 'split', 'paper'], ['square', 2, 0.5, 'dots', 'cyan'], ['diamond', 1.2, 1, 'solid', 'lime'], ['half', 1.8, 1, 'grad', 'red']][k];
-          return { x: 0.5 + 0.06 * S(t * 2.2 + k * 0.7) * (k + 1) / 6, y: 0.1 + k * 0.11, s: 0.2, shape: L[0], sx: L[1], sy: L[2], fill: L[3], c: L[4], c2: 'ink', rot: k === 5 ? PI : 0, ext: k % 2 ? 0.8 : 0, z: 0.5 + k * 0.05 };
-        }
-        const k = i - 10, a = t * 2 + (k * TAU) / 14;
-        return { x: 0.5 + ox(0.38 * Co(a), K), y: 0.4 + oy(0.24 * S(a), K), s: 0.035, shape: 'spark', rot: t * 4, c: k % 2 ? 'paper' : 'lime', z: S(a) > 0 ? 0.9 : 0.3 };
-      }
-    },
-    { // 8) 全部が画面の外へ、はじけ飛ぶ
-      name: 'SHATTER', bg: 'ink', beats: 0.6,
-      act: (i, t) => { const a = (i / 24) * TAU + 0.3; return { x: 0.5 + Co(a) * 0.95, y: 0.42 + S(a) * 0.95, s: 0.15, shape: i % 2 ? 'spark' : 'tri', c: col('ink', i), rot: t * 3, dur: 0.72, ease: 'in', delay: i * 0.01, z: 0.5 }; }
-    },
-    { // 9) 渦を巻いて戻ってくる（外側ほど巨大）
-      name: 'VORTEX', bg: 'ink',
-      act: (i, t, K) => { const k = i / 23, a = k * TAU * 1.5 + t * 1.3, r = 0.03 + 0.66 * k; return { x: 0.5 + ox(r * Co(a), K), y: 0.42 + oy(r * S(a), K), s: 0.03 + 0.34 * k, shape: SH[i % SH.length], fill: FL[(i * 5) % FL.length], c: col('ink', i), c2: 'ink', rot: a, delay: (23 - i) * 0.02, z: 0.2 + k * 0.6 }; }
     }
   ];
+
+  window.OC_HERO_ACTORS = A;
+  return shots;
 };
