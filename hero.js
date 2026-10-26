@@ -92,15 +92,19 @@
     if (ev.pointerType !== 'mouse') return;
     tilt.mx = cl((ev.clientX / window.innerWidth - 0.5) * 2); tilt.my = cl((ev.clientY / window.innerHeight - 0.5) * 2); tilt.mt = performance.now();
   }, { passive: true });
+  let baseB = null, baseG = 0;   // スマホの「ふだんの持ち方」。傾けた分だけを使う（ゆっくり、今の持ち方に合わせ直す）
   window.addEventListener('deviceorientation', (ev) => {
     if (ev.gamma == null || ev.beta == null) return;
-    tilt.ox = cl(ev.gamma / 30); tilt.oy = cl((ev.beta - 45) / 30); tilt.ot = performance.now();
+    if (baseB === null) { baseB = ev.beta; baseG = ev.gamma; }
+    baseB += (ev.beta - baseB) * 0.02; baseG += (ev.gamma - baseG) * 0.02;
+    tilt.ox = cl((ev.gamma - baseG) / 15); tilt.oy = cl((ev.beta - baseB) / 15); tilt.ot = performance.now();
   }, { passive: true });
   function updateTilt(now, T0) {
     let tx, ty;
+    const sx = Math.sin(T0 * 0.37) * 0.5, sy = Math.sin(T0 * 0.23 + 1) * 0.4;   // 自動のゆらゆら
     if (now - tilt.mt < 4000) { tx = tilt.mx; ty = tilt.my; }
-    else if (now - tilt.ot < 1500) { tx = tilt.ox; ty = tilt.oy; }
-    else { tx = Math.sin(T0 * 0.37) * 0.5; ty = Math.sin(T0 * 0.23 + 1) * 0.4; }   // 何もしていないときは、自動でゆらゆら
+    else if (now - tilt.ot < 1500) { tx = cl(tilt.ox + sx * 0.6); ty = cl(tilt.oy + sy * 0.6); }
+    else { tx = sx; ty = sy; }
     G.tx += (tx * TILT - G.tx) * 0.05; G.ty += (ty * TILT - G.ty) * 0.05;
   }
 
@@ -204,7 +208,11 @@
       const g = ctx.createRadialGradient(W / 2, FH * 0.45, Math.min(W, FH) * 0.35, W / 2, FH * 0.45, Math.hypot(W, FH) * 0.65);
       g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${VIGNETTE})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
-    if (HUD) HUD.hud(cur, k, tb, loopT, ink, T0, cam);
+    if (HUD) {   // 少し下にスクロールしたとき、サイトの上の文字と重ならないように、その下にもぐらせる
+      const sy = window.scrollY || 0; ctx.save();
+      if (sy > 0) { ctx.beginPath(); ctx.rect(0, sy + 46, W, H); ctx.clip(); }
+      HUD.hud(cur, k, tb, loopT, ink, T0, cam); ctx.restore();
+    }
     else T.label('hero-hud.js が読み込めていません', 20, 60, ink, 10);   // 飾りのファイルが無いときの知らせ
     if (GRAIN > 0 && grainPat && Q < 1) {
       if (now - lastGrain > 70) { gx = Math.random() * 256; gy = Math.random() * 256; lastGrain = now; }
