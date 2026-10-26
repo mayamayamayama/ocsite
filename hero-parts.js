@@ -26,6 +26,8 @@ window.OC_HERO_PARTS = function (G) {
   const reg = (n, r, off = -Math.PI / 2) => Array.from({ length: n }, (_, k) => [Math.cos(off + (k / n) * TAU) * r, Math.sin(off + (k / n) * TAU) * r]);
   const starV = (n, r1, r2) => Array.from({ length: n * 2 }, (_, k) => { const a = -Math.PI / 2 + (k * Math.PI) / n, r = k % 2 ? r2 : r1; return [Math.cos(a) * r, Math.sin(a) * r]; });
   const half = (() => { const v = []; for (let k = 0; k <= 32; k++) { const a = Math.PI + (k / 32) * Math.PI; v.push([Math.cos(a) * 1.15, Math.sin(a) * 1.15 + 0.49]); } return v; })();
+  const quarter = (() => { const v = [[0, 0]], c = 0.4244 * 1.5; for (let k = 0; k <= 24; k++) { const a = (k / 24) * Math.PI / 2; v.push([Math.cos(a) * 1.5, Math.sin(a) * 1.5]); } return v.map(([x, y]) => [x - c, y - c]); })();
+  const lens = (() => { const v = []; for (let k = 0; k <= 24; k++) { const a = -Math.PI / 3 + (k / 24) * (2 * Math.PI / 3); v.push([(-0.5 + Math.cos(a)) * 1.3, Math.sin(a) * 1.3]); } for (let k = 0; k <= 24; k++) { const a = Math.PI - Math.PI / 3 + (k / 24) * (2 * Math.PI / 3); v.push([(0.5 + Math.cos(a)) * 1.3, Math.sin(a) * 1.3]); } return v; })();
   const w = 0.34, cross = [[-w, -1], [w, -1], [w, -w], [1, -w], [1, w], [w, w], [w, 1], [-w, 1], [-w, w], [-1, w], [-1, -w], [-w, -w]];
   const SHAPES = {
     circle: fromFn(() => 1),
@@ -37,6 +39,8 @@ window.OC_HERO_PARTS = function (G) {
     burst: fromPoly(starV(12, 1.08, 0.78)),
     spark: fromPoly(starV(4, 1.25, 0.3)),
     half: fromPoly(half),
+    quarter: fromPoly(quarter),
+    lens: fromPoly(lens),
     cross: fromPoly(cross),
     flower: fromFn((a) => 0.72 + 0.28 * Math.cos(5 * (a + Math.PI / 2))),
     gear: fromFn((a) => 0.9 + 0.12 * Math.sign(Math.sin(8 * a))),
