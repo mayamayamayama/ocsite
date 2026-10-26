@@ -41,26 +41,35 @@
     });
   });
 
-  // ---------- ミニキャラ（3種類を、毎回ランダムに出す） ----------
-  // 画像は mini1.png / mini2.png / mini3.png という名前でアップロードしてください。
-  // 名前や数を変えたいときは、下の MINIS を書き換えます。まだ画像がないときは、何も出ません。
-  const MINIS = ['mini1.png', 'mini2.png', 'mini3.png'];
-  const COUNT = 6;         // 一度に出すミニキャラの数
+  // ---------- ミニキャラ（いる人数の中から、毎回ランダムに選んで出す） ----------
+  // ★ ミニキャラを増やすとき：mini1.png、mini2.png、mini3.png… という名前でアップロードするだけ（20人まで）。
+  //    ここのコードは触らなくて大丈夫です。番号が飛んでいても動きます。
+  // ★ 一度に出す人数を変えるとき：下の COUNT の数字を変えます。
+  const MINIS = Array.from({ length: 20 }, (_, i) => `mini${i + 1}.png`);
+  const COUNT = 3;         // 一度に出すミニキャラの数（同じ子は2回出ません）
   const thumbs = reel.querySelector('.rs-thumbs'), okMinis = [];
   MINIS.forEach((src) => { const im = new Image(); im.onload = () => okMinis.push(src); im.src = src; });
+  let lastPicked = [];
   function spawnMinis() {
     thumbs.innerHTML = '';
     if (!okMinis.length) return;
-    for (let i = 0; i < COUNT; i++) {
+    // くじ引き：全員をシャッフルして、前回と同じ顔ぶれになりにくいようにしてから、先頭から COUNT 人を選ぶ
+    const pool = okMinis.slice().sort(() => Math.random() - 0.5);
+    if (pool.length > COUNT) pool.sort((a, b) => lastPicked.includes(a) - lastPicked.includes(b));
+    const picked = pool.slice(0, Math.min(COUNT, pool.length));
+    lastPicked = picked;
+    const n = picked.length;
+    picked.forEach((src, i) => {
       const el = new Image();
-      el.src = okMinis[Math.floor(Math.random() * okMinis.length)]; el.alt = ''; el.draggable = false; el.className = 'mini';
-      el.style.left = (3 + Math.random() * 80) + '%';
-      el.style.bottom = (Math.random() * 42) + '%';
-      el.style.width = (15 + Math.random() * 13) + 'vw';
+      el.src = src; el.alt = ''; el.draggable = false; el.className = 'mini';
+      const slot = 100 / n;                                                     // 横に均等に並べて、重なりにくくする
+      el.style.left = (slot * i + slot * 0.08 + Math.random() * slot * 0.18) + '%';
+      el.style.bottom = (Math.random() * 30) + '%';
+      el.style.width = Math.min(30, 72 / n) * (0.9 + Math.random() * 0.2) + 'vw';
       el.style.animationDelay = `${(i * 0.12).toFixed(2)}s, -${(Math.random() * 4).toFixed(2)}s, -${(Math.random() * 6).toFixed(2)}s`;
       el.style.animationDuration = `.6s, ${(2.6 + Math.random() * 2.4).toFixed(2)}s, ${(5 + Math.random() * 4).toFixed(2)}s`;
       thumbs.appendChild(el);
-    }
+    });
   }
 
   // ---------- 大きな文字を、画面の幅いっぱいに合わせる ----------
