@@ -11,12 +11,12 @@
   window.addEventListener('load', () => {
     const css = getComputedStyle(document.documentElement), miss = [];
     [['style.css', '--oc-css-style'], ['design.css', '--oc-css-design'], ['motion.css', '--oc-css-motion']].forEach(([n, k]) => { if (!css.getPropertyValue(k).trim()) miss.push(n); });
-    ['site', 'hero-parts', 'hero-scenes', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
+    ['site', 'hero-parts', 'hero-scenes', 'hero-scenes2', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
     let dataOK = false;
     try { dataOK = typeof characters === 'object' && !!characters && Object.keys(characters).length > 0; } catch (e) {}
     if (!dataOK) miss.push('editor.js（キャラクターの書き間違いかも。カンマ「,」や「}」を確認）');
     if (!miss.length) return;
-    const heroFiles = ['style.css', 'motion.css', 'hero.js', 'hero-parts.js', 'hero-scenes.js'], reelFiles = ['style.css', 'motion.css', 'reel.js'];
+    const heroFiles = ['style.css', 'motion.css', 'hero.js', 'hero-parts.js', 'hero-scenes.js', 'hero-scenes2.js'], reelFiles = ['style.css', 'motion.css', 'reel.js'];
     const dataBad = miss.some((n) => n.startsWith('editor.js'));
     if (dataBad || miss.some((n) => heroFiles.includes(n))) document.body.classList.add('oc-no-hero');   // 入場画面だけを引っ込めて、ほかは見られるようにする
     if (dataBad || miss.some((n) => reelFiles.includes(n))) document.body.classList.add('oc-no-reel');
