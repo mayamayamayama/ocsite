@@ -17,8 +17,8 @@ window.OC_HERO_SCENES2 = function () {
     [[1.6, ['#1b1b1b', '#bdbdbd']], [0.5, 'orange'], [0.8, 'black'], [0.6, 'verm']],
     [[0.9, 'verm'], [0.5, 'orange'], [1.2, 'navy'], [0.7, ['cyan', 'white']]]
   ];
-  const RY = [1.75, 1.2, 0.55, -0.05, -0.55, -1.0], RH = [0.42, 0.55, 0.7, 0.32, 0.5, 0.3], RS = [0.9, -0.6, 1.2, -1.4, 0.7, -1.0];
-  ROWS.forEach((segs, i) => { A['row' + i] = { type: 'strip', w: 7, h: RH[i], segs, sp: RS[i] }; });
+  const RY = [2.3, 1.55, 0.72, -0.05, -0.75, -1.42], RH = [0.5, 0.66, 0.86, 0.4, 0.6, 0.38], RS = [0.9, -0.6, 1.2, -1.4, 0.7, -1.0];
+  ROWS.forEach((segs, i) => { A['row' + i] = { type: 'strip', w: 13, h: RH[i], segs, sp: RS[i] }; });
 
   // グラデーションのブロック（ショット8）
   Object.assign(A, {
@@ -27,13 +27,17 @@ window.OC_HERO_SCENES2 = function () {
     b3: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: 'teal', side: '#0d7d7a', top: '#3fc6c2' },
     b4: { type: 'box', bw: 1.4, bh: 0.9, bd: 1.4, c: '#cfcfcf', g: ['#f2f2f2', '#9a9a9a'], side: '#8a8a8a', top: '#ffffff' },
     b5: { type: 'box', bw: 1.4, bh: 0.4, bd: 1.4, c: 'orange', side: '#c96a00', top: '#ffb24d' },
-    b6: { type: 'box', bw: 1.4, bh: 0.45, bd: 1.4, c: 'verm', side: '#b83a12', top: '#ff7a4c' }
+    b6: { type: 'box', bw: 1.4, bh: 0.45, bd: 1.4, c: 'verm', side: '#b83a12', top: '#ff7a4c' },
+    b7: { type: 'box', bw: 0.7, bh: 3.2, bd: 0.7, c: 'blue', g: ['cyan', 'blue'], side: '#1d1dc0', top: '#7fe9ff' },
+    b8: { type: 'box', bw: 2.4, bh: 0.28, bd: 1.6, c: 'cream', side: '#d9b9a6', top: '#fff4ea' },
+    b9: { type: 'box', bw: 0.9, bh: 0.9, bd: 0.9, c: 'pink', g: ['#ffd0dc', 'pink'], side: '#c41f7c', top: '#ff8acb' },
+    b10: { type: 'box', bw: 0.5, bh: 1.9, bd: 0.5, c: 'orange', side: '#c96a00', top: '#ffb24d' }
   });
 
   const shots = [
     { // 5) 回るコインのまわりを、カメラが一周する
       name: 'COINS', bg: 'teal', sel: 'coin2',
-      cam: (tb, t) => ({ yaw: t * 0.35, pitch: 0.38, dist: 10, zoom: 1, t: [0, -0.4, 0] }),
+      cam: (tb, t) => ({ yaw: t * 0.35, pitch: 0.38, dist: 10, zoom: 1.15, t: [0, -0.4, 0] }),
       act: (t) => {
         const o = {
           coin1: { p: [-1.1, 0.8, 0], r: [0, t * 1.8, 0.14] }, coin2: { p: [-0.2, 0.8, 0.3], r: [0, t * 1.8 + 0.5, 0.14], c: 'white' }, coin3: { p: [0.7, 0.8, 0.6], r: [0, t * 1.8 + 1, 0.14], c: 'verm', c2: 'verm' },
@@ -69,8 +73,11 @@ window.OC_HERO_SCENES2 = function () {
     },
     { // 8) グラデーションのブロックが、立体に積み上がる
       name: 'BLOCKS', bg: 'navy', sel: 'b2',
-      cam: (tb, t) => ({ yaw: 0.6 + tb * 0.22, pitch: 0.32, dist: 11, zoom: 1, t: [0.2, 0.2, 0] }),
+      cam: (tb, t) => ({ yaw: 0.6 + tb * 0.22, pitch: 0.32, dist: 11, zoom: 1.12, t: [0.2, 0.1, 0] }),
       act: (t) => ({
+        b7: { p: [-2.7, 0.2 + 0.1 * S(t * 1.1), -1.2] }, b8: { p: [1.7, -1.05, 1.5], r: [0, 0.3, 0] }, b9: { p: [1.7, -0.45 + 0.12 * Math.abs(S(t * 2.2)), 1.5], r: [0, t * 0.8, 0] },
+        b10: { p: [2.9, -0.3, -1.4] }, holoSlab: { p: [-0.6, 2.6 + 0.12 * S(t), -0.4], r: [0.2, t * 0.3, 0] },
+        chrome: { p: [-1.0, -0.6 + Math.abs(S(t * 2.4)) * 1.1, 1.8], w: 0.42 }, spring: { p: [0.4, -1.0, 2.2], r: [0, PI / 2, 0], w: 0.4, L: 1.6 },
         b1: { p: [-1.2, 0 + 0.08 * S(t * 2), 0] }, b6: { p: [-1.2, -0.95, 0] },
         b2: { p: [0.2, -0.3, 0.1] }, b3: { p: [0.2, 1.5 + 0.1 * S(t * 1.6), 0.1], r: [0, 0.2 * S(t * 0.8), 0] },
         b4: { p: [1.6, 0.9, 0] }, b5: { p: [1.6, 0.25, 0] },
