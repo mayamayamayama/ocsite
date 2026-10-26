@@ -47,6 +47,9 @@
   // ★ 一度に出す人数を変えるとき：下の COUNT の数字を変えます。
   const MINIS = Array.from({ length: 20 }, (_, i) => `mini${i + 1}.png`);
   const COUNT = 3;         // 一度に出すミニキャラの数（同じ子は2回出ません）
+  // ★ ミニキャラの大きさを変えるとき：下の2つの数字を変えます。
+  const MINI_SIZE = 1.3;     // 大きさの倍率（1がふつう。1.3で1.3倍、0.8で小さめ）
+  const MINI_MAX = 200;    // パソコンなど大きな画面で、これ以上は大きくしない幅（px）
   const thumbs = reel.querySelector('.rs-thumbs'), okMinis = [];
   MINIS.forEach((src) => { const im = new Image(); im.onload = () => okMinis.push(src); im.src = src; });
   let lastPicked = [];
@@ -65,7 +68,8 @@
       const slot = 100 / n;                                                     // 横に均等に並べて、重なりにくくする
       el.style.left = (slot * i + slot * 0.08 + Math.random() * slot * 0.18) + '%';
       el.style.bottom = (Math.random() * 30) + '%';
-      el.style.width = Math.min(30, 72 / n) * (0.9 + Math.random() * 0.2) + 'vw';
+      el.style.width = Math.min(30, 72 / n) * MINI_SIZE * (0.9 + Math.random() * 0.2) + 'vw';
+      el.style.maxWidth = MINI_MAX * MINI_SIZE + 'px';
       el.style.animationDelay = `${(i * 0.12).toFixed(2)}s, -${(Math.random() * 4).toFixed(2)}s, -${(Math.random() * 6).toFixed(2)}s`;
       el.style.animationDuration = `.6s, ${(2.6 + Math.random() * 2.4).toFixed(2)}s, ${(5 + Math.random() * 4).toFixed(2)}s`;
       thumbs.appendChild(el);
@@ -156,3 +160,4 @@
   if (REDUCE) { visible = true; fit(); render(performance.now()); return; }
   requestAnimationFrame(loop);
 })();
+
