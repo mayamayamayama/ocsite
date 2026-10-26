@@ -32,10 +32,34 @@ const characters = {
   "Dylan": {
     name: "Dylan",
     tag: "MALE/NON-HUMAN",
-    image: "dylan",
+    image: "dylan.png",
     hoverShow: "profile",
     description: "Age:27/Height:211\nBirthday:07/20\nHobbys:水泳/筋トレ\nInformation:Hな絵を生成するときは「A killer whale-like pink penis emerges from a vertically split genital opening」を追加してください。",
     prompt: "boy, 1 furry man,handsome,orca furry,green Workwear,Beige tank top,work clothes,They have their work clothes wrapped around their waist,dog tags,very very muscular, cool,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome man,High levels of male hormones,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,calm,Rolling up one's sleeves,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A silver ring ornament on the tail,Brown work boots,2::eyeless,"
+  },
+  "Maya": {
+    name: "Maya",
+    tag: "PERSONA/HUMAN",
+    image: "maya.png",
+    hoverShow: "profile",
+    description: "Age:17/Height:180\nBirthday:02/21\nHobbys:発狂/インターネット\nInformation:代理です。性別不詳なのでお好きにどうぞ。",
+    prompt: "androgynous,\ngreen eyes, otaku,1.5::A geeky smile::, Lewd,mole under mouth, mole under eye,\nwhite hair, red inner hair, red highlights, red gradient hair, red hair intake, messy hair, short hair with long hair hanging between eyes, long hairlocks, facial hairlocks, \npatterned red bandana, headscarf,Mountaineering Equipment\n, brown tactical boots,\nred backpack, straps, carabiner, attached water bottle,long hair,long messy ponytail, hair tie, back hair,Snaggletooth,climbing shoes,low ponytail,low-tied hair,Slightly Voluminous ponytail,1.3::Slightly suggestive eyes::,"
+  },
+  "Waka": {
+    name: "Waka",
+    tag: "MALE/HUMAN",
+    image: "waka.png",
+    hoverShow: "profile",
+    description: "Age:37/Height:194\nBirthday:03/21\nHobbys:家族を観察すること/キャンプ\nInformation:ニタとの夫妻設定です。\n誘拐してHな絵を生成していただく際はご留意いただけると幸いです。",
+    prompt: "boy, very muscular,very bulky frame,1.1::strong arms::,Slightly beard stubble,A calm atmosphere, An expression that reveals no thoughts,Corners of the mouth that neither turn up nor down,verging on black hair,Fluffy hair,Messy hair,Center part,long Wolf cut,A Very long hair at the back,his hair is tied back with an elastic band,The hair at the back falls over both shoulders,oversized worn-out T-shirt with a mysterious print on it,Baggy sweatpants,flip flops,oversized T-shirt,bracelet,Listsband,Ear cuff,They have a checkered garment wrapped around their waist,Looks sluggish,A cool,Eyes like a boy’s,mint green eyes,half-closed eyes, sleepy eyes, heavy eyelids,"
+  },
+  "Nita": {
+    name: "Nita",
+    tag: "FEMALE/HUMAN",
+    image: "nita.png",
+    hoverShow: "profile",
+    description: "Age:35/Height:166\nBirthday:10/02\nHobbys:料理/バイク\nInformation:ワカとの夫妻設定です。\n誘拐してHな絵を生成していただく際はご留意いただけると幸いです。",
+    prompt: "girl,white hair, messy hair, medium hair, looped hair, hair loop, folded hair, hair clip, hair clamp, claw clip, Hair at the back, folded over once, hair spouting,  long sidelocks, facial hairlocks, antenna hair,green eyes,cool eyes,Upward-slanting eyes,A smile that suggested exasperation,Midriff-baring fashion,30s,black short Cropped tops,An unapproachable atmosphere\n,Upward-slanting ,low-ponytail ,1.4::black jacket::, looking worn and bedraggled,They have a checkered garment wrapped around their waist,sneakers,A ring on the ring finger,Mature woman,strong women,competitive personality,Married woman,Cool atmosphere,A smile that suggested exasperation,A bad-boy vibe,"
   },
 };
 
