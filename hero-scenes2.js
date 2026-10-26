@@ -13,7 +13,7 @@ window.OC_HERO_SCENES2 = function () {
     [[0.5, '#f4f4f4'], [0.9, ['cyan', 'pink', '#ff9ad5']], [0.7, 'teal'], [0.5, 'blue'], [0.9, 'verm'], [0.4, 'peach'], [0.3, 'orange'], [0.8, ['white', '#1b1b1b']]],
     [[0.4, 'white'], [1.2, '#2b2b2b'], [1.4, ['white', '#9a9a9a', '#1b1b1b']], [0.6, 'blue'], [0.7, 'navy']],
     [[1.4, ['pink', '#ff9ad5', 'blue']], [0.6, 'navy'], [0.6, 'teal'], [0.9, 'cream'], [0.6, 'orange']],
-    [[0.6, 'orange'], [1.0, 'teal'], [0.8, 'cream'], [0.7, ['#1b1b1b', 'white']], [0.5, 'verm']],
+    [[0.6, 'orange'], [1.0, 'teal'], [0.5, '#d8ff00'], [0.8, 'cream'], [0.7, ['#1b1b1b', 'white']], [0.5, 'verm']],
     [[1.6, ['#1b1b1b', '#bdbdbd']], [0.5, 'orange'], [0.8, 'black'], [0.6, 'verm']],
     [[0.9, 'verm'], [0.5, 'orange'], [1.2, 'navy'], [0.7, ['cyan', 'white']]]
   ];
@@ -24,7 +24,7 @@ window.OC_HERO_SCENES2 = function () {
   Object.assign(A, {
     b1: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: 'peach', g: ['#ffb08a', '#ff7a7a'], side: '#e0604f', top: '#ffc6a8' },
     b2: { type: 'box', bw: 1.4, bh: 2.2, bd: 1.4, c: '#1b1b1b', g: ['#2a2a2a', '#3a1a2a', '#ff4fa3'], side: '#111111', top: '#333333' },
-    b3: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: 'teal', side: '#0d7d7a', top: '#3fc6c2' },
+    b3: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: '#d8ff00', side: '#9fbd00', top: '#f0ff9a' },
     b4: { type: 'box', bw: 1.4, bh: 0.9, bd: 1.4, c: '#cfcfcf', g: ['#f2f2f2', '#9a9a9a'], side: '#8a8a8a', top: '#ffffff' },
     b5: { type: 'box', bw: 1.4, bh: 0.4, bd: 1.4, c: 'orange', side: '#c96a00', top: '#ffb24d' },
     b6: { type: 'box', bw: 1.4, bh: 0.45, bd: 1.4, c: 'verm', side: '#b83a12', top: '#ff7a4c' },
@@ -54,7 +54,7 @@ window.OC_HERO_SCENES2 = function () {
       cam: (tb, t) => ({ yaw: t * 0.35, pitch: 0.38, dist: 10, zoom: 1.15, t: [0, -0.4, 0] }),
       act: (t) => {
         const o = {
-          coin1: { p: [-1.1, 0.8, 0], r: [0, t * 1.8, 0.14] }, coin2: { p: [-0.2, 0.8, 0.3], r: [0, t * 1.8 + 0.5, 0.14], c: 'white' }, coin3: { p: [0.7, 0.8, 0.6], r: [0, t * 1.8 + 1, 0.14], c: 'verm', c2: 'verm' },
+          coin1: { p: [-1.1, 0.8, 0], r: [0, t * 1.8, 0.14] }, coin2: { p: [-0.2, 0.8, 0.3], r: [0, t * 1.8 + 0.5, 0.14], c: '#d8ff00' }, coin3: { p: [0.7, 0.8, 0.6], r: [0, t * 1.8 + 1, 0.14], c: 'verm', c2: 'verm' },
           stk1: { p: [-2.2, -1.3 + 0.1 * S(t * 1.4), 1.0], r: FLOOR }, stk2: { p: [-2.2, -1.08 + 0.1 * S(t * 1.4), 1.0], r: FLOOR }, stk3: { p: [-2.2, -0.86 + 0.1 * S(t * 1.4), 1.0], r: FLOOR },
           orbitRing: { p: [0, -1.4, 0], r: FLOOR },
           aster: { p: [0.4, -1.4, 1.8], r: [0, 0, t * 1.2] },
@@ -85,7 +85,7 @@ window.OC_HERO_SCENES2 = function () {
         oBar1: { p: [0.15, -2.3, 0.06], sy: 2.4 + 0.15 * S(t * 2) }, oBar2: { p: [0.6, -2.3, 0.06] }, oBar3: { p: [1.0, -2.3, 0.06], sy: 2.4 + 0.15 * S(t * 2 + 1) },
         oTri: { p: [-1.6 + 0.2 * S(t * 0.9), 0.25, 0.05] },
         oDisc: { p: [1.9 + 0.25 * Co(t * 0.6), -1.4 + 0.25 * S(t * 0.6), 0.1], sa: t * 0.4 },
-        oSq: { p: [-0.4, -1.0 + 0.15 * S(t * 1.6), 0.05], r: [0, 0, t] },
+        oSq: { p: [-0.4, -1.0 + 0.15 * S(t * 1.6), 0.05], r: [0, 0, t], c: '#d8ff00' },
         oCen: { p: [0.2, -0.05, 0.08], sa: t * 2 },
         pRing: { p: [0, 0, 0.03], w: 3.35, c: 'cream', lw: 1 }, ring1: { p: [-2.6, 2.5, 0.05], w: 0.38, c: 'cream' },
         pDots: { p: [-2.3, -2.4, 0.05], c: 'cream' },
