@@ -152,6 +152,21 @@
     return [g('Age') && `${g('Age')}Y`, g('Height') && `${g('Height')}CM`].filter(Boolean).join(' / ');
   }
   const hoverSrc = (c) => c.hover || c.image.replace(/(\.[A-Za-z0-9]+)$/, '_hover$1');
+  // 表情違いの絵を、どこで見せるか（editor.js のキャラに  hoverShow: "detail"  のように書く）
+  //   一覧のカードは、どのキャラも、マウスを乗せると表情違いの絵に変わります。
+  //   詳細画面（プロフィール）でどちらの絵を出すかを、ここで選びます。
+  //   書かない   … いつもの絵
+  //   "profile" … 表情違いの絵
+  const altMode = (c) => (['card', 'profile', 'detail', 'both'].includes(c.hoverShow) ? c.hoverShow : 'card');
+  const altCache = {};   // 表情違いの絵があるかどうか（一度調べたら覚えておく）
+  function hasAlt(c, cb) {
+    const src = hoverSrc(c);
+    if (src in altCache) { if (altCache[src]) cb(src); return; }
+    const im = new Image();
+    im.onload = () => { altCache[src] = true; cb(src); };
+    im.onerror = () => { altCache[src] = false; };
+    im.src = src;
+  }
   const toneStyle = (i) => `--t1:${TONES[i % TONES.length][0]};--t2:${TONES[i % TONES.length][1]}`;
 
   async function copyText(text, btn) {
@@ -196,12 +211,13 @@
       <div class="d-body">
         <figure class="d-media" style="${toneStyle(i)}">
           <div class="plate d-plate">
-            <img src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
+            <img class="d-img" src="${esc(c.image)}" alt="${esc(c.name)}" draggable="false">
             <i class="mk tl"></i><i class="mk br"></i>
             <span class="pl tr">OC-${pad(i + 1, 3)}</span><span class="pl bl">&copy; OC ARCHIVE</span>
             <div class="shield"></div>
           </div>
           <figcaption class="mono"><span>FIG. ${pad(i + 1)} — ${esc(c.name)}</span>${barcode(id)}</figcaption>
+          <div class="expr mono" hidden><span>Expression</span><button type="button" class="on" data-k="a">01</button><button type="button" data-k="b">02</button></div>
         </figure>
         <div class="d-info">
           <section><h3 class="sec mono">Profile</h3>${rows}</section>
@@ -218,6 +234,24 @@
 
     split($('.d-name'));
     scatter($('#scatter-head'), 'head' + id, 22);
+
+    // 詳細画面で、表情違いの絵に切り替えるボタン（hoverShow が "detail" か "both" のキャラだけ）
+    if (altMode(c) === 'profile') hasAlt(c, (src) => { const img = $('.d-img'); if (img) img.src = src; });   // プロフィールの絵を、表情違いの絵に
+    if (altMode(c) === 'detail' || altMode(c) === 'both') hasAlt(c, (src) => {
+      const box = $('.expr'), img = $('.d-img'), plate = $('.d-plate');
+      if (!box || !img) return;
+      box.hidden = false;
+      const set = (k) => {
+        if (box.dataset.k === k) return;
+        box.dataset.k = k;
+        box.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
+        plate.classList.remove('flip'); void plate.offsetWidth; plate.classList.add('flip');   // 切り替わるときの一瞬のちらつき
+        img.src = k === 'b' ? src : c.image;
+      };
+      box.querySelectorAll('button').forEach((b) => { b.onclick = () => set(b.dataset.k); });
+      plate.style.cursor = 'pointer';
+      $('.shield').onclick = () => set(box.dataset.k === 'b' ? 'a' : 'b');   // 絵をタップしても切り替わる
+    });
     $('.copy').onclick = (e) => copyText(c.prompt, e.currentTarget);
     document.querySelectorAll('.d-nav a').forEach((a) => {
       a.onclick = (e) => { e.preventDefault(); window.showDetail(a.dataset.id, true); };
@@ -282,15 +316,13 @@
     grid.appendChild(a);
     reveal(a);
 
-    // 表情違いの絵があれば（名前_hover.png）、マウスを乗せたときに差し替える
-    const probe = new Image();
-    probe.onload = () => {
+    // 表情違いの絵があれば（名前_hover.png）、マウスを乗せたときに差し替える（全キャラ）
+    hasAlt(c, (src) => {
       const b = document.createElement('img');
-      b.className = 'img-b'; b.src = probe.src; b.alt = ''; b.draggable = false;
+      b.className = 'img-b'; b.src = src; b.alt = ''; b.draggable = false;
       $('.plate', a).insertBefore(b, $('.shield', a));
       a.classList.add('has-alt');
-    };
-    probe.src = hoverSrc(c);
+    });
   });
 
   // ---------- 見出しまわりの飾り ----------
