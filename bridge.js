@@ -11,9 +11,9 @@
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ===== ここの数字を変えると、見た目が変わります =====
-  const EVERY = [1.2, 3.2];   // 次の部品が落ちてくるまでの秒数（最短, 最長）
+  const EVERY = [0.9, 2.3];   // 次の部品が落ちてくるまでの秒数（最短, 最長）
   const AT_ONCE = 3;          // 1回に落ちてくる数の最大（1〜この数のあいだで、毎回ばらばら）
-  const MAX_LIVE = 8;         // 同時に落ちている数の上限
+  const MAX_LIVE = 10;        // 同時に落ちている数の上限
   const SIZE = 1;             // 部品の大きさ（2で2倍）
   const FALL_SEC = [2.6, 4.6];// 画面の上から下まで落ちるのにかかる秒数（速い, 遅い）
 
@@ -50,7 +50,7 @@
 
   // 部品の絵を、最初に1回だけ描いておく（落ちている間は、絵を動かすだけなので軽い）
   const PAL = { cream: '#fde9dc', teal: '#14a39f', orange: '#fa8c14', verm: '#e8501e', navy: '#141b3a', blue: '#2a2aff', pink: '#ff2fa0', peach: '#ff9a76', cyan: '#00f0ff', white: '#fffaf4', black: '#1b1b1b', lime: '#d8ff00' };
-  const PI = Math.PI, PT = 0.36, D = 900, cp = Math.cos(PT), sp = Math.sin(PT), BOX = 96, RES = 2;
+  const PI = Math.PI, PT = 0.36, D = 900, cp = Math.cos(PT), sp = Math.sin(PT), BOX = 96, RES = 5;   // RES：絵の細かさ（大きく表示しても、ぼやけないように）
   const pc = document.createElement('canvas'); pc.width = pc.height = BOX * RES; const ctx = pc.getContext('2d');
   const G = { ctx, PAL, f: D, dpr: RES, CA: 1, tx: 0, ty: 0, camPos: [0, D * sp, D * cp] };
   G.proj = (p) => { const yc = p[1] * cp - p[2] * sp, depth = D - (p[1] * sp + p[2] * cp), k = D / Math.max(depth, 1); return [BOX / 2 + p[0] * k, BOX / 2 - yc * k, depth]; };
@@ -71,18 +71,21 @@
     { o: { type: 'flat', shape: 'circle', w: 22, sx: 0.72, g: ['#ffd0dc', 'pink', 'blue'], ga: 0.8 }, flip: 1 },
     { o: { type: 'coin', w: 22, d: 7, c: 'teal', c2: 'teal', bull: 'cream', r: [0, -0.5, 0] }, flip: 1 }
   ];
-  KINDS.forEach((k) => {
-    const o = Object.assign({}, base, k.o); if (typeof o.shape === 'string') o.shape = T.SHAPES[o.shape];
+  // 1つずつ、少し時間をずらして描く（ページを開いた瞬間が重くならないように）
+  (function paint(n) {
+    if (n >= KINDS.length) return;
+    const k = KINDS[n], o = Object.assign({}, base, k.o); if (typeof o.shape === 'string') o.shape = T.SHAPES[o.shape];
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, pc.width, pc.height); ctx.setTransform(RES, 0, 0, RES, 0, 0);
     if (o.type === 'coin') T.coin(o, 0.8); else if (o.type === 'box') T.box(o); else if (o.type === 'sphere') T.sphere(o);
     else if (o.type === 'lines') T.lines(o, 0); else T.flat(o, 1.2);
-    k.src = pc.toDataURL();
-  });
+    const next = () => setTimeout(() => paint(n + 1), 60);
+    if (pc.toBlob) pc.toBlob((b) => { if (b) k.src = URL.createObjectURL(b); next(); }); else { k.src = pc.toDataURL(); next(); }
+  })(0);
 
   // カードの後ろに、部品が落ちる層を敷く
   const layer = document.createElement('div'); layer.className = 'fall-layer'; layer.setAttribute('aria-hidden', 'true');
   grid.insertBefore(layer, grid.firstChild);
-  let live = 0, last = -1;
+  let live = 0, last = null;
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   function drop() {
@@ -91,9 +94,10 @@
     const g0 = grid.getBoundingClientRect(), b0 = band ? band.getBoundingClientRect() : g0;
     layer.style.top = -Math.max(0, g0.top - b0.top) + 'px';   // 文字の輪の帯から、カードの並びの下まで
     const gr = layer.getBoundingClientRect(), vh = window.innerHeight, vw = window.innerWidth;
-    let k = Math.floor(Math.random() * KINDS.length); if (k === last) k = (k + 1) % KINDS.length; last = k;
-    const K = KINDS[k], far = Math.random() < 0.4;   // 奥のもの（小さく、うすく、ゆっくり）と、手前のもの
-    const size = Math.round((far ? rnd(26, 40) : rnd(44, 72)) * SIZE * Math.min(1.4, Math.max(1, vw / 700)));
+    const ready = KINDS.filter((q) => q.src); if (!ready.length) return;
+    let k = Math.floor(Math.random() * ready.length); if (ready[k] === last && ready.length > 1) k = (k + 1) % ready.length;
+    const K = ready[k], far = Math.random() < 0.35; last = K;   // 奥のもの（小さく、うすく、ゆっくり）と、手前のもの
+    const size = Math.round((far ? rnd(60, 90) : rnd(110, 170)) * SIZE * Math.min(1.5, Math.max(1, vw / 700)));
     const top = Math.max(-size, -gr.top - size - 10);                 // 今見ている画面の、少し上から
     const dist = Math.min(vh + size * 2 + 40, gr.height - top);      // 画面の下まで（カードの並びの下の端まで）
     if (dist < 120) return;
