@@ -18,9 +18,9 @@
 /* 流れる文字の帯：4つに1つを朱色に */
 .ticker-track span:nth-child(4n) { color: var(--verm); }
 
-/* 散らばる小さな文字：ときどきオレンジと青緑 */
-.scatter span.hot:nth-child(3n) { color: var(--orange); }
-.scatter span.hot:nth-child(5n) { color: var(--teal); }
+/* 散らばる小さな文字（一覧の飾りの帯だけ）：ときどきオレンジと青緑 */
+.deco-band .scatter span.hot:nth-child(3n) { color: var(--orange); }
+.deco-band .scatter span.hot:nth-child(5n) { color: var(--teal); }
 
 /* カード：1枚ずつ、入場画面の色を1つ持つ（「CHARACTER」の前の四角と、マウスを乗せたときの線） */
 .card { --hc: var(--verm); }
@@ -37,20 +37,6 @@
 .rs-multi div:nth-child(3) {
   background: var(--holo); -webkit-background-clip: text; background-clip: text;
   color: transparent; -webkit-text-fill-color: transparent;
-}
-
-/* 画面切り替えの幕：黄緑の中に、入場画面の色を混ぜる */
-.curtain i:nth-child(2) { background: var(--orange); }
-.curtain i:nth-child(3) { background: var(--verm); }
-.curtain i:nth-child(5) { background: var(--teal); }
-.curtain i:nth-child(6) { background: linear-gradient(180deg, #00f0ff, #2a2aff 50%, #ff2fa0); }
-
-/* 詳細画面：名前の板の下のふちに、色の帯 */
-.d-head::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px;
-  background: linear-gradient(90deg,
-    #e8501e 0 16%, #fa8c14 16% 27%, #14a39f 27% 41%, #141b3a 41% 49%, #fde9dc 49% 63%,
-    #2a2aff 63% 70%, #ff2fa0 70% 82%, #0d0d0d 82% 86%, #fffaf4 86%);
 }
 
 /* ---------- 色の帯（入場画面のショット7「SIGNAL」と同じ帯が、細く流れる） ---------- */
