@@ -3,7 +3,7 @@ const characters = {
   "Barnard": {
     name: "Barnard",
     tag: "Male / Human",
-    image: "Barnard.png",
+    image: "1Barnard.png",
     description: "Age:38/Height:188\nBirthday:08/29\nHobbys:音楽制作,映画鑑賞\nInformation:出力時にプロンプトによっては上手く衣装が反映されないことがあるので、適宜衣装を消して調整をお願いします。",
     prompt: "boy, 1man,handsome,short blonde hair, slightly messy hair,blue eyes, sunglasses,white hoodie,baseball cap, headphones, watch,thick beard,goatee, dog tags,heavy stubble beard, scruffy chin beard, an incognito actor, cargo pants, ,sneakers,muscular, cool,black oversized jacket, layered distressed streetwear, multiple belts, silver chains, fingerless gloves, metallic accessories,dark Y2K punk aesthetic,bulky frame,An outfit with a well-balanced color scheme that avoids looking too dark,dark yellow and black backpack,A rugged, masculine face,smile,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure"
   },
