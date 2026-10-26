@@ -1,82 +1,84 @@
-// hero-scenes2.js — 入場画面のループの「隊形」後半（10〜17）。書き方は hero-scenes.js の上の説明と同じです
+// hero-scenes2.js — 入場画面のショット 5〜8。書き方は hero-scenes.js の上の説明と同じです
+// （登場する物体の一覧は hero-scenes.js にあります）
 (window.OC_LOADED = window.OC_LOADED || []).push('hero-scenes2');
 
 window.OC_HERO_SCENES2 = function () {
-  const S = Math.sin, Co = Math.cos, TAU = Math.PI * 2, PI = Math.PI;
-  const rnd = (i, k) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
-  const ox = (v, K) => (v * K.M) / K.W, oy = (v, K) => (v * K.M) / K.FH;
+  const S = Math.sin, Co = Math.cos, PI = Math.PI;
   const cl = (x) => Math.max(0, Math.min(1, x)), io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-  const step = (t, sp) => { const v = t * sp, k = Math.floor(v); return k + io(cl((v - k - 0.45) / 0.55)); };
-  const AC = { blue: ['paper', 'ink', 'lime', 'cyan', 'red', 'lilac'], lime: ['ink', 'paper', 'blue', 'red', 'grey'] };
-  const col = (bg, k) => { const l = AC[bg]; return l[((k % l.length) + l.length) % l.length]; };
-  const SH = ['circle', 'square', 'half', 'quarter', 'lens', 'diamond', 'hex', 'tri', 'cross'];
-  const FL = ['solid', 'stripes', 'split', 'solid', 'dots', 'grad', 'solid', 'bull'];
+  const FLOOR = [-PI / 2, 0, 0];
+  const A = window.OC_HERO_ACTORS;
 
-  return [
-    { // 10) いちばん外の巨大な形が広がって、背景が青に
-      name: 'FLOOD', bg: 'ink', to: 'blue', beats: 0.8,
-      act: (i) => i === 23 ? { x: 0.5, y: 0.4, s: 4.6, shape: 'circle', c: 'blue', z: 9, dur: 1.25, ease: 'in', delay: 0.05 } : null
-    },
-    { // 11) 斜めに画面を切る帯と、逆向きに流れる形の列
-      name: 'DIAGONAL', bg: 'blue',
-      act: (i, t) => {
-        if (i === 0) return { x: 0.5 + 0.05 * S(t * 1.2), y: 0.45, s: 0.5, shape: 'square', sx: 7, sy: 0.5, rot: -0.9 + 0.06 * S(t), fill: 'stripes', c: 'ink', c2: 'lime', z: 0.1 };
-        if (i === 1) return { x: 0.86, y: 0.14, s: 0.72, shape: 'circle', fill: 'bull', c: 'paper', c2: 'red', rot: t, z: 0.2 };
-        if (i === 2) return { x: 0.02, y: 0.98, s: 0.85, shape: 'quarter', rot: -PI / 2, c: 'lime', z: 0.15 };
-        if (i === 3) return null;
-        if (i < 14) { const k = i - 4, q = k / 9; return { x: 0.08 + q * 0.84, y: 0.78 - q * 0.66, s: 0.07 + q * 0.3, shape: k % 2 ? 'tri' : 'diamond', rot: t * 1.4 * (k % 2 ? 1 : -1) + q, fill: ['solid', 'stripes', 'split'][k % 3], c: col('blue', k), c2: col('blue', k + 1), ext: 1, delay: k * 0.04, z: 0.4 + q * 0.4 }; }
-        const k = i - 14, q = (k / 10 + t * 0.15) % 1;
-        return { x: 0.1 + q * 0.8, y: 0.15 + q * 0.65, s: 0.045, shape: 'square', rot: t * 3, c: 'paper', z: 0.8 };
+  // 流れる色の帯（ショット7）の、行ごとの並び。色の配列は、グラデーション
+  const ROWS = [
+    [[0.5, '#f4f4f4'], [0.9, ['cyan', 'pink', '#ff9ad5']], [0.7, 'teal'], [0.5, 'blue'], [0.9, 'verm'], [0.4, 'peach'], [0.3, 'orange'], [0.8, ['white', '#1b1b1b']]],
+    [[0.4, 'white'], [1.2, '#2b2b2b'], [1.4, ['white', '#9a9a9a', '#1b1b1b']], [0.6, 'blue'], [0.7, 'navy']],
+    [[1.4, ['pink', '#ff9ad5', 'blue']], [0.6, 'navy'], [0.6, 'teal'], [0.9, 'cream'], [0.6, 'orange']],
+    [[0.6, 'orange'], [1.0, 'teal'], [0.8, 'cream'], [0.7, ['#1b1b1b', 'white']], [0.5, 'verm']],
+    [[1.6, ['#1b1b1b', '#bdbdbd']], [0.5, 'orange'], [0.8, 'black'], [0.6, 'verm']],
+    [[0.9, 'verm'], [0.5, 'orange'], [1.2, 'navy'], [0.7, ['cyan', 'white']]]
+  ];
+  const RY = [1.75, 1.2, 0.55, -0.05, -0.55, -1.0], RH = [0.42, 0.55, 0.7, 0.32, 0.5, 0.3], RS = [0.9, -0.6, 1.2, -1.4, 0.7, -1.0];
+  ROWS.forEach((segs, i) => { A['row' + i] = { type: 'strip', w: 7, h: RH[i], segs, sp: RS[i] }; });
+
+  // グラデーションのブロック（ショット8）
+  Object.assign(A, {
+    b1: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: 'peach', g: ['#ffb08a', '#ff7a7a'], side: '#e0604f', top: '#ffc6a8' },
+    b2: { type: 'box', bw: 1.4, bh: 2.2, bd: 1.4, c: '#1b1b1b', g: ['#2a2a2a', '#3a1a2a', '#ff4fa3'], side: '#111111', top: '#333333' },
+    b3: { type: 'box', bw: 1.4, bh: 1.4, bd: 1.4, c: 'teal', side: '#0d7d7a', top: '#3fc6c2' },
+    b4: { type: 'box', bw: 1.4, bh: 0.9, bd: 1.4, c: '#cfcfcf', g: ['#f2f2f2', '#9a9a9a'], side: '#8a8a8a', top: '#ffffff' },
+    b5: { type: 'box', bw: 1.4, bh: 0.4, bd: 1.4, c: 'orange', side: '#c96a00', top: '#ffb24d' },
+    b6: { type: 'box', bw: 1.4, bh: 0.45, bd: 1.4, c: 'verm', side: '#b83a12', top: '#ff7a4c' }
+  });
+
+  const shots = [
+    { // 5) 回るコインのまわりを、カメラが一周する
+      name: 'COINS', bg: 'teal', sel: 'coin2',
+      cam: (tb, t) => ({ yaw: t * 0.35, pitch: 0.38, dist: 10, zoom: 1, t: [0, -0.4, 0] }),
+      act: (t) => {
+        const o = {
+          coin1: { p: [-1.1, 0.8, 0], r: [0, t * 1.8, 0.14] }, coin2: { p: [-0.2, 0.8, 0.3], r: [0, t * 1.8 + 0.5, 0.14], c: 'white' }, coin3: { p: [0.7, 0.8, 0.6], r: [0, t * 1.8 + 1, 0.14], c: 'verm', c2: 'verm' },
+          stk1: { p: [-2.2, -1.3 + 0.1 * S(t * 1.4), 1.0], r: FLOOR }, stk2: { p: [-2.2, -1.08 + 0.1 * S(t * 1.4), 1.0], r: FLOOR }, stk3: { p: [-2.2, -0.86 + 0.1 * S(t * 1.4), 1.0], r: FLOOR },
+          orbitRing: { p: [0, -1.4, 0], r: FLOOR },
+          aster: { p: [0.4, -1.4, 1.8], r: [0, 0, t * 1.2] },
+          tri1: { p: [0.42, -2.55, 1.7], r: [0, t * 1.6, 0] }, tri2: { p: [0.4, -2.5, 1.65], r: [0, t * 1.6, 0] }, tri3: { p: [0.38, -2.45, 1.6], r: [0, t * 1.6, 0] },
+          burst: { p: [1.4, 2.2, -0.4], r: [0, 0, 0], kind: 'burst', w: 1, n: 9, spread: 1, a0: -0.9 + 0.2 * S(t), c: 'cream' }
+        };
+        ['ob1', 'ob2', 'ob3'].forEach((k, i) => { const a = t * 0.9 + i * 2.1; o[k] = { p: [Co(a) * 4.2, -1.4, S(a) * 4.2] }; });
+        ['rip1', 'rip2', 'rip3'].forEach((k, i) => { const q = (t * 0.35 + i / 3) % 1; o[k] = { p: [0, -1.42, 0], r: FLOOR, w: 0.5 + q * 5, alpha: 0.5 * (1 - q) }; });
+        return o;
       }
     },
-    { // 12) 大きなコインが3枚、くるくる回る
-      name: 'COINS', bg: 'blue',
-      act: (i, t, K) => {
-        if (i === 0) return { x: 0.5, y: 0.38, s: 1.5, shape: 'circle', fill: 'ring', c: 'ink', z: 0.05 };
-        if (i === 1) return { x: 0.93, y: 0.95, s: 0.95, shape: 'half', rot: -PI / 2, c: 'red', z: 0.1 };
-        if (i < 4) return null;
-        if (i < 7) { const k = i - 4; return { x: 0.5 + ox((k - 1) * 0.36, K), y: 0.38, s: 0.36, shape: 'circle', flip: 1, ext: 1.2, fill: 'bull', c: ['paper', 'ink', 'lime'][k], c2: ['red', 'paper', 'ink'][k], z: 0.5 + k * 0.05 }; }
-        if (i < 19) { const k = i - 7, a = t * 1.3 + (k * TAU) / 12; return { x: 0.5 + ox(0.62 * Co(a), K), y: 0.38 + oy(0.32 * S(a), K), s: 0.05, shape: k % 2 ? 'diamond' : 'circle', c: k % 2 ? 'paper' : 'lime', rot: t * 2, z: S(a) > 0 ? 0.9 : 0.3 }; }
-        return null;
-      }
-    },
-    { // 13) 大きな花びらが開き、四隅を巨大な四分円が囲む
-      name: 'BLOOM', bg: 'blue',
-      act: (i, t, K) => {
-        if (i < 4) return { x: [0.02, 0.98, 0.98, 0.02][i], y: [0.02, 0.02, 0.98, 0.98][i], s: 0.8, shape: 'quarter', rot: [0, PI / 2, PI, -PI / 2][i], c: ['ink', 'red', 'paper', 'lime'][i], fill: i % 2 ? 'solid' : 'stripes', c2: 'blue', z: 0.1 };
-        if (i < 16) { const k = i - 4, a = (k / 12) * TAU + t * 0.9, r = 0.4 + 0.03 * S(t * 4 + k); return { x: 0.5 + ox(r * Co(a), K), y: 0.4 + oy(r * S(a), K), s: 0.2, shape: 'half', rot: a + PI / 2, fill: k % 2 ? 'solid' : 'stripes', c: col('blue', k), c2: 'blue', z: 0.5 }; }
-        if (i === 16) return { x: 0.5, y: 0.4, s: 0.3, shape: 'burst', rot: t * 1.5, fill: 'split', c: 'paper', c2: 'red', z: 0.7 };
-        const k = i - 17, a = -t * 1.6 + (k * TAU) / 7;
-        return { x: 0.5 + ox(0.2 * Co(a), K), y: 0.4 + oy(0.2 * S(a), K), s: 0.05, shape: 'diamond', rot: a, c: 'lime', z: 0.8 };
-      }
-    },
-    { // 14) 真ん中の形が広がって、背景がライムに
-      name: 'FLOOD', bg: 'blue', to: 'lime', beats: 0.8,
-      act: (i) => i === 16 ? { x: 0.5, y: 0.4, s: 4.6, shape: 'circle', c: 'lime', z: 9, dur: 1.25, ease: 'in', delay: 0.05 } : null
-    },
-    { // 15) 階段のようにずれる大きな板と、その上を行進する四角
-      name: 'STAIRS', bg: 'lime',
-      act: (i, t) => {
-        if (i === 0) return { x: 0.92, y: 0.9, s: 1.15, shape: 'circle', fill: 'split', c: 'ink', c2: 'blue', rot: t * 0.6, z: 0.1 };
-        if (i === 1) return { x: 0.86, y: 0.12, s: 0.52, shape: 'lens', rot: 0.6 + 0.3 * S(t * 1.4), fill: 'stripes', c: 'paper', c2: 'red', z: 0.2 };
-        if (i === 2) return { x: 0.03, y: 0.03, s: 0.75, shape: 'quarter', c: 'ink', fill: 'dots', c2: 'lime', z: 0.1 };
-        if (i === 3) return null;
-        if (i < 12) { const k = i - 4; return { x: 0.12 + k * 0.1 + 0.06 * S(t * 2 + k), y: 0.08 + k * 0.09, s: 0.18, shape: 'square', sx: 2.6, sy: 0.5, fill: k % 2 ? 'solid' : 'stripes', c: col('lime', k), c2: 'lime', ext: 0.8, delay: k * 0.04, z: 0.4 + k * 0.04 }; }
-        const k = i - 12, q = (k / 12 + t * 0.25) % 1;
-        return { x: 0.12 + q * 0.75, y: 0.05 + q * 0.68, s: 0.04, shape: 'square', rot: (step(t + k * 0.2, 2) * PI) / 2, c: k % 2 ? 'ink' : 'blue', z: 0.8 };
-      }
-    },
-    { // 16) 大小さまざまに、画面いっぱいに散らばる
-      name: 'SCATTER', bg: 'lime',
-      act: (i, t) => ({
-        x: -0.05 + 1.1 * rnd(i, 11) + 0.05 * S(t * 1.2 + i), y: -0.04 + 0.86 * rnd(i, 12) + 0.05 * Co(t * 1.1 + i),
-        s: 0.08 + 0.4 * rnd(i, 13) ** 1.8, shape: SH[(i + 2) % SH.length], fill: FL[(i + 3) % FL.length],
-        c: col('lime', i), c2: col('lime', i + 2), rot: t * (rnd(i, 14) - 0.5) * 2.4, z: 0.2 + rnd(i, 15) * 0.6
+    { // 6) 正面に戻ると、また平らなポスター（大きな丸と虹色の帯）
+      name: 'FLAT', bg: 'teal', sel: 'oDisc',
+      cam: () => ({ yaw: 0, pitch: 0, dist: 40, zoom: 1, t: [0, 0.2, 0] }),
+      act: (t) => ({
+        oRow: { p: [0, 0.05, -0.2] },
+        oBig: { p: [0, 0, 0], sa: -PI / 2 + 0.25 * S(t * 0.5) },
+        oHolo: { p: [0.4, 2.7 + 0.25 * S(t * 0.9), 0.05] },
+        oBar1: { p: [0.15, -2.3, 0.06], sy: 2.4 + 0.15 * S(t * 2) }, oBar2: { p: [0.6, -2.3, 0.06] }, oBar3: { p: [1.0, -2.3, 0.06], sy: 2.4 + 0.15 * S(t * 2 + 1) },
+        oTri: { p: [-1.6 + 0.2 * S(t * 0.9), 0.25, 0.05] },
+        oDisc: { p: [1.9 + 0.25 * Co(t * 0.6), -1.4 + 0.25 * S(t * 0.6), 0.1], sa: t * 0.4 },
+        oSq: { p: [-0.4, -1.0 + 0.15 * S(t * 1.6), 0.05], r: [0, 0, t] },
+        oCen: { p: [0.2, -0.05, 0.08], sa: t * 2 }
       })
     },
-    { // 17) 形が広がって、背景が紙の色に（ここから 1) に戻る）
-      name: 'FLOOD', bg: 'lime', to: 'paper', beats: 0.8,
-      act: (i) => i === 0 ? { x: 0.5, y: 0.4, s: 4.6, shape: 'circle', c: 'paper', z: 9, dur: 1.25, ease: 'in', delay: 0.05 } : null
+    { // 7) 色の帯が流れる。カメラが回ると、帯が奥行きにばらけていたと分かる
+      name: 'SIGNAL', bg: '#ececec', sel: 'row2',
+      cam: (tb) => { const k = io(cl((tb - 1.9) / 1.8)); return { yaw: 0.75 * k, pitch: 0.25 * k, dist: 40 - 31 * k, zoom: 1 - 0.08 * k, t: [0, 0.4, 0] }; },
+      act: (t) => { const o = {}; ROWS.forEach((_, i) => { o['row' + i] = { p: [0, RY[i], (i - 2.5) * 1.1] }; }); return o; }
+    },
+    { // 8) グラデーションのブロックが、立体に積み上がる
+      name: 'BLOCKS', bg: 'navy', sel: 'b2',
+      cam: (tb, t) => ({ yaw: 0.6 + tb * 0.22, pitch: 0.32, dist: 11, zoom: 1, t: [0.2, 0.2, 0] }),
+      act: (t) => ({
+        b1: { p: [-1.2, 0 + 0.08 * S(t * 2), 0] }, b6: { p: [-1.2, -0.95, 0] },
+        b2: { p: [0.2, -0.3, 0.1] }, b3: { p: [0.2, 1.5 + 0.1 * S(t * 1.6), 0.1], r: [0, 0.2 * S(t * 0.8), 0] },
+        b4: { p: [1.6, 0.9, 0] }, b5: { p: [1.6, 0.25, 0] },
+        frames: { p: [0.2, -1.2, 0], r: FLOOR, w: 6, h: 5, c: 'cream', alpha: 0.4 },
+        glass: { p: [2.4 + 0.4 * S(t * 0.7), 1.6, 1.8], w: 1.2 },
+        aster: { p: [-2.2, 1.6, 1.0], r: [0, 0.4, t] }
+      })
     }
   ];
+  return shots;
 };
