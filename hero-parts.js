@@ -75,8 +75,9 @@ window.OC_HERO_PARTS = function (G) {
   // ---------- 1) 平らな形（板） ----------
   // o: { p, r, s, shape(配列), w, sx, sy, c, g(グラデの色), ga(グラデの向き), holo, stripes(色), split(色), sa, ring, ext(厚み), alpha }
   function flat(o, t) {
-    const B = basis(o.r), R = o.w, pts = [];
-    for (let i = 0; i < N; i++) { const a = ang(i), r = o.shape[i] * R; pts.push(G.proj(W3(o, B, Math.cos(a) * r * o.sx, Math.sin(a) * r * o.sy, 0))); }
+    const B = basis(o.r), R = o.w, pts = [], c0 = G.proj(o.p);
+    const st = (G.f * o.s * R * Math.max(o.sx, o.sy)) / Math.max(c0[2], 0.3) < 40 ? 3 : 1;   // 小さく写るときは、点を減らして軽くする
+    for (let i = 0; i < N; i += st) { const a = ang(i), r = o.shape[i] * R; pts.push(G.proj(W3(o, B, Math.cos(a) * r * o.sx, Math.sin(a) * r * o.sy, 0))); }
     if (!visible(pts)) return;
     const alpha = o.alpha === undefined ? 1 : o.alpha; ctx.globalAlpha = alpha;
     if (o.ring) { path(pts); ctx.strokeStyle = col(o.c); ctx.lineWidth = Math.max(1, o.ring); ctx.stroke(); ctx.globalAlpha = 1; return; }
