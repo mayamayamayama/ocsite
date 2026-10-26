@@ -1,0 +1,82 @@
+/* bridge.css — 入場画面（明るくてカラフル）と、下の一覧（黒と黄緑）を「つなぐ」飾り。
+   入場画面の色（朱色・オレンジ・青緑・クリーム・虹色）を、下の一覧にも少しだけ使います。
+   このファイルが無くても、サイトはふつうに動きます（つなぎの飾りが出ないだけ）。 */
+
+:root {
+  --verm: #e8501e; --orange: #fa8c14; --teal: #14a39f; --cream: #fde9dc;
+  --pink: #ff2fa0; --blue: #2a2aff; --cyan: #00f0ff;
+  --holo: linear-gradient(90deg, #00f0ff, #2a2aff 45%, #ff2fa0);
+}
+
+/* ---------- 色をつなぐ ---------- */
+
+/* 「CHARACTER」の上の小さな図形（＋ ○ □ は入場画面の色、棒グラフは黄緑のまま） */
+.ai.a1 { color: var(--verm); }
+.ai.a2 { color: var(--teal); }
+.ai.a3 { color: var(--orange); }
+
+/* 回る文字の輪：片方をオレンジに */
+.ring.b text { fill: var(--orange); }
+
+/* 流れる文字の帯：4つに1つを朱色に */
+.ticker-track span:nth-child(4n) { color: var(--verm); }
+
+/* 散らばる小さな文字：ときどきオレンジと青緑 */
+.scatter span.hot:nth-child(3n) { color: var(--orange); }
+.scatter span.hot:nth-child(5n) { color: var(--teal); }
+
+/* カード：1枚ずつ、入場画面の色を1つ持つ（「CHARACTER」の前の四角と、マウスを乗せたときの線） */
+.card { --hc: var(--verm); }
+.card:nth-child(4n+2) { --hc: var(--orange); }
+.card:nth-child(4n+3) { --hc: var(--teal); }
+.card:nth-child(4n+4) { --hc: var(--pink); }
+.cm-label::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; vertical-align: 1px;
+  background: var(--hc);
+}
+.card .card-meta::before { background: var(--hc); height: 2px; }
+
+/* 最後の「OC ARCHIVE」の3行目を、虹色に */
+.rs-multi div:nth-child(3) {
+  background: var(--holo); -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}
+
+/* 画面切り替えの幕：黄緑の中に、入場画面の色を混ぜる */
+.curtain i:nth-child(2) { background: var(--orange); }
+.curtain i:nth-child(3) { background: var(--verm); }
+.curtain i:nth-child(5) { background: var(--teal); }
+.curtain i:nth-child(6) { background: linear-gradient(180deg, #00f0ff, #2a2aff 50%, #ff2fa0); }
+
+/* 詳細画面：名前の板の下のふちに、色の帯 */
+.d-head::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px;
+  background: linear-gradient(90deg,
+    #e8501e 0 16%, #fa8c14 16% 27%, #14a39f 27% 41%, #141b3a 41% 49%, #fde9dc 49% 63%,
+    #2a2aff 63% 70%, #ff2fa0 70% 82%, #0d0d0d 82% 86%, #fffaf4 86%);
+}
+
+/* ---------- 色の帯（入場画面のショット7「SIGNAL」と同じ帯が、細く流れる） ---------- */
+.cbar { position: relative; z-index: 2; width: 100vw; height: 8px; overflow: hidden; flex-shrink: 0; }
+.cbar.thin { height: 4px; }
+.cbar-track { display: flex; width: max-content; height: 100%; animation: tick 40s linear infinite; }
+.cbar.rev .cbar-track { animation-direction: reverse; animation-duration: 56s; }
+.cbar-track i { display: block; flex: none; height: 100%; }
+
+/* ---------- 質感をつなぐ：フィルムの粒子 ---------- */
+.oc-grain {
+  position: fixed; inset: 0; z-index: 39; pointer-events: none;
+  opacity: 0; transition: opacity .8s; background-repeat: repeat;
+}
+.oc-grain.on { opacity: .07; }
+
+/* ---------- 物をつなぐ：ノイズをすり抜けて落ちてくる、入場画面の物体 ---------- */
+#drop-cv { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 38; pointer-events: none; }
+
+/* 落ちてきた物体が乗るすき間（「CHARACTER」の上と、下の線のまわり） */
+.list-head .kicker { margin-bottom: clamp(36px, 7vw, 84px); }
+.list-head .meta { margin-top: clamp(22px, 3.5vw, 44px); }
+
+@media (prefers-reduced-motion: reduce) { .cbar-track { animation: none; } }
+
+:root { --oc-css-bridge: 1; }
