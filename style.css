@@ -329,6 +329,7 @@ body.in-detail #dot-bg { opacity: .3; }
 /* 横にはみ出して、画面の右側に余白ができるのを防ぐ */
 html { overflow-x: clip; }
 /* 読み込めていないファイルがあるときは、壊れやすい部分を出さない */
-body.oc-broken .hero-main, body.oc-broken .reel { display: none !important; }
-body.oc-broken .hero-after { display: flex; }
+body.oc-no-hero .hero-main { display: none !important; }
+body.oc-no-hero .hero-after { display: flex; }
+body.oc-no-reel .reel { display: none !important; }
 :root { --oc-css-style: 1; }
