@@ -19,7 +19,7 @@
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ===== ここの数字を変えると、見た目が変わります =====
-  const SHOT_SEC = 1.7;       // 1つのショットの長さ（秒）
+  const SHOT_SEC = 2.0;       // 1つのショットの長さ（秒）
   const MOVE_SEC = 1.5;       // 次のショットへ、物体が動くのにかける時間（秒）
   const TILT = 1;             // マウスや傾きで、カメラが回り込む強さ（0で動かない）
   const CHROMA = 1.3;         // 色収差（ふちの水色と桃色のずれ）の幅。0で無し
