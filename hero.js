@@ -1,7 +1,7 @@
 // hero.js — 入場画面のメインビジュアル（3Dエンジンの本体）
 // 3Dの空間に置いた物体を、動くカメラで撮った、1本の長いループです。
 // 平らなポスターに見えていたものが、カメラが回り込むと立体だったと分かる…という、2Dと3Dの入れ替えをくり返します。
-// 物体の一覧とショット 1〜4 は hero-scenes.js、ショット 5〜8 は hero-scenes2.js、3Dの部品は hero-parts.js にあります。
+// 物体の一覧とショット 1〜4 は hero-scenes.js、ショット 5〜8 は hero-scenes2.js、3Dの部品は hero-parts.js、飾りは hero-hud.js にあります。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
 (function () {
@@ -64,7 +64,7 @@
   let fw = [0, 0, -1], rt = [1, 0, 0], up = [0, 1, 0], rollC = 1, rollS = 0;
   function setCam(c) {
     const cp = Math.cos(c.pitch), pos = [c.t[0] + c.dist * Math.sin(c.yaw) * cp, c.t[1] + c.dist * Math.sin(c.pitch), c.t[2] + c.dist * Math.cos(c.yaw) * cp];
-    const d = [c.t[0] - pos[0], c.t[1] - pos[1], c.t[2] - pos[2]], n = Math.hypot(...d); fw = d.map((v) => v / n);
+    const d = [c.t[0] - pos[0], c.t[1] - pos[1], c.t[2] - pos[2]], n = Math.hypot(...d); fw = d.map((v) => v / n); E.fw = fw;
     const r = [-fw[2], 0, fw[0]], rn = Math.hypot(...r) || 1; rt = r.map((v) => v / rn);
     up = [rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]];
     G.camPos = pos; G.f = M * SC * 0.11 * c.dist * c.zoom; rollC = Math.cos(c.roll || 0); rollS = Math.sin(c.roll || 0);
@@ -81,6 +81,8 @@
   const SH = [].concat(window.OC_HERO_SCENES(), typeof window.OC_HERO_SCENES2 === 'function' ? window.OC_HERO_SCENES2() : []);
   const ACT = window.OC_HERO_ACTORS || {};
   const NS = SH.length, LOOP = NS * SHOT_SEC;
+  const E = { W: 0, FH: 0, fw, NS, LOOP, SHOT_SEC };   // 飾り（hero-hud.js）に渡す情報
+  const HUD = typeof window.OC_HERO_HUD === 'function' ? window.OC_HERO_HUD(G, T, E) : null;
   const morph = {}; Object.keys(ACT).forEach((id) => { morph[id] = new Float32Array(T.N); });
 
   // ---------- 傾き（マウス → スマホの傾き → 自動のゆらゆら、の順に使う） ----------
@@ -130,114 +132,6 @@
     else if (o.type === 'aster') T.asterisk(o);
     else if (o.type === 'text') T.text(o);
     else if (o.type === 'strip') T.strip(o, T0);
-  }
-
-  // ---------- 飾り：3Dの軸・選択枠 ----------
-  function gizmo(ink) {
-    const o = G.proj([0, 0, 0]); if (o[2] < 0.3) return;
-    [[[1, 0, 0], PAL.verm, 'X'], [[0, 1, 0], PAL.teal, 'Y'], [[0, 0, 1], PAL.blue, 'Z']].forEach(([v, c, n]) => {
-      const q = G.proj([v[0] * 0.9, v[1] * 0.9, v[2] * 0.9]); ctx.strokeStyle = c; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
-      T.label(n, q[0] + 4, q[1], c, 8);
-    });
-    ctx.fillStyle = ink; ctx.fillRect(o[0] - 2, o[1] - 2, 4, 4);
-  }
-  function selBox(o, id, ink, bgc) {
-    let e;
-    if (o.type === 'flat') e = [o.w * o.sx, o.w * o.sy, 0.05]; else if (o.type === 'coin') e = [o.w, o.w, o.d / 2];
-    else if (o.type === 'box') e = [o.bw / 2, o.bh / 2, o.bd / 2]; else if (o.type === 'strip') e = [o.w / 2, o.h / 2, 0.05]; else return;
-    const B = T.basis(o.r), P = [];
-    for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) P.push(G.proj(T.W3(o, B, x * e[0] * 1.06, y * e[1] * 1.06, z * e[2] * 1.06)));
-    if (P.some((q) => q[2] < 0.3)) return;
-    ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.globalAlpha = 0.85; ctx.beginPath();
-    [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(([a, b]) => { ctx.moveTo(P[a][0], P[a][1]); ctx.lineTo(P[b][0], P[b][1]); });
-    ctx.stroke();
-    P.forEach((q) => { ctx.fillStyle = bgc; ctx.fillRect(q[0] - 2.5, q[1] - 2.5, 5, 5); ctx.strokeRect(q[0] - 2.5, q[1] - 2.5, 5, 5); });
-    const top = P.reduce((a, q) => (q[1] < a[1] ? q : a), P[0]);
-    labelIn(`3D LAYER — ${id}  [${o.p.map((v) => v.toFixed(1)).join(', ')}]`, top[0] + 8, top[1] - 10, ink, 8);
-    ctx.globalAlpha = 1;
-  }
-
-  // 画面からはみ出さないように、位置をずらして文字を書く
-  const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-  function labelIn(str, x, y, c, size) {
-    ctx.font = `600 ${size}px ${MONO}`; const w = ctx.measureText(str).width + str.length * 1.4;
-    T.label(str, Math.max(14, Math.min(x, W - 30 - w)), Math.max(14, y), c, size);
-  }
-  // 3Dの線分を、カメラの後ろに回り込んだ部分を切り落としてから描く
-  function seg3(a, b) {
-    const za = (a[0] - G.camPos[0]) * fw[0] + (a[1] - G.camPos[1]) * fw[1] + (a[2] - G.camPos[2]) * fw[2];
-    const zb = (b[0] - G.camPos[0]) * fw[0] + (b[1] - G.camPos[1]) * fw[1] + (b[2] - G.camPos[2]) * fw[2], NEAR = 0.4;
-    if (za < NEAR && zb < NEAR) return;
-    if (za < NEAR) { const k = (NEAR - za) / (zb - za); a = [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)]; }
-    if (zb < NEAR) { const k = (NEAR - zb) / (za - zb); b = [lerp(b[0], a[0], k), lerp(b[1], a[1], k), lerp(b[2], a[2], k)]; }
-    const p = G.proj(a), q = G.proj(b); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]);
-  }
-  // 床の方眼
-  function grid(ink, dist) {
-    const Y = -3.05, R = 10, a = clamp01((28 - dist) / 10);   // 正面から遠くで見ている（平らな絵の）ときは、消える
-    if (a <= 0) return;
-    ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.globalAlpha = 0.11 * a; ctx.beginPath();
-    for (let v = -R; v <= R; v++) { seg3([v, Y, -R], [v, Y, R]); seg3([-R, Y, v], [R, Y, v]); }
-    ctx.stroke(); ctx.globalAlpha = 0.3 * a; ctx.beginPath(); seg3([-R, Y, 0], [R, Y, 0]); seg3([0, Y, -R], [0, Y, R]); ctx.stroke(); ctx.globalAlpha = 1;
-  }
-  // 物体から線を引いて、名前と色を書く
-  function callout(o, ink, side, fade) {
-    const c = G.proj(o.p); if (c[2] < 0.3 || c[0] < 0 || c[0] > W || c[1] < 90 || c[1] > FH - 60) return;
-    if (side > 0 && c[0] + 34 + 74 + 70 > W - 14) side = -1; else if (side < 0 && c[0] - 34 - 74 < 14) side = 1;   // はみ出すなら、反対側に出す
-    const dx = side * 34, x1 = c[0] + dx, y1 = c[1] - 30, L = 74, x2 = x1 + side * L;
-    ctx.globalAlpha = fade; ctx.strokeStyle = ink; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(c[0], c[1], 3.5, 0, TAU); ctx.moveTo(c[0] + side * 3, c[1] - 3); ctx.lineTo(x1, y1); ctx.lineTo(x2, y1); ctx.stroke();
-    const seg0 = o.segs ? [].concat(o.segs[1][1])[0] : null;
-    const sw = o.segs ? `${o.segs.length} SEG` : o.holo ? 'HOLOGRAM' : o.g ? 'GRADIENT' : o.glass ? 'GLASS' : o.type === 'sphere' ? 'CHROME' : String(col(o.c || ink)).toUpperCase();
-    const kind = (o.type === 'flat' ? 'PLANE/' + (typeof o.shapeName === 'string' ? o.shapeName : '') : o.type).toUpperCase();
-    const lx = side > 0 ? x1 : x2;
-    ctx.fillStyle = seg0 ? col(seg0) : o.holo ? PAL.pink : o.g ? col(o.g[o.g.length - 1]) : o.type === 'sphere' ? '#bdbdbd' : col(o.c || ink); ctx.fillRect(lx, y1 - 18, 8, 8); ctx.strokeRect(lx, y1 - 18, 8, 8);
-    T.label(o.id.toUpperCase(), lx + 12, y1 - 14, ink, 8);
-    T.label(`${kind} · ${sw}`, lx, y1 + 9, ink, 7);
-    ctx.globalAlpha = 1;
-  }
-  // 真上から見た図
-  function minimap(items, ink, cam) {
-    const S = W < FH ? 78 : 118, x0 = W < FH ? W - 20 - S - 34 : W - 20 - S - 30, y0 = W < FH ? 112 : FH - 70 - S, k = S / 14;
-    const mx = (x) => x0 + S / 2 + Math.max(-7, Math.min(7, x)) * k, my = (z) => y0 + S / 2 + Math.max(-7, Math.min(7, z)) * k;
-    ctx.globalAlpha = 0.5; ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, y0 + 0.5, S, S);
-    ctx.globalAlpha = 0.14; ctx.beginPath(); for (let n = 1; n < 4; n++) { ctx.moveTo(x0 + (S * n) / 4, y0); ctx.lineTo(x0 + (S * n) / 4, y0 + S); ctx.moveTo(x0, y0 + (S * n) / 4); ctx.lineTo(x0 + S, y0 + (S * n) / 4); } ctx.stroke();
-    ctx.globalAlpha = 1; T.label(`TOP · ${items.length}`, x0, y0 - 9, ink, 7);
-    items.forEach(({ o }) => {
-      if (o.s < 0.05 || o.z) return;
-      const r = Math.max(1.5, Math.min(5, (o.w || 1) * (o.sx || 1) * o.s * 2.2));
-      ctx.fillStyle = o.holo ? PAL.pink : o.g ? col(o.g[0]) : col(o.c || ink); ctx.fillRect(mx(o.p[0]) - r / 2, my(-o.p[2]) - r / 2, r, r);
-    });
-    const cx = mx(G.camPos[0]), cz = my(-G.camPos[2]), tx = mx(cam.t[0]), tz = my(-cam.t[2]), a = Math.atan2(tz - cz, tx - cx);   // カメラと、写っている範囲
-    ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, S, S); ctx.clip();
-    ctx.strokeStyle = PAL.verm; ctx.globalAlpha = 0.9; ctx.beginPath();
-    ctx.moveTo(cx, cz); ctx.lineTo(cx + Math.cos(a - 0.45) * S * 0.7, cz + Math.sin(a - 0.45) * S * 0.7);
-    ctx.moveTo(cx, cz); ctx.lineTo(cx + Math.cos(a + 0.45) * S * 0.7, cz + Math.sin(a + 0.45) * S * 0.7); ctx.stroke();
-    ctx.fillStyle = PAL.verm; ctx.beginPath(); ctx.arc(cx, cz, 3, 0, TAU); ctx.fill(); ctx.restore(); ctx.globalAlpha = 1;
-  }
-
-  // ---------- 情報の文字 ----------
-  function hud(shot, k, tb, loopT, ink, T0, cam) {
-    const m = 20, y1 = 58, fr = Math.floor(T0 * 24), tc = `${pad(T0 / 3600)}:${pad((T0 / 60) % 60)}:${pad(T0 % 60)}:${pad(fr % 24)}`;
-    const deg = (r) => pad(((((r * 180) / Math.PI) % 360) + 360) % 360, 3);
-    T.label(`SHOT ${pad(k + 1)} / ${pad(NS)} — ${shot.name}`, m, y1, ink, 9);
-    T.label(`CAM ${deg(cam.yaw)}° ${deg(cam.pitch)}°  ${Math.round(18 + cam.dist * 3)}mm`, m, y1 + 15, ink, 9);
-    T.label('24 FPS', W - m - 44, y1, ink, 9, 'right');
-    if (Math.floor(T0 * 1.6) % 2 === 0) { ctx.fillStyle = PAL.verm; ctx.beginPath(); ctx.arc(W - m - 34, y1, 3.5, 0, TAU); ctx.fill(); }
-    T.label('REC', W - m, y1, ink, 9, 'right');
-    T.label(tc, W - m, y1 + 15, ink, 9, 'right');
-    ctx.fillStyle = ink; ctx.globalAlpha = 0.25; ctx.fillRect(m, y1 + 28, W - m * 2, 1); ctx.globalAlpha = 1; ctx.fillRect(m + (W - m * 2) * (tb / SHOT_SEC) - 1, y1 + 24, 2, 9);
-    const rx = W - 12, r0 = y1 + 56, r1 = Math.max(r0 + 60, FH * 0.6);   // 右のものさし（カメラの距離）
-    ctx.globalAlpha = 0.7;
-    for (let y = r0; y <= r1; y += 6) { const long = Math.round((y - r0) / 6) % 5 === 0; ctx.fillRect(rx - (long ? 8 : 4), y, long ? 8 : 4, 1); }
-    const my = r0 + (r1 - r0) * clamp01((cam.dist - 8) / 34);
-    ctx.globalAlpha = 1; ctx.beginPath(); ctx.moveTo(rx - 10, my); ctx.lineTo(rx - 16, my - 4); ctx.lineTo(rx - 16, my + 4); ctx.closePath(); ctx.fill();
-    T.label(`Z ${cam.dist.toFixed(1)}`, rx - 19, my, ink, 8, 'right');
-    const yb = FH - 28, span = W - m * 2;   // 下：ループ全体の進み具合
-    T.label(`LOOP ${LOOP.toFixed(1)}s ▶`, m, yb - 16, ink, 9);
-    T.label(`TILT ${G.tx >= 0 ? '+' : ''}${G.tx.toFixed(2)} ${G.ty >= 0 ? '+' : ''}${G.ty.toFixed(2)}`, W - m, yb - 16, ink, 9, 'right');
-    ctx.fillStyle = ink; ctx.globalAlpha = 0.22; ctx.fillRect(m, yb, span, 2); ctx.globalAlpha = 1; ctx.fillRect(m, yb, span * (loopT / LOOP), 2);
-    for (let n = 1; n < NS; n++) ctx.fillRect(m + span * (n / NS), yb - 3, 1, 8);
   }
 
   // ---------- 1コマを描く ----------
@@ -291,20 +185,65 @@
       const bn = { type: 'text', str: pad(k + 1), p: [1.4, 0.4, -5.5], r: [0, wrapD(cam.yaw) * 0.6, 0], s: 7, c: ink, alpha: 0.4, id: 'num' };
       items.push({ z: G.proj(bn.p)[2] + 100, o: bn });
     }
-    if (GRID) grid(ink, cam.dist);
+    if (HUD && GRID) HUD.grid(ink, cam.dist);
     items.sort((a, b) => b.z - a.z);
     items.forEach((it) => draw(it.o, T0));
 
-    if (GIZMO && !REDUCE) {
-      if (cam.dist < 20) gizmo(ink);
+    if (HUD && GIZMO && !REDUCE) {
+      if (cam.dist < 20) HUD.gizmo(ink);
       if (CALLOUT && tb > 1.9) {
         const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && ACT[id].type !== 'lines' && ACT[id].type !== 'text' && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
-        [ks[1], ks[ks.length - 2]].forEach((id, n) => { const it = id && items.find((q) => q.o.id === id); if (it) callout(it.o, ink, it.o.p[0] > cam.t[0] - 0.3 ? 1 : -1, fade); });
+        [ks[1], ks[ks.length - 2]].forEach((id, n) => { const it = id && items.find((q) => q.o.id === id); if (it) HUD.callout(it.o, ink, it.o.p[0] > cam.t[0] - 0.3 ? 1 : -1, fade); });
       }
-      if (MINIMAP) minimap(items, ink, cam);
-      if (cur.sel && tb > 1.7) { const it = items.find((q) => q.o.id === cur.sel); if (it && it.o.s > 0.9) selBox(it.o, cur.sel, ink, col(cur.bg)); }
+      if (MINIMAP) HUD.minimap(items, ink, cam);
+      if (cur.sel && tb > 1.7) { const it = items.find((q) => q.o.id === cur.sel); if (it && it.o.s > 0.9) HUD.selBox(it.o, cur.sel, ink, col(cur.bg)); }
     }
 
     // 画面全体の質感：ふちを暗く、フィルムの粒子
     if (VIGNETTE > 0 && Q < 1) {
-      const g = ctx.createRadialGradient(W / 2, FH * 0.45, 
+      const g = ctx.createRadialGradient(W / 2, FH * 0.45, Math.min(W, FH) * 0.35, W / 2, FH * 0.45, Math.hypot(W, FH) * 0.65);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${VIGNETTE})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    if (HUD) HUD.hud(cur, k, tb, loopT, ink, T0, cam);
+    else T.label('hero-hud.js が読み込めていません', 20, 60, ink, 10);   // 飾りのファイルが無いときの知らせ
+    if (GRAIN > 0 && grainPat && Q < 1) {
+      if (now - lastGrain > 70) { gx = Math.random() * 256; gy = Math.random() * 256; lastGrain = now; }
+      ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = GRAIN; ctx.translate(-gx, -gy); ctx.fillStyle = grainPat; ctx.fillRect(0, 0, W + 256, H + 256); ctx.restore();
+    }
+    // 大きな文字の色。大きな物体と重なっても読めるよう、背景の色でふちを取る
+    if (ink !== inkNow) { inkNow = ink; titleEls.forEach((el) => { el.style.color = ink; }); }
+    if (titleEls[0] && col(bgShow) !== strokeNow) { strokeNow = col(bgShow); titleEls[0].style.webkitTextStroke = `2px ${strokeNow}`; titleEls[0].style.paintOrder = 'stroke fill'; }
+  }
+
+  // ---------- 大きさを決める ----------
+  function build() {
+    const r0 = hero.getBoundingClientRect();
+    W = r0.width; H = r0.height;
+    if (!W || !H || H > 4000 || W > 5000) { W = 0; return; }   // 異常に大きいときは動かさない
+    FH = H - (parseFloat(getComputedStyle(hero).paddingBottom) || NOISE_H);
+    E.W = W; E.FH = FH; M = Math.min(W, FH); SC = W < FH ? SCALE_TALL : SCALE_WIDE; CX = W > FH * 1.1 ? W * 0.6 : W * 0.5; CY = FH * 0.4;
+    dpr = Q >= 2 ? 1 : Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(4e6 / (W * H))); G.dpr = dpr; G.CA = CHROMA;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!grainPat) {   // フィルムの粒子（灰色のまだら模様を、重ね方「オーバーレイ」で重ねる）
+      const nc = document.createElement('canvas'); nc.width = nc.height = 256; const c = nc.getContext('2d'), d = c.createImageData(256, 256);
+      for (let q = 0; q < d.data.length; q += 4) { const v = 128 + (Math.random() - 0.5) * 200; d.data[q] = d.data[q + 1] = d.data[q + 2] = v; d.data[q + 3] = 255; }
+      c.putImageData(d, 0, 0); grainPat = ctx.createPattern(nc, 'repeat');
+    }
+    frame(performance.now());
+  }
+
+  // ---------- ループ ----------
+  new ResizeObserver(() => { const r = hero.getBoundingClientRect(); if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1) build(); }).observe(hero);
+  new IntersectionObserver((en) => { visible = en[0].isIntersecting; }).observe(hero);
+  function loop(now) {
+    if (visible && W) {
+      if (lastNow) { const dt = now - lastNow; if (dt < 200) { dtAvg += (dt - dtAvg) * 0.03; runT += dt; } }
+      lastNow = now;
+      if (autoQ && runT > 3000 && dtAvg > 28 && Q < 2) { Q++; runT = 0; dtAvg = 16.7; if (Q === 2) build(); }
+      frame(now);
+    } else lastNow = 0;
+    requestAnimationFrame(loop);
+  }
+  build();
+  if (!REDUCE) requestAnimationFrame(loop);
+})();
