@@ -31,7 +31,21 @@ window.OC_HERO_SCENES2 = function () {
     b7: { type: 'box', bw: 0.7, bh: 3.2, bd: 0.7, c: 'blue', g: ['cyan', 'blue'], side: '#1d1dc0', top: '#7fe9ff' },
     b8: { type: 'box', bw: 2.4, bh: 0.28, bd: 1.6, c: 'cream', side: '#d9b9a6', top: '#fff4ea' },
     b9: { type: 'box', bw: 0.9, bh: 0.9, bd: 0.9, c: 'pink', g: ['#ffd0dc', 'pink'], side: '#c41f7c', top: '#ff8acb' },
-    b10: { type: 'box', bw: 0.5, bh: 1.9, bd: 0.5, c: 'orange', side: '#c96a00', top: '#ffb24d' }
+    b10: { type: 'box', bw: 0.5, bh: 1.9, bd: 0.5, c: 'orange', side: '#c96a00', top: '#ffb24d' },
+    // 小物（いろいろなショットに、場所を変えて出てくる）
+    pRing: { type: 'lines', kind: 'ring', w: 0.7, c: 'navy', lw: 1.5 },
+    pRingDot: { type: 'flat', shape: 'circle', w: 0.14, c: 'verm' },
+    pHatch: { type: 'flat', shape: 'square', sx: 1.1, sy: 0.75, c: 'peach', stripes: 'verm' },
+    pQuart: { type: 'flat', shape: 'quarter', w: 0.75, c: 'navy' },
+    pGrad: { type: 'flat', shape: 'square', sx: 0.32, sy: 1.4, g: ['cyan', 'blue', 'pink'], ga: PI / 2 },
+    pBar: { type: 'flat', shape: 'square', sx: 3.2, sy: 0.035, c: 'navy' },
+    pTri: { type: 'flat', shape: 'tri', w: 0.45, c: 'teal' },
+    pDots: { type: 'lines', kind: 'dots', nx: 6, ny: 4, gap: 0.28, dot: 0.045, c: 'navy', alpha: 1 },
+    pCoin: { type: 'coin', w: 0.6, d: 0.22, c: 'cream', c2: 'orange', bull: 'verm' },
+    pCube: { type: 'box', bw: 0.75, bh: 0.75, bd: 0.75, c: 'teal', side: '#0d7d7a', top: '#3fc6c2' },
+    cube2: { type: 'box', bw: 0.42, bh: 0.42, bd: 0.42, c: 'white', side: '#d8cfc8', top: '#ffffff' },
+    ball1: { type: 'sphere', w: 0.3 },
+    ring1: { type: 'lines', kind: 'ring', w: 0.6, c: 'cream', lw: 1.5 }
   });
 
   const shots = [
@@ -47,6 +61,15 @@ window.OC_HERO_SCENES2 = function () {
           tri1: { p: [0.42, -2.55, 1.7], r: [0, t * 1.6, 0] }, tri2: { p: [0.4, -2.5, 1.65], r: [0, t * 1.6, 0] }, tri3: { p: [0.38, -2.45, 1.6], r: [0, t * 1.6, 0] },
           burst: { p: [1.4, 2.2, -0.4], r: [0, 0, 0], kind: 'burst', w: 1, n: 9, spread: 1, a0: -0.9 + 0.2 * S(t), c: 'cream' }
         };
+        Object.assign(o, {
+          pCube: { p: [2.3, -1.02, -1.4], r: [0, 0.4, 0] }, cube2: { p: [2.3, -0.43, -1.4], r: [0, t * 0.9, 0] },
+          ball1: { p: [Co(-t * 0.7) * 2.4, -1.25, S(-t * 0.7) * 2.4] },
+          ring1: { p: [-0.2, 0.8, 0.3], r: [0.3, t * 0.6, 0], w: 1.9, c: 'cream' },
+          pGrad: { p: [-3.0, 0.2, -2.0], r: [0, 0.4, 0], sx: 0.3, sy: 1.6 },
+          pHatch: { p: [1.8, -1.41, 1.8], r: FLOOR, sx: 0.8, sy: 0.6 },
+          floorDots: { p: [0, -1.41, -2.4], r: FLOOR, c: 'cream' },
+          pCoin: { p: [-2.9, 1.6 + 0.15 * S(t * 1.4), 0.4], r: [0, t * 2.2, 0] }
+        });
         ['ob1', 'ob2', 'ob3'].forEach((k, i) => { const a = t * 0.9 + i * 2.1; o[k] = { p: [Co(a) * 4.2, -1.4, S(a) * 4.2] }; });
         ['rip1', 'rip2', 'rip3'].forEach((k, i) => { const q = (t * 0.35 + i / 3) % 1; o[k] = { p: [0, -1.42, 0], r: FLOOR, w: 0.5 + q * 5, alpha: 0.5 * (1 - q) }; });
         return o;
@@ -63,13 +86,28 @@ window.OC_HERO_SCENES2 = function () {
         oTri: { p: [-1.6 + 0.2 * S(t * 0.9), 0.25, 0.05] },
         oDisc: { p: [1.9 + 0.25 * Co(t * 0.6), -1.4 + 0.25 * S(t * 0.6), 0.1], sa: t * 0.4 },
         oSq: { p: [-0.4, -1.0 + 0.15 * S(t * 1.6), 0.05], r: [0, 0, t] },
-        oCen: { p: [0.2, -0.05, 0.08], sa: t * 2 }
+        oCen: { p: [0.2, -0.05, 0.08], sa: t * 2 },
+        pRing: { p: [0, 0, 0.03], w: 3.35, c: 'cream', lw: 1 }, ring1: { p: [-2.6, 2.5, 0.05], w: 0.38, c: 'cream' },
+        pDots: { p: [-2.3, -2.4, 0.05], c: 'cream' },
+        pCube: { p: [2.7, 2.4, 0.1], r: [0, 0, t * 0.3], c: 'navy', side: '#0b1026', top: '#2b3566' },
+        pCoin: { p: [-2.8, -0.9, 0.1] }, pQuart: { p: [2.9, -0.2, 0.06], r: [0, 0, t * 0.5], c: 'orange' },
+        pTri: { p: [-1.0, 2.9, 0.06], r: [0, 0, -t * 0.6], c: 'cream' }, pBar: { p: [0, -3.2, 0.05], c: 'cream', sx: 3.6 },
+        cube2: { p: [1.6, 2.05, 0.1], r: [0, 0, -t * 0.5] }
       })
     },
     { // 7) 色の帯が流れる。カメラが回ると、帯が奥行きにばらけていたと分かる
       name: 'SIGNAL', bg: '#ececec', sel: 'row2',
       cam: (tb) => { const k = io(cl((tb - 1.9) / 1.8)); return { yaw: 0.75 * k, pitch: 0.25 * k, dist: 40 - 31 * k, zoom: 1 - 0.08 * k, t: [0, 0.4, 0] }; },
-      act: (t) => { const o = {}; ROWS.forEach((_, i) => { o['row' + i] = { p: [0, RY[i], (i - 2.5) * 1.1] }; }); return o; }
+      act: (t) => {
+        const o = {}; ROWS.forEach((_, i) => { o['row' + i] = { p: [0, RY[i], (i - 2.5) * 1.1] }; });
+        return Object.assign(o, {
+          chrome: { p: [2.8 * S(t * 0.7), RY[3], 2.2], w: 0.45 },
+          pGrad: { p: [1.3, 0.45, -0.3], sx: 0.28, sy: 2.6 },   // 帯のあいだに差し込まれた、縦の光
+          pCube: { p: [2.6, 2.7, 2.4], r: [t * 0.5, t * 0.7, 0] }, cube2: { p: [-2.6, -2.0, 2.0], r: [t * 0.6, t * 0.4, 0] },
+          ring1: { p: [-2.4, 2.6, 1.2], r: [0, t * 1.2, 0], w: 0.45, c: 'navy' },
+          pTri: { p: [2.9, -1.9, 1.5], r: [0, 0, t], c: 'verm' }
+        });
+      }
     },
     { // 8) グラデーションのブロックが、立体に積み上がる
       name: 'BLOCKS', bg: 'navy', sel: 'b2',
@@ -83,7 +121,14 @@ window.OC_HERO_SCENES2 = function () {
         b4: { p: [1.6, 0.9, 0] }, b5: { p: [1.6, 0.25, 0] },
         frames: { p: [0.2, -1.2, 0], r: FLOOR, w: 6, h: 5, c: 'cream', alpha: 0.4 },
         glass: { p: [2.4 + 0.4 * S(t * 0.7), 1.6, 1.8], w: 1.2 },
-        aster: { p: [-2.2, 1.6, 1.0], r: [0, 0.4, t] }
+        aster: { p: [-2.2, 1.6, 1.0], r: [0, 0.4, t] },
+        stk1: { p: [1.6, 1.43, 0], r: FLOOR, w: 0.5, d: 0.16 }, stk2: { p: [1.6, 1.59, 0], r: FLOOR, w: 0.5, d: 0.16 }, stk3: { p: [1.6, 1.75 + 0.06 * S(t * 2), 0], r: FLOOR, w: 0.5, d: 0.16 },
+        ring1: { p: [0.2, 0.9, 0.1], r: [-PI / 2 + 0.25 * S(t), 0, 0], w: 1.3, c: 'cream' },
+        floorDots: { p: [-1.9, -1.18, 1.7], r: FLOOR, c: 'cream' },
+        pTri: { p: [-2.7, 2.2, -1.2], r: [0, t * 1.6, 0], c: 'pink' },
+        pCube: { p: [-0.4, -0.82, 2.1], r: [0, 0.6, 0] }, cube2: { p: [-0.4, -0.23, 2.1], r: [0, t * 0.9, 0] },
+        ball1: { p: [3.0, -0.9 + Math.abs(S(t * 2.6)) * 0.9, 0.9] },
+        pCoin: { p: [-1.2, 1.32, 0], r: [0, t * 2, 0] }
       })
     }
   ];
