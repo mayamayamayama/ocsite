@@ -11,12 +11,15 @@
   window.addEventListener('load', () => {
     const css = getComputedStyle(document.documentElement), miss = [];
     [['style.css', '--oc-css-style'], ['design.css', '--oc-css-design'], ['motion.css', '--oc-css-motion']].forEach(([n, k]) => { if (!css.getPropertyValue(k).trim()) miss.push(n); });
-    ['site', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
+    ['site', 'hero-parts', 'hero-scenes', 'hero', 'reel', 'effects'].forEach((n) => { if (!window.OC_LOADED.includes(n)) miss.push(n + '.js'); });
     let dataOK = false;
     try { dataOK = typeof characters === 'object' && !!characters && Object.keys(characters).length > 0; } catch (e) {}
     if (!dataOK) miss.push('editor.js（キャラクターの書き間違いかも。カンマ「,」や「}」を確認）');
     if (!miss.length) return;
-    document.body.classList.add('oc-broken');
+    const heroFiles = ['style.css', 'motion.css', 'hero.js', 'hero-parts.js', 'hero-scenes.js'], reelFiles = ['style.css', 'motion.css', 'reel.js'];
+    const dataBad = miss.some((n) => n.startsWith('editor.js'));
+    if (dataBad || miss.some((n) => heroFiles.includes(n))) document.body.classList.add('oc-no-hero');   // 入場画面だけを引っ込めて、ほかは見られるようにする
+    if (dataBad || miss.some((n) => reelFiles.includes(n))) document.body.classList.add('oc-no-reel');
     const b = document.createElement('div');
     b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#d8ff00;color:#000;font:12px/1.5 system-ui,sans-serif;padding:8px 10px;border-radius:6px';
     b.textContent = '読み込めていない（または古い）ファイル：' + miss.join('、') + '　→ GitHubで置き換えを確認してね';
