@@ -59,7 +59,6 @@ window.OC_HERO_SCENES = function () {
     spark: { type: 'flat', shape: 'spark', w: 0.55, c: 'teal' },
     sun: { type: 'flat', shape: 'sun', w: 0.28, c: 'cream' },
     aster: { type: 'aster', w: 0.7, g: ['cream', 'white', 'pink'] },
-    word: { type: 'text', str: 'キャラクター', c: 'navy' },
     pink: { type: 'flat', shape: 'circle', w: 0.8, sx: 0.72, g: ['#ffd0dc', 'pink', 'blue'], ga: 0.8 },
     glow1: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 }, glow2: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 },
     glow3: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#ffe1a0', alpha: 0.22 }, glow4: { type: 'flat', shape: 'square', sx: 0.75, sy: 1.05, c: '#fff4d6', alpha: 0.3 },
@@ -79,7 +78,13 @@ window.OC_HERO_SCENES = function () {
     pNavy: { p: [-3.1 + 0.2 * S(t * 0.9 + 2), -0.6, 0] }, pDisc2: { p: [-3.9 + 0.2 * S(t * 0.9 + 2), -0.6, 0.03], sa: -t * 1.4 },
     pVerm: { p: [-2.4 + 0.25 * S(t * 0.6 + 3), -1.85, 0] }, pHalf: { p: [-0.6 + 0.25 * S(t * 0.6 + 3), -1.85, 0.02], r: [0, 0, -PI / 2] },
     pDot: { p: [-1.2, 2.6 + 0.15 * S(t * 2), 0] },
-    pFan: { p: [2.25, 0.5, 0], w: 2.4 * (0.88 + 0.12 * S(t * 1.6)), spread: 0.55 + 0.25 * S(t * 1.1) }, pFan2: { p: [2.25, 0.5, 0] }
+    pFan: { p: [2.25, 0.5, 0], w: 2.4 * (0.88 + 0.12 * S(t * 1.6)), spread: 0.55 + 0.25 * S(t * 1.1) }, pFan2: { p: [2.25, 0.5, 0] },
+    // 小物（hero-scenes2.js の一覧にあるもの）
+    pRing: { p: [-2.7, 2.5, 0] }, pRingDot: { p: [-2.7 + 0.7 * Co(t * 1.2), 2.5 + 0.7 * S(t * 1.2), 0.02] },
+    pDots: { p: [-1.5, 1.75 + 0.06 * S(t * 2), 0] }, pHatch: { p: [1.7, -1.25, 0] },
+    pQuart: { p: [3.1, -0.9, 0.01], r: [0, 0, t * 0.6] }, pGrad: { p: [0.75, -2.3 + 0.12 * S(t * 1.3), 0.02] },
+    pBar: { p: [0.4, -0.5, 0.01], sx: 3.2 * (0.75 + 0.25 * S(t * 0.9)) }, pTri: { p: [2.9, 2.85, 0], r: [0, 0, t * 0.8] },
+    pCoin: { p: [2.4, -2.5, 0] }, pCube: { p: [-0.1, -2.75, 0] }
   });
   const shots = [
     { // 1) 平面のポスター（真正面から見ると、ただの平らな絵）
@@ -91,8 +96,11 @@ window.OC_HERO_SCENES = function () {
       name: 'DEPTH', bg: 'cream', sel: 'pOrange',
       cam: (tb) => ({ yaw: 0.75 + 0.12 * S(tb * 0.5), pitch: 0.3, dist: 9, zoom: 0.9, t: [0, -0.2, 0] }),
       act: (t) => {
-        const o = posterFlat(t), z = { pTeal: 0, pOrSmall: 0.7, pOrange: -2.6, pDisc1: -2.2, pNavy: 2, pDisc2: 2.5, pVerm: 3.2, pHalf: 3.6, pDot: -1.2, pFan: -1, pFan2: -1 };
+        const o = posterFlat(t), z = { pTeal: 0, pOrSmall: 0.7, pOrange: -2.6, pDisc1: -2.2, pNavy: 2, pDisc2: 2.5, pVerm: 3.2, pHalf: 3.6, pDot: -1.2, pFan: -1, pFan2: -1,
+          pRing: -1.8, pRingDot: -1.78, pDots: 1.5, pHatch: -0.8, pQuart: 1.2, pGrad: 2.6, pBar: 0.4, pTri: -3, pCoin: 2.2, pCube: 1.0 };
         Object.keys(o).forEach((k) => { o[k].p = [o[k].p[0], o[k].p[1], z[k]]; o[k].r = [0, (k.length % 3 - 1) * 0.25, (o[k].r || [0, 0, 0])[2]]; });
+        if (o.pCoin) o.pCoin.r = [0, t * 1.5, 0];   // 回ると、厚みがあったと分かる
+        if (o.pCube) o.pCube.r = [0.3, t * 0.7, 0.2];
         o.frames = { p: [0, -2.6, 0], r: FLOOR, w: 8, h: 7 };
         o.wave = { p: [1.6, -2.5, 1.2], r: FLOOR };
         o.floorDisc = { p: [-1, -2.55, 0.6], r: FLOOR, w: 1.4 };
@@ -115,7 +123,15 @@ window.OC_HERO_SCENES = function () {
         chip: { p: [2.4 + 0.2 * S(t * 1.2), -0.85, 1.6] },
         spark: { p: [-2.8, 2.1, -1], r: [0, t, 0] },
         burst: { p: [1.8, 2.6, -1.6], r: [0, 0.4, t * 0.3] },
-        word: { p: [1.4, -1.15, 1.9], r: [-PI / 2, 0, -0.5], s: 0.55 },
+        pCube: { p: [-0.6, -0.82, -2.0], r: [0, 0.3, 0] }, cube2: { p: [-0.6, -0.24, -2.0], r: [0, t * 0.9, 0] },
+        pCoin: { p: [-2.3, -0.55, 0.6], r: [0, t * 2, 0] },
+        stk1: { p: [2.2, -1.12, 1.6], r: FLOOR, w: 0.5, d: 0.16 }, stk2: { p: [2.2, -0.96, 1.6], r: FLOOR, w: 0.5, d: 0.16 }, stk3: { p: [2.2, -0.8 + 0.06 * S(t * 2), 1.6], r: FLOOR, w: 0.5, d: 0.16 },
+        ball1: { p: [-1.2 + 1.2 * S(t * 1.1), -0.9, 2.2] },
+        pRing: { p: [1.0, -1.16, 0.4], r: FLOOR, w: 1.5, c: 'navy' }, ring1: { p: [2.6, 1.7, 0.2], r: [0, t * 1.4, 0], w: 0.5, c: 'navy' },
+        pGrad: { p: [2.9, 0.2, 0.9], r: [0, -0.5, 0], sx: 0.25, sy: 1.2 },
+        pQuart: { p: [-2.0, -1.17, -1.4], r: [-PI / 2, 0, t * 0.5], c: 'verm' },
+        pTri: { p: [-2.7, 0.4, 0.9], r: [0, t * 1.6, 0], c: 'navy' },
+        pHatch: { p: [0.4, -1.17, 2.4], r: FLOOR, sx: 0.8, sy: 0.5 },
         glow1: { p: [2.3, 1.0, -2.2] }, glow2: { p: [2.3, 1.0, -1.95] }, glow3: { p: [2.3, 1.0, -1.7] }, glow4: { p: [2.3, 1.0, -1.45] },
         pink: { p: [-0.1, 2.6 + 0.2 * S(t * 1.3), 0.4], r: [0, 0.4 + 0.3 * S(t), 0.3] }
       })
@@ -136,6 +152,17 @@ window.OC_HERO_SCENES = function () {
           aster: { p: [-1.8, -2.2, 1.8], r: [0, 0.3, t] }, sun: { p: [2.6, 0.8, 0.4], r: [0, 0, t] },
           pill: { p: [2.2, 1.8 + 0.15 * S(t * 1.5), 0] }
         };
+        Object.assign(o, {
+          stk1: { p: [2.3, -2.92, 1.8], r: FLOOR, w: 0.55, d: 0.16 }, stk2: { p: [2.3, -2.76, 1.8], r: FLOOR, w: 0.55, d: 0.16 }, stk3: { p: [2.3, -2.6 + 0.08 * Math.abs(S(t * 2)), 1.8], r: FLOOR, w: 0.55, d: 0.16 },
+          pCube: { p: [-1.7, -2.62, -0.4], r: [0, 0.5, 0] }, cube2: { p: [-1.7, -2.03, -0.4], r: [0, t * 0.9, 0] },
+          ball1: { p: [-0.6 + 1.0 * S(t * 1.3), -2.7, 2.4] },
+          ring1: { p: [2.3, 0.4, 0.2], r: [0, t * 1.4, 0], w: 0.45, c: 'cream' },
+          floorDots: { p: [-2.9, -2.98, 1.8], r: FLOOR, c: 'cream' },
+          pGrad: { p: [3.6, -1.3, -1.6], r: [0, -0.3, 0], sx: 0.35, sy: 1.7 },
+          pTri: { p: [-4.4, -1.4, 1.4], r: [0, PI / 2, t], c: 'cream' },
+          burst: { p: [-4.42, 2.0, 1.2], r: [0, PI / 2, t * 0.3], c: 'cream', w: 0.7 },
+          pRing: { p: [-4.42, 0.6, -0.4], r: [0, PI / 2, 0], w: 0.95, c: 'cream' }
+        });
         [1, 2, 3, 4].forEach((k) => { const h = 2 + 1.2 * Math.abs(S(t * 1.8 + k * 1.3)); o['slab' + k] = { p: [0.9 + k * 0.72, -3 + h / 2, -1.2], bh: h }; });
         return o;
       }
