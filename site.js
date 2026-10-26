@@ -259,7 +259,12 @@
     hud.sec.textContent = `FILE ${pad(i + 1)}`;
   }
 
+  // ブラウザの「戻る」で、ブラウザが勝手にスクロール位置を戻さないようにする（ガクッと下へ飛ぶのを防ぐ）
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  let lastCardId = null;   // 一覧から最後に開いたキャラ（戻ったとき、そのカードの位置に戻す）
+
   function openDetail(id) {
+    if ($('#index-screen').classList.contains('active')) lastCardId = id;
     renderDetail(id);
     document.body.classList.add('is-after');   // 一度開いたら、入場画面は代わりの空間に差し替わる
     document.body.classList.add('in-detail');
@@ -274,7 +279,12 @@
     $('#index-screen').classList.add('active');
     document.title = 'OC ARCHIVE';
     hud.sec.textContent = 'INDEX';
-    window.scrollTo(0, 0);
+    // さっき開いたキャラのカードが、画面の真ん中に来るように戻る（幕で隠れているあいだに動かす）
+    const card = lastCardId && document.querySelector(`.card[href="#${CSS.escape(lastCardId)}"]`);
+    if (card) {
+      const r = card.getBoundingClientRect();
+      window.scrollTo(0, Math.max(0, window.scrollY + r.top - (window.innerHeight - r.height) / 2));
+    } else window.scrollTo(0, 0);
   }
 
   // editor.js にある同じ名前の関数を、新しいものに置き換える（戻るボタンなども、これを呼びます）
@@ -286,6 +296,13 @@
   window.showIndex = function (push = true) {
     if (push) history.pushState({ screen: 'index' }, '', window.location.pathname);
     transition(openIndex);
+  };
+
+  // スマホやパソコンの「戻る」「進む」ボタン（editor.js の同じ処理を、こちらに置き換える）
+  window.onpopstate = (e) => {
+    const st = e.state;
+    if (st && st.screen === 'detail' && characters[st.id]) window.showDetail(st.id, false);
+    else window.showIndex(false);
   };
 
   // ---------- 一覧 ----------
