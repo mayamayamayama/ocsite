@@ -1,7 +1,7 @@
 // trans.js — 画面が切り替わるときの演出（文字なし・入場画面と同じ色）
-// 2種類から、毎回ランダムに選びます。
-//   SIGNAL：色の帯が、左右から斜めに飛び込む（入場画面のショット7）
-//   SLIDE ：入場画面の色の板が3枚、少しずつずれて重なりながら通り抜ける
+// 今は COLUMNS だけを使っています。
+//   COLUMNS：6本の色の柱が、下から順に伸びて覆い、上へ抜けていく（最初の幕と同じ動き）
+//   SIGNAL ：色の帯が、左右から斜めに飛び込む（入場画面のショット7）※今は使っていません
 // 元の幕（#curtain）の動きに合わせて上から描いているだけなので、site.js は変えていません。このファイルが無いときは、元の幕が出ます。
 
 (function () {
@@ -13,9 +13,10 @@
   // ===== ここの数字を変えると、見た目が変わります =====
   const COVER = 0.6;     // 画面を覆いきるまでの秒数（0.65より短くしてね。0.65秒で中身が入れ替わるため）
   const REVEAL = 0.9;    // 覆いが開いて、新しい画面が見えるまでの秒数
-  const ONLY = '';       // 'signal' か 'slide' と書くと、その1種類だけになる
-  // SLIDE の色の組み合わせ（左から順に重なって、最後の色が画面を覆う）
-  const SETS = [['verm', 'orange', 'cream'], ['teal', 'navy', 'cream'], ['orange', 'teal', 'navy'], ['cream', 'verm', 'navy'], ['navy', 'teal', 'orange']];
+  const ONLY = 'columns';   // 使う種類。'' にすると COLUMNS と SIGNAL が毎回ランダムに、'signal' にすると SIGNAL だけになる
+  const COLS = 6;        // COLUMNS の柱の本数
+  // COLUMNS の柱の色（毎回ここから選んで並べる。[ ] で囲んだものは、グラデーション）
+  const COLORS = ['teal', 'verm', 'orange', 'navy', 'cream', 'blue', 'peach', '#2b2b2b', ['cyan', 'pink', '#ff9ad5'], ['white', '#1b1b1b'], ['pink', '#ff9ad5', 'blue'], ['#1b1b1b', '#bdbdbd']];
 
   const css = document.createElement('style'); css.textContent = '.curtain i{visibility:hidden!important}';   // 元の幕の色の柱は、見えなくする
   document.head.appendChild(css);
@@ -33,7 +34,6 @@
 
   const cl = (x) => Math.max(0, Math.min(1, x));
   const eIn = (x) => x * x * x, eX = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
-  const eIO = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2);   // ゆっくり出て、速く動いて、ゆっくり止まる
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const fill = (c) => { ctx.fillStyle = col(c); ctx.fillRect(0, 0, W, H); };
 
@@ -66,26 +66,28 @@
     };
   }
 
-  // ---------- 2) SLIDE：色の板が3枚、少しずつずれて重なりながら通り抜ける ----------
-  function slide() {
-    const C = pick(SETS), dir = pick([[0, -1], [0, 1], [-1, 0], [1, 0]]);   // 動く向き（上へ・下へ・左へ・右へ）
-    const L = dir[0] ? W : H;
-    // 板1枚を描く。pos：0で画面ぴったり、1で入ってくる側の外、-1で出ていく側の外
-    function panel(c, pos) {
-      if (pos <= -1 || pos >= 1) return;
-      const x = -dir[0] * pos * L, y = -dir[1] * pos * L, ca = 1.4;
-      ctx.fillStyle = 'rgba(0,225,255,.55)'; ctx.fillRect(x + (dir[0] ? ca : 0), y + (dir[1] ? ca : 0), W, H);   // ふちの色のずれ（入場画面と同じ）
-      ctx.fillStyle = 'rgba(255,40,150,.55)'; ctx.fillRect(x - (dir[0] ? ca : 0), y - (dir[1] ? ca : 0), W, H);
-      ctx.fillStyle = col(c); ctx.fillRect(x, y, W, H);
+  // ---------- 2) COLUMNS：6本の色の柱が、下から順に伸びて覆い、上へ抜けていく ----------
+  const eQ = (x) => (x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2);   // 最初の幕と同じ、ゆっくり→速く→ゆっくり
+  function columns() {
+    const mix = (a) => a.sort(() => Math.random() - 0.5);
+    const grad = mix(COLORS.filter(Array.isArray)).slice(0, 1 + Math.floor(Math.random() * 2));   // グラデーションは1〜2本
+    const list = mix(grad.concat(mix(COLORS.filter((c) => !Array.isArray(c))).slice(0, COLS - grad.length)));
+    const cw = W / COLS;
+    function col1(k, y0, y1) {   // k本目の柱を、y0 から y1 の高さまで塗る
+      if (y1 - y0 < 0.5) return;
+      const c = list[k], x = Math.floor(k * cw), w = Math.ceil((k + 1) * cw) - x;
+      if (Array.isArray(c)) { const g = ctx.createLinearGradient(x, 0, x + w, 0); c.forEach((cc, i) => g.addColorStop(i / (c.length - 1), col(cc))); ctx.fillStyle = g; }
+      else ctx.fillStyle = col(c);
+      ctx.fillRect(x, y0, w, y1 - y0);
     }
     return {
-      cover(p) { C.forEach((c, k) => panel(c, 1 - eIO(cl((p - k * 0.1) / 0.75)))); },
-      reveal(q) { C.forEach((c, k) => panel(c, -eIO(cl((q - (C.length - 1 - k) * 0.12) / 0.66)))); }
+      cover(p) { const s = p * COVER; for (let k = 0; k < COLS; k++) { const e = eQ(cl((s - k * 0.04) / 0.42)); col1(k, H * (1 - e), H); } },   // 下から伸びる
+      reveal(q) { const s = q * REVEAL; for (let k = 0; k < COLS; k++) { const e = eQ(cl((s - k * 0.055) / 0.55)); col1(k, 0, H * (1 - e)); } }   // 下の端が上へ抜ける
     };
   }
 
   // ---------- 動かす ----------
-  const FX = { signal, slide };
+  const FX = { signal, columns };
   let phase = '', t0 = 0, t1 = 0, fx = null, lastK = '', raf = 0;
   function start() {
     W = window.innerWidth; H = window.innerHeight; dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(3.5e6 / (W * H))); G.dpr = dpr;
