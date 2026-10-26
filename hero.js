@@ -1,6 +1,7 @@
 // hero.js — 入場画面のメインビジュアル（3Dエンジンの本体）
-// 3Dの空間に置いた物体を、動くカメラで撮った、1本の長いループです。
-// 平らなポスターに見えていたものが、カメラが回り込むと立体だったと分かる…という、2Dと3Dの入れ替えをくり返します。
+// 3Dの空間に置いた物体のまわりを、カメラがいつもぐるぐる回り続ける、1本の長いループです。
+// 真上から見ると平らなポスター、横から見ると立体…という、2Dと3Dの入れ替えをくり返します。
+// いつもカメラの方を向く平らな板（bill）と、本物の立体が、同じ空間に混ざっています。
 // 物体の一覧とショット 1〜4 は hero-scenes.js、ショット 5〜8 は hero-scenes2.js、3Dの部品は hero-parts.js、飾りは hero-hud.js にあります。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
@@ -19,7 +20,8 @@
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ===== ここの数字を変えると、見た目が変わります =====
-  const SHOT_SEC = 2.0;       // 1つのショットの長さ（秒）
+  const SHOT_SEC = 5.2;       // 1つのショットの長さ（秒）
+  const ORBIT_SEC = 22;       // カメラがまわりを1周する秒数（小さくすると速く回る。マイナスにすると逆回り）
   const MOVE_SEC = 1.5;       // 次のショットへ、物体が動くのにかける時間（秒）
   const TILT = 1;             // マウスや傾きで、カメラが回り込む強さ（0で動かない）
   const CHROMA = 1.3;         // 色収差（ふちの水色と桃色のずれ）の幅。0で無し
@@ -110,17 +112,18 @@
 
   // ---------- 2つの状態のあいだを、なめらかにつなぐ ----------
   const ANG = { sa: 1, ga: 1, a0: 1 };
-  function full(id, st) { return st ? Object.assign({ p: [0, 0, 0], r: [0, 0, 0], s: 1, w: 1, sx: 1, sy: 1, ga: 0, sa: 0 }, ACT[id], st) : null; }
+  function full(id, st) { return st ? Object.assign({ p: [0, 0, 0], r: [0, 0, 0], s: 1, w: 1, sx: 1, sy: 1, ga: 0, sa: 0, bill: 0, scr: [0, 0, 0] }, ACT[id], st) : null; }
+  const numArr = (a, b) => Array.isArray(a) && Array.isArray(b) && a.length === b.length && typeof b[0] === 'number' && typeof a[0] === 'number';
   function blend(A, B, p, pc) {
     const o = {};
     for (const k in B) {
       const a = A[k], b = B[k];
       if (typeof b === 'number' && typeof a === 'number') o[k] = ANG[k] ? a + wrapD(b - a) * p : lerp(a, b, p);
-      else if (k === 'r' && a) o[k] = [a[0] + wrapD(b[0] - a[0]) * p, a[1] + wrapD(b[1] - a[1]) * p, a[2] + wrapD(b[2] - a[2]) * p];
-      else if (k === 'p' && a) o[k] = [lerp(a[0], b[0], p), lerp(a[1], b[1], p), lerp(a[2], b[2], p)];
+      else if (k === 'r' && numArr(a, b)) o[k] = [a[0] + wrapD(b[0] - a[0]) * p, a[1] + wrapD(b[1] - a[1]) * p, a[2] + wrapD(b[2] - a[2]) * p];
+      else if (numArr(a, b)) o[k] = a.map((v, i) => lerp(v, b[i], p));   // 位置など、数字の並び
       else o[k] = pc < 0.5 && a !== undefined ? a : b;
     }
-    for (const k in A) if (!(k in o)) o[k] = A[k];
+    for (const k in A) if (!(k in o)) o[k] = pc < 0.5 ? A[k] : undefined;   // 前のショットだけにある設定は、途中で消す
     return o;
   }
   function camAt(shot, tb, T0) { return Object.assign({ yaw: 0, pitch: 0, dist: 10, zoom: 1, t: [0, 0, 0], roll: 0 }, shot.cam(tb, T0)); }
@@ -140,25 +143,26 @@
 
   // ---------- 1コマを描く ----------
   let start = performance.now(), lastGrain = 0, gx = 0, gy = 0, inkNow = '', strokeNow = '';
-  // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子とふちの暗さを省く → 2：解像度を下げる）
+  // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子・ふちの暗さ・色のずれを省く → 2：解像度を下げる）
   let Q = 0, autoQ = true, dtAvg = 16.7, lastNow = 0, runT = 0;
   window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS };   // （確認用）
   function frame(now) {
     if (!W) return;
-    const T0 = REDUCE ? SHOT_SEC * 1 + 3 : (now - start) / 1000;
+    const T0 = REDUCE ? SHOT_SEC * 1 + 3 : Math.max(0, (now - start) / 1000);
     updateTilt(now, T0);
     const loopT = ((T0 % LOOP) + LOOP) % LOOP, k = Math.min(NS - 1, Math.floor(loopT / SHOT_SEC)), tb = loopT - k * SHOT_SEC;
     const cur = SH[k], prv = SH[(k - 1 + NS) % NS], wipe = prv.bg !== cur.bg && tb < 0.9;
     const bgShow = wipe && tb < 0.4 ? prv.bg : cur.bg, ink = INK[bgShow] || PAL.navy;   // 色が広がりきる少し前に、文字の色を変える
 
-    // カメラ（前のショットのカメラから、今のショットのカメラへ）
-    const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = eIO(clamp01(tb / 1.8));
-    const cam = { yaw: ca.yaw + wrapD(cb.yaw - ca.yaw) * qc, pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)), zoom: lerp(ca.zoom, cb.zoom, qc), t: ca.t.map((v, n) => lerp(v, cb.t[n], qc)), roll: lerp(ca.roll, cb.roll, qc) };
-    cam.yaw += G.tx * 0.16; cam.pitch += G.ty * 0.1;
+    // カメラ：横の向き（yaw）は、いつも同じ速さで回り続ける。高さ・距離・見る場所は、ショットごとに、なめらかに変わる
+    const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = eIO(clamp01(tb / 2.2));
+    const cam = { yaw: (T0 * TAU) / ORBIT_SEC + lerp(ca.yaw, cb.yaw, qc), pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)) * (1 + 0.05 * Math.sin(T0 * 0.37)),
+      zoom: lerp(ca.zoom, cb.zoom, qc), t: ca.t.map((v, n) => lerp(v, cb.t[n], qc)), roll: lerp(ca.roll, cb.roll, qc) };
+    cam.yaw += G.tx * 0.3; cam.pitch = Math.max(-0.25, Math.min(1.45, cam.pitch + G.ty * 0.1));
     setCam(cam);
 
     // 背景（色が変わるときは、真ん中から丸く広がる）
-    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; G.CA = Q >= 1 ? 0 : CHROMA;   // 重い端末では、色のずれも省く
     if (wipe) {
       ctx.fillStyle = col(prv.bg); ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = col(cur.bg); ctx.beginPath(); ctx.arc(CX, CY, eIO(tb / 0.9) * Math.hypot(W, H), 0, TAU); ctx.fill();
@@ -182,11 +186,14 @@
         for (let i = 0; i < T.N; i++) r[i] = ra[i] + (rb[i] - ra[i]) * p;
         o.shape = r;
       }
+      if (o.scr[0] || o.scr[1] || o.scr[2]) { const d = o.scr; o.p = [0, 1, 2].map((i) => o.p[i] + rt[i] * d[0] + up[i] * d[1] - fw[i] * d[2]); }   // カメラから見た向きで、ずらす
+      if (o.bill > 0) { const b = Math.min(1, o.bill), rb = [-cam.pitch, cam.yaw]; o.r = [o.r[0] + wrapD(rb[0] - o.r[0]) * b, o.r[1] + wrapD(rb[1] - o.r[1]) * b, o.r[2]]; }   // カメラの方を向く
       o.id = id;
       items.push({ z: G.proj(o.p)[2] - (o.z || 0), o });
     });
-    if (BIG_NUM) {   // 奥に浮かぶ、ショット番号（少しだけカメラの方を向く）
-      const bn = { type: 'text', str: pad(k + 1), p: [1.4, 0.4, -5.5], r: [0, wrapD(cam.yaw) * 0.6, 0], s: 7, c: ink, alpha: 0.4, id: 'num' };
+    if (BIG_NUM) {   // ずっと奥に浮かぶ、ショット番号（いつもカメラの方を向く）
+      const bp = [0, 1, 2].map((i) => cam.t[i] + fw[i] * 7 + rt[i] * 1.6 + up[i] * 0.6);
+      const bn = { type: 'text', str: pad(k + 1), p: bp, r: [-cam.pitch, cam.yaw, 0], s: 7, c: ink, alpha: 0.35, id: 'num' };
       items.push({ z: G.proj(bn.p)[2] + 100, o: bn });
     }
     if (HUD && GRID) HUD.grid(ink, cam.dist);
