@@ -20,7 +20,23 @@ const characters = {
     image: "deseo.png",
     description: "Age:21/Height:196\nBirthday:12/28\nHobbys:散歩,服屋巡り\nInformation:安定出力難易度高めです。ケモノモードよりもアニメモードのほうが私の場合安定して出力できました。\nリアルな動物のように描写される場合、ネガティブプロンプトに「realistic」等を入力してください。",
     prompt: "boy, 1 furry man,handsome,black panther furry,sunglasses,baseball cap,watch,dog tags,grey Cargo jogger pants, very very muscular, cool,very oversized worn-out red Basketball jersey, jacket ::,tie a jacket around your waist,layered distressed streetwear, multiple leather belts, golden chains, fingerless black gloves, metallic accessories,dark Y2K punk aesthetic,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure,A face that looks, if only slightly, as if the person is in a bad mood,side eyes,calm,An annoyed face,Baring its fangs and acting in a threatening manner,A single scratch on the right eye,golden eyes,Rolling up one's sleeves,Smartphone,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A gold ring ornament on the tail,Brown work boots, not smile"
-  }
+  },
+  "Arceo": {
+    name: "Arceo",
+    tag: "MALE/NON-HUMAN",
+    image: "arceo.png",
+    hoverShow: "profile",
+    description: "Age:24/Height:200\nBirthday:08/07\nHobbys:読書/運動\nInformation:出力難易度激高だと思います。\n複雑なプロンプトなので適宜改変お願いします。\n私の場合出力モードはケモノです。",
+    prompt: "((boy, solo, anthropomorphic doberman cyborg:1.5)), highly muscular build, heavily armored plating, dark grey and matte black primary armor, vibrant yellow secondary color accents and glowing panels, intricate mechanical joint structures. (Anubis-style full face mask head:1.4), pointy ears with internal gold accents, black armor plating with detailed panel lines, (smooth solid face plate without eye slits:1.6), (no eyes:1.5), intricate mechanical components within the mask, (glowing yellow triangular emblem on forehead:1.5). Massively muscled upper body armor with heavily defined pectoral and abdominal plating, Heavily armored arms, mechanical joints, articulated gauntlets,Wrist armor cuffs with detailed mechanical elements. (Primary armor color is gunmetal grey and matte black:1.3), (secondary accent color is vibrant yellow:1.4), glowing yellow vents, detailed technical panels,Intricate and heavy detailed rendering,1.4::digitigrade,strong legs,::"
+  },
+  "Dylan": {
+    name: "Dylan",
+    tag: "MALE/NON-HUMAN",
+    image: "dylan",
+    hoverShow: "profile",
+    description: "Age:27/Height:211\nBirthday:07/20\nHobbys:水泳/筋トレ\nInformation:Hな絵を生成するときは「A killer whale-like pink penis emerges from a vertically split genital opening」を追加してください。",
+    prompt: "boy, 1 furry man,handsome,orca furry,green Workwear,Beige tank top,work clothes,They have their work clothes wrapped around their waist,dog tags,very very muscular, cool,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome man,High levels of male hormones,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,calm,Rolling up one's sleeves,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A silver ring ornament on the tail,Brown work boots,2::eyeless,"
+  },
 };
 
 // 一覧カードの描画
