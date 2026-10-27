@@ -1,6 +1,6 @@
 // hero-elder.js — 入場画面の別バージョン「未知の古代（ELDER）」：道具と、どのショットにも出る飾り
 // いつものように、カメラが3Dの空間をぐるぐる回ります。暗くて、巨大で、得体の知れない古代の世界です。
-// ショットは hero-elder2.js〜hero-elder6.js にあります（人の形や円盤は使わず、図形と光だけで描きます）。
+// ショットは hero-elder2.js〜hero-elder7.js にあります（人の形や円盤は使わず、図形と光だけで描きます）。
 (window.OC_LOADED = window.OC_LOADED || []).push('hero-elder');
 
 if (typeof window.OC_HERO_PARTS4 === 'function') (window.OC_HERO_VERSIONS = window.OC_HERO_VERSIONS || {}).elder = function (cfg) {
@@ -97,5 +97,5 @@ if (typeof window.OC_HERO_PARTS4 === 'function') (window.OC_HERO_VERSIONS = wind
     }
   };
   const more = (f) => (typeof f === 'function' ? f(E) : []);
-  return { shots: [].concat(more(window.OC_ELDER2), more(window.OC_ELDER3), more(window.OC_ELDER4), more(window.OC_ELDER5), more(window.OC_ELDER6)), actors: A, opts };
+  return { shots: [].concat(more(window.OC_ELDER2), more(window.OC_ELDER3), more(window.OC_ELDER4), more(window.OC_ELDER5), more(window.OC_ELDER6), more(window.OC_ELDER7)), actors: A, opts };
 };
