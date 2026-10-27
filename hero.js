@@ -2,11 +2,11 @@
 // 3Dの空間に置いた物体のまわりを、カメラがいつもぐるぐる回り続ける、1本の長いループです。
 // 真上から見ると平らなポスター、横から見ると立体…という、2Dと3Dの入れ替えをくり返します。
 // いつもカメラの方を向く平らな板（bill）と、本物の立体が、同じ空間に混ざっています。
-// バージョンは7つ。入場するたびに、前回と違うものがランダムで選ばれます。
+// バージョンはいくつかあり、入場するたびに、前回と違うものがランダムで選ばれます。
 //   いつもの：hero-scenes.js と 2　抽象：hero-abstract.js と 2　山：hero-mountain.js と 2
-//   空：hero-sky.js と 2　ゲーム：hero-game.js と 2　創作：hero-create.js と 2　インダストリアル：hero-industrial.js と 2
-//   （アドレスの最後に ?hero=sky などをつけると、そのバージョンを選べます。名前：main / abstract / mountain / sky / game / create / industrial）
-// 3Dの部品は hero-parts.js と hero-parts2.js、飾りは hero-hud.js にあります。
+//   ゲーム：hero-game.js と 2　物理：hero-physics.js と 2・3　古代：hero-ancient.js と 2・3
+//   （アドレスの最後に ?hero=ancient などをつけると、そのバージョンを選べます。名前：main / abstract / mountain / game / physics / ancient）
+// 3Dの部品は hero-parts.js〜hero-parts4.js、飾りは hero-hud.js にあります。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
 (function () {
@@ -87,13 +87,14 @@
   const T = window.OC_HERO_PARTS(G);
   const T2 = typeof window.OC_HERO_PARTS2 === 'function' ? window.OC_HERO_PARTS2(G, T) : null;
   const T3 = typeof window.OC_HERO_PARTS3 === 'function' ? window.OC_HERO_PARTS3(G, T) : null;
+  const T4 = typeof window.OC_HERO_PARTS4 === 'function' ? window.OC_HERO_PARTS4(G, T) : null;
   const VERS = [{ id: 'main', make: () => ({ shots: [].concat(window.OC_HERO_SCENES(), typeof window.OC_HERO_SCENES2 === 'function' ? window.OC_HERO_SCENES2() : []), actors: window.OC_HERO_ACTORS || {} }) }];
   if (T2) Object.keys(window.OC_HERO_VERSIONS || {}).forEach((id) => VERS.push({ id, make: window.OC_HERO_VERSIONS[id] }));
   let V = VERS.find((v) => v.id === (location.search.match(/[?&]hero=(\w+)/) || [])[1]), last = '';
   try { last = localStorage.getItem('oc-hero-ver') || ''; } catch (e) {}
   if (!V) { const pool = VERS.length > 1 ? VERS.filter((v) => v.id !== last) : VERS; V = pool[Math.floor(Math.random() * pool.length)]; }   // 前回と違うものを、ランダムに
   try { localStorage.setItem('oc-hero-ver', V.id); } catch (e) {}
-  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
+  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC, P4: !!T4 }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
   const SH = made.shots, ACT = made.actors;
   const shp = (v) => (typeof v === 'string' ? T.SHAPES[v] : v && v.length === T.N ? v : null) || T.SHAPES.circle;   // 形の名前、または形そのもの
   const NS = SH.length, LOOP = NS * SHOT_SEC;
@@ -155,13 +156,14 @@
     else if (o.type === 'strip') T.strip(o, T0);
     else if (T2 && T2[o.type]) T2[o.type](o, T0);   // 追加の部品（hero-parts2.js）
     else if (T3 && T3[o.type]) T3[o.type](o, T0);   // さらに追加の部品（hero-parts3.js）
+    else if (T4 && T4[o.type]) T4[o.type](o, T0);   // 古代の部品（hero-parts4.js）
   }
 
   // ---------- 1コマを描く ----------
   let start = performance.now(), lastGrain = 0, gx = 0, gy = 0, inkNow = '', strokeNow = '';
   // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子・ふちの暗さ・色のずれを省く → 2：解像度を下げる）
   let Q = 0, autoQ = true, dtAvg = 16.7, lastNow = 0, runT = 0;
-  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id) };   // （確認用）
+  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id), p4: !!T4 };   // （確認用）
   function frame(now) {
     if (!W) return;
     const T0 = REDUCE ? SHOT_SEC * 1 + 3 : Math.max(0, (now - start) / 1000);
@@ -186,7 +188,7 @@
     } else { ctx.fillStyle = col(cur.bg); ctx.fillRect(0, 0, W, H); }
 
     // 物体（前のショットの状態から、今のショットの状態へ）
-    const SA = prv.act(T0, tb + SHOT_SEC) || {}, SB = cur.act(T0, tb) || {}, items = [];
+    const SA = tb < MOVE_SEC + 0.75 ? prv.act(T0, tb + SHOT_SEC) || {} : {}, SB = cur.act(T0, tb) || {}, items = [];   // 前のショットは、動き終わったら計算しない（軽くする）
     let n = 0;
     new Set(Object.keys(SA).concat(Object.keys(SB))).forEach((id) => {
       if (!ACT[id]) return;
@@ -220,7 +222,7 @@
     if (HUD && GIZMO && !REDUCE) {
       if (cam.dist < 20) HUD.gizmo(ink);
       if (CALLOUT && tb > 1.9) {
-        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && !['lines', 'text', 'path', 'contour', 'terrain'].includes(ACT[id].type) && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
+        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && !['lines', 'text', 'path', 'contour', 'terrain', 'cubes', 'tiles', 'glow', 'beam', 'ribbon', 'dust', 'shadow'].includes(ACT[id].type) && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
         [ks[1], ks[ks.length - 2]].forEach((id, n) => { const it = id && items.find((q) => q.o.id === id); if (it) HUD.callout(it.o, ink, it.o.p[0] > cam.t[0] - 0.3 ? 1 : -1, fade); });
       }
       if (MINIMAP) HUD.minimap(items, ink, cam);
