@@ -19,11 +19,14 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
     ctx.fillStyle = ink; ctx.fillRect(o[0] - 2, o[1] - 2, 4, 4);
   }
   function selBox(o, id, ink, bgc) {
-    let e;
+    let e, lo, hi;
     if (o.type === 'flat') e = [o.w * o.sx, o.w * o.sy, 0.05]; else if (o.type === 'coin') e = [o.w, o.w, o.d / 2];
-    else if (o.type === 'box') e = [o.bw / 2, o.bh / 2, o.bd / 2]; else if (o.type === 'strip') e = [o.w / 2, o.h / 2, 0.05]; else return;
+    else if (o.type === 'box') e = [o.bw / 2, o.bh / 2, o.bd / 2]; else if (o.type === 'strip') e = [o.w / 2, o.h / 2, 0.05];
+    else if (o.type === 'solid' && o.V && o.V.length > 1) { lo = [0, 1, 2].map((k) => Math.min(...o.V.map((v) => v[k]))); hi = [0, 1, 2].map((k) => Math.max(...o.V.map((v) => v[k]))); }   // 多面体：頂点の広がりから
+    else return;
+    if (e) { lo = e.map((v) => -v); hi = e; }
     const B = T.basis(o.r), P = [];
-    for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) P.push(G.proj(T.W3(o, B, x * e[0] * 1.06, y * e[1] * 1.06, z * e[2] * 1.06)));
+    for (const x of [0, 1]) for (const y of [0, 1]) for (const z of [0, 1]) { const q = [x, y, z].map((s, k) => { const c = (lo[k] + hi[k]) / 2, h = ((hi[k] - lo[k]) / 2) * 1.06; return c + (s ? h : -h); }); P.push(G.proj(T.W3(o, B, q[0], q[1], q[2]))); }
     if (P.some((q) => q[2] < 0.3)) return;
     ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.globalAlpha = 0.85; ctx.beginPath();
     [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(([a, b]) => { ctx.moveTo(P[a][0], P[a][1]); ctx.lineTo(P[b][0], P[b][1]); });
@@ -121,36 +124,46 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 };
 
 // ===== 読み込みチェック =====
-// 入場画面のファイルが足りないときは、画面の下に、何が足りないかを表示します。
+// 入場画面のファイルが足りない・古い・入れ替わっているときは、画面の下に、どのファイルをどうすればいいかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R34';   // このファイル一式の番号
-  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-hud', 'hero'];
+  const RELEASE = 'R40';   // このファイル一式の番号
+  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-elder', 'hero-elder2', 'hero-elder3', 'hero-elder4', 'hero-elder5', 'hero-elder6', 'hero-elder7', 'hero-hud', 'hero'];
+  const SIZE = { 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 13705, 'hero': 19122 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
+  const nameOf = (s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '');
+  const look = (src, mode) => fetch(src, { cache: mode }).then((r) => (r.ok ? r.text().then((tx) => ({ len: tx.length, who: (tx.match(/push\('([\w-]+)'\)/) || [])[1] })) : { len: -r.status })).catch(() => null);
   function run() {
-    const loaded = window.OC_LOADED || [], tags = [...document.scripts].map((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '')).filter(Boolean);
+    const loaded = window.OC_LOADED || [], els = {}; [...document.scripts].forEach((s) => { const n = nameOf(s); if (n) els[n] = s; });
     const H = window.OC_HERO, msg = [], vers = (H && H.vers) || [];
-    const notTag = NEED.filter((n) => !tags.includes(n)), notLoaded = NEED.filter((n) => tags.includes(n) && !loaded.includes(n));
+    const notTag = NEED.filter((n) => !els[n]), notLoaded = NEED.filter((n) => els[n] && !loaded.includes(n));
     if (notTag.length) msg.push('index.html が古いみたい（新しい index.html を入れてね）');
     if (notLoaded.length) msg.push('読み込めていないファイル：' + notLoaded.map((n) => n + '.js').join('、'));
-    if (H && (!H.vers || !('p4' in H))) msg.push('hero.js が古いみたい（新しい hero.js を入れてね）');
+    if (H && (!H.vers || !('p4' in H) || !H.hooks)) msg.push('hero.js が古いみたい（新しい hero.js を入れてね）');
     if (window.OC_HERO_ERR) msg.push('バージョンを作るときにエラー：' + window.OC_HERO_ERR);
     const full = /[?&]check/.test(location.search);
-    if (!msg.length && !full) return;
-    const box = document.createElement('div');
-    box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:6px;white-space:pre-wrap;max-height:60vh;overflow:auto';
-    const lines = ['入場画面チェック（' + RELEASE + '）'].concat(msg.length ? msg : ['問題なし！']);
-    if (full) lines.push('', '使えるバージョン：' + (vers.join(' / ') || '?'), '今のバージョン：' + ((H && H.version) || '?'), '', NEED.map((n) => (loaded.includes(n) ? '✓ ' : '✗ ') + n + '.js').join('\n'));
-    box.textContent = lines.join('\n');
-    box.addEventListener('click', () => box.remove());
-    document.body.appendChild(box);
-    // 読み込めなかったファイルが、GitHub にあるのか・無いのかを、確かめて書き足す
-    notLoaded.forEach((n) => {
-      const el = [...document.scripts].find((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '') === n); if (!el || !window.fetch) return;
-      fetch(el.src, { cache: 'no-store' }).then((r) => (r.ok ? r.text().then((tx) => { const m = tx.match(/push\('([\w-]+)'\)/), who = m && m[1];
-          return who && who !== n ? '→ ' + n + '.js の中身が、' + who + '.js になっている！ 正しい ' + n + '.js をアップロードしてね'
-            : '→ ' + n + '.js は GitHub にあるけど、途中で切れているか、こわれている（' + (tx.length / 1024).toFixed(1) + 'KB）。もう一度アップロードしてね'; })
-        : '→ ' + n + '.js が GitHub に見つからない（' + r.status + '）。名前がちょうど「' + n + '.js」か確かめて、アップロードしてね'))
-        .catch(() => '→ ' + n + '.js を確かめられませんでした').then((t) => { box.textContent += '\n' + t; });
+    let box = null;
+    const show = (t) => {
+      if (!box) { box = document.createElement('div'); box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:6px;white-space:pre-wrap;max-height:60vh;overflow:auto';
+        box.textContent = '入場画面チェック（' + RELEASE + '）'; box.addEventListener('click', () => box.remove()); document.body.appendChild(box); }
+      box.textContent += '\n' + t;
+    };
+    if (msg.length) show(msg.join('\n'));
+    if (full) show((msg.length ? '' : '問題なし！\n') + '\n使えるバージョン：' + (vers.join(' / ') || '?') + '\n今のバージョン：' + ((H && H.version) || '?') + '\n\n' + NEED.map((n) => (loaded.includes(n) ? '✓ ' : '✗ ') + n + '.js').join('\n'));
+    // ファイルの中身を確かめる（まず、今動いているもの。おかしければ、GitHub にあるものも）
+    if (!window.fetch || location.protocol === 'file:') return;
+    Promise.all(NEED.map((n) => (els[n] ? look(els[n].src, 'default') : Promise.resolve(null)))).then((got) => {
+      const bad = NEED.filter((n, i) => got[i] && (got[i].len !== SIZE[n] || got[i].who !== n));
+      if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
+      Promise.all(bad.map((n) => look(els[n].src, 'no-store'))).then((srv) => {
+        const kb = (v) => (v / 1024).toFixed(1) + 'KB';
+        show('\nファイルの中身のチェック：\n' + bad.map((n, i) => { const q = srv[i], f = '・' + n + '.js：';
+          if (!q) return f + '確かめられませんでした';
+          if (q.len < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '.js」か確かめて、アップロードしてね';
+          if (q.who && q.who !== n) return f + '中身が ' + q.who + '.js になっている！ 正しい ' + n + '.js をアップロードしてね';
+          if (q.len !== SIZE[n]) return f + '中身が古いか、途中で切れている（' + kb(q.len) + '、正しくは ' + kb(SIZE[n]) + '）。もう一度アップロードしてね';
+          return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね';
+        }).join('\n'));
+      });
     });
   }
   if (document.readyState === 'complete') setTimeout(run, 300); else window.addEventListener('load', () => setTimeout(run, 300));
