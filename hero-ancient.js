@@ -1,4 +1,5 @@
-// hero-ancient.js — 入場画面の別バージョン「古代」：物体の一覧・道具と、ショット 1〜3（4〜6 は hero-ancient2.js、7〜8 は hero-ancient3.js）
+// hero-ancient.js — 入場画面の別バージョン「古代」：物体の一覧・道具と、ショット 1（2〜3 は hero-ancient2.js、4〜6 は hero-ancient3.js、7〜8 は hero-ancient4.js）
+// ※ スマホで保存すると、とても長いファイルは途中で切れてしまうので、4つに分けています。
 // ピラミッドの建設・アンティキティラの歯車・フーリエ級数で描くホルスの目・迷路を作って解く・ストーンヘンジの影・
 // モザイク・プラトンの立体・アルファベット3000年の旅。新しい部品（hero-parts4.js）をたくさん使います。
 (window.OC_LOADED = window.OC_LOADED || []).push('hero-ancient');
@@ -79,42 +80,6 @@ if (typeof window.OC_HERO_PARTS4 === 'function') (window.OC_HERO_VERSIONS = wind
   const LV0 = range(NL).map((L) => BLK.find((k) => k.L === L).tl);
   const vort = (k, i, tt) => { const a = k.a0 + tt * 0.9; return [Co(a) * k.vr, k.vh + 0.12 * S(tt * 2 + i), S(a) * k.vr]; };
 
-  // ===== 2) アンティキティラの歯車：歯の数の比で、正しくかみ合って回る =====
-  const GM = 0.0128, PR = (n) => (GM * n) / 2;
-  const GE = [{ N: 223, at: [0, 0], L: 0, c: '#ffb24d', c2: '#c96a00', hole: 0.86 }, { N: 64, mesh: 0, a: 0.62, L: 0, c: 'cream', c2: '#d9b9a6' }, { N: 38, co: 1, L: 1, c: 'verm', c2: '#b83a12' },
-    { N: 48, mesh: 2, a: 2.05, L: 1, c: GOLD, c2: '#c99a2e' }, { N: 24, co: 0, L: 1, c: 'navy', c2: '#0b1026' }, { N: 127, mesh: 4, a: -2.35, L: 1, c: '#3fc6c2', c2: '#0d7d7a', hole: 0.3 },
-    { N: 32, co: 5, L: 2, c: 'cream', c2: '#d9b9a6' }, { N: 50, mesh: 6, a: 0.9, L: 2, c: 'verm', c2: '#b83a12' }, { N: 53, mesh: 0, a: -0.75, L: 0, c: 'navy', c2: '#0b1026' },
-    { N: 27, co: 8, L: 1, c: GOLD, c2: '#c99a2e' }, { N: 60, mesh: 9, a: -1.6, L: 1, c: 'cream', c2: '#d9b9a6' }, { N: 57, mesh: 0, a: 2.5, L: 0, c: 'blue', c2: '#1d1dc0' }];
-  GE.forEach((g) => { g.p = PR(g.N); g.R = g.p + GM; g.dp = (2.2 * GM) / g.R; g.h = TAU / g.N;
-    if (g.mesh !== undefined) { const q = GE[g.mesh], d = q.p + g.p; g.at = [q.at[0] + Co(g.a) * d, q.at[1] + S(g.a) * d]; } else if (g.co !== undefined) g.at = GE[g.co].at.slice(); });
-  const gearAng = (th0) => { const th = []; GE.forEach((g, i) => { if (i === 0) th.push(th0); else if (g.co !== undefined) th.push(th[g.co] * 1 + 0.3); else { const q = GE[g.mesh]; th.push(g.a + PI + (g.a - th[g.mesh]) * (q.N / g.N) - 1.32 * g.h); } }); return th; };
-
-  // ===== 3) フーリエ級数：ホルスの目を1本の線にして、64個の回る円で描く =====
-  const EYE = (() => {
-    const bez = (a, b, c, d, n) => range(n + 1).map((i) => { const u = i / n, v = 1 - u; return [v * v * v * a[0] + 3 * v * v * u * b[0] + 3 * v * u * u * c[0] + u * u * u * d[0], v * v * v * a[1] + 3 * v * v * u * b[1] + 3 * v * u * u * c[1] + u * u * u * d[1]]; });
-    const seg = (a, b, n = 6) => range(n + 1).map((i) => [a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n]), rev = (p) => p.slice().reverse();
-    const LC = [-0.95, 0.02], RC = [0.95, 0.06], upper = bez(LC, [-0.55, 0.42], [0.45, 0.46], RC, 30), low = bez(RC, [0.55, -0.26], [-0.45, -0.26], LC, 30), iS = 9, iT = 19;
-    const sp = [low[iS], [0.36, -0.4], [0.48, -0.62], [0.66, -0.78], [0.86, -0.8], [1.0, -0.68], [0.98, -0.53], [0.86, -0.49], [0.79, -0.58], [0.85, -0.65]], te = [low[iT], [-0.27, -0.45], [-0.3, -0.7], [-0.33, -0.86], [-0.24, -0.92], [-0.2, -0.82]];
-    const pupil = range(25).map((i) => { const a = PI / 2 - (i / 24) * TAU; return [0.02 + 0.2 * Co(a), 0.08 + 0.2 * S(a)]; }), top = upper[15];
-    const brow = bez([-1.0, 0.56], [-0.4, 0.86], [0.6, 0.84], [1.3, 0.66], 26), brow2 = bez([1.3, 0.58], [0.6, 0.72], [-0.4, 0.74], [-1.0, 0.47], 26);
-    const s1 = bez(sp[0], sp[1], sp[2], sp[3], 8), s2 = seg(sp[3], sp[4], 3), s3b = bez(sp[4], sp[5], sp[6], sp[7], 8), s4 = seg(sp[7], sp[8], 2), s5 = seg(sp[8], sp[9], 2);
-    const t1 = bez(te[0], te[1], te[2], te[3], 8), t2 = seg(te[3], te[4], 2), t3 = seg(te[4], te[5], 2);
-    const T = [].concat(upper.slice(0, 16), seg(top, [0.02, 0.28], 3), pupil, seg([0.02, 0.28], top, 3), upper.slice(15), seg(RC, [1.4, 0.03], 8), seg([1.4, 0.03], RC, 8),
-      low.slice(0, iS + 1), s1, s2, s3b, s4, s5, rev(s5), rev(s4), rev(s3b), rev(s2), rev(s1), low.slice(iS, iT + 1), t1, t2, t3, rev(t3), rev(t2), rev(t1), low.slice(iT),
-      seg(LC, [-1.0, 0.56], 5), brow, seg([1.3, 0.66], [1.3, 0.58], 1), brow2, seg([-1.0, 0.47], LC, 5));
-    const Ls = [0]; for (let i = 1; i < T.length; i++) Ls.push(Ls[i - 1] + Math.hypot(T[i][0] - T[i - 1][0], T[i][1] - T[i - 1][1]));
-    const tot = Ls[Ls.length - 1] + Math.hypot(T[0][0] - T[T.length - 1][0], T[0][1] - T[T.length - 1][1]), N = 256, R = []; let j = 0;
-    for (let k = 0; k < N; k++) { const s = (k / N) * tot; while (j < T.length - 2 && Ls[j + 1] < s) j++; const a = T[j], b = T[j + 1], f = Math.min(1, (s - Ls[j]) / Math.max(1e-9, Ls[j + 1] - Ls[j])); R.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]); }
-    const C = []; for (let k = -N / 2; k < N / 2; k++) { let re = 0, im = 0; R.forEach((p, n) => { const a = (-TAU * k * n) / N, c = Co(a), s = S(a); re += p[0] * c - p[1] * s; im += p[0] * s + p[1] * c; }); C.push([k, re / N, im / N, Math.hypot(re / N, im / N)]); }
-    C.sort((a, b) => b[3] - a[3]);
-    const use = C.slice(0, 64);
-    const at = (u, upto = 64) => { let x = 0, y = 0; for (let i = 0; i < upto; i++) { const [k, re, im] = use[i], a = TAU * k * u; x += re * Co(a) - im * S(a); y += re * S(a) + im * Co(a); } return [x, y]; };
-    const chain = (u) => { const pts = []; let x = 0, y = 0; for (let i = 0; i < 64; i++) { pts.push([x, y]); const [k, re, im] = use[i], a = TAU * k * u; x += re * Co(a) - im * S(a); y += re * S(a) + im * Co(a); } pts.push([x, y]); return pts; };
-    const curve = range(601).map((i) => at(i / 600));
-    return { use, at, chain, curve };
-  })();
-  Object.assign(X, { EYE });
-
   const shots = [
     { // 1) ピラミッド：空の渦をまわる石が、1つずつ飛んできて段を作る。最後にガラスの外装がかぶさり、金の冠石がのると、光の柱が空へ
       name: 'PYRAMID', bg: 'orange', sel: 'fl0',
@@ -165,15 +130,8 @@ if (typeof window.OC_HERO_PARTS4 === 'function') (window.OC_HERO_VERSIONS = wind
         o.dots0 = { p: [0, Y0, 0], r: FLOOR, c: 'navy', alpha: 0.35 }; o.r3 = { p: [0, Y0, 0], r: FLOOR, w: 2.9, c: 'cream', alpha: 0.6 };
         return o;
       }
-    },
-    { // 2) アンティキティラの機械：ばらばらの歯車が手前と奥から集まり、歯の数の比どおりに回り出す。太陽と月の針、月の満ち欠けの玉
-      name: 'ANTIKYTHERA', bg: 'teal', sel: 's24',
-      cam: (tb, t) => ({ pitch: 0.12 + 0.07 * S(t * 0.4), dist: 10.4, zoom: 1.16 + 0.1 * io(cl((tb - 1) / 3)), t: [0, 0.7, 0], tilt: 0.6 }),
-      act: (t, tb) => {
-        const o = {}, C = [0, 0.35, 0], cd = card(t, C, 0.34, 0, -0.06, 0.18), gap = 0.07 + 0.55 * (1 - io(cl((tb - 0.15) / 1.5))) + 0.42 * io(cl((tb - 3.7) / 0.9));   // 最後に、もう一度ばらして奥行きを見せる
-        const yr = 6, th0 = (-TAU * tb) / yr, th = gearAng(th0), lz = (L) => (L - 1) * gap;
-        GE.forEach((g, i) => { const R = mat(0, 0, th[i]), M = mmul(cd.M, R); o['gr' + i] = { p: cd.P(g.at[0], g.at[1], lz(g.L)), r: eul(M), w: g.R, n: g.N, dp: g.dp, c: g.c, c2: g.c2, ext: 0.55, hole: g.hole || 0.22, hub: g.hole && g.hole > 0.5 ? null : 'navy' }; });
-        [0, PI / 2].forEach((a, n) => { o['s' + (24 + n)] = Object.assign({ p: cd.P(0, 0, lz(0) + 0.01), r: eul(mmul(cd.M, mat(0, 0, th0 + a))), bw: GE[0].R * 1.78, bh: 0.075, bd: 0.03 }, K.bc('orange')); });   // 大歯車の4本の腕
-        const LZ = lz(3) + 0.02;   // いちばん前の文字盤
-        range(12).forEach((k) => { o['sc' + k] = { p: cd.P(0, 0, LZ), r: cd.rr, ro: 1.5, ri: 1.31, a0: (k * TAU) / 12 + 0.012, a1: ((k + 1) * TAU) / 12 - 0.012, c: k % 2 ? 'cream' : 'navy', alpha: 0.92 }; });
-        const segs = []; range(73).forEach((k) => { const a = (k * TAU) / 73, r1 = k % 6 ? 1.6 : 1.67; segs.push([cd.P(Co(a) * 1.53, S(a) * 1.53, LZ), cd.P(Co(a) * r1, S(a) * r1, LZ)]); }
+    }
+  ];
+  const more = (f) => (typeof f === 'function' ? f(K, X, A) : []);   // ほかのファイルのショット（無いときは飛ばす）
+  return { shots: shots.concat(more(window.OC_HERO_ANC2), more(window.OC_HERO_ANC3), more(window.OC_HERO_ANC4)), actors: A };
+};
