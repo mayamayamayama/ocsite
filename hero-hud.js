@@ -124,8 +124,8 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 // 入場画面のファイルが足りないときは、画面の下に、何が足りないかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R33';   // このファイル一式の番号
-  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-hud', 'hero'];
+  const RELEASE = 'R34';   // このファイル一式の番号
+  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-hud', 'hero'];
   function run() {
     const loaded = window.OC_LOADED || [], tags = [...document.scripts].map((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '')).filter(Boolean);
     const H = window.OC_HERO, msg = [], vers = (H && H.vers) || [];
