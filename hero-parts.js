@@ -229,5 +229,5 @@ window.OC_HERO_PARTS = function (G) {
     if ('letterSpacing' in ctx) ctx.letterSpacing = '1.4px'; ctx.fillText(textS, x, y);
   }
 
-  return { N, SHAPES, basis, W3, flat, coin, box, sphere, lines, asterisk, text, strip, label, hex, col };
+  return { N, SHAPES, basis, W3, flat, coin, box, sphere, lines, asterisk, text, strip, label, hex, col, fillCA, shade, gradOn, fromPoly, fromFn, LIGHT, HOLO, path };   // 後ろの方は hero-parts2.js が使う道具
 };
