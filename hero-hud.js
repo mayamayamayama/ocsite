@@ -119,3 +119,30 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 
   return { gizmo, selBox, grid, callout, minimap, hud };
 };
+
+// ===== 読み込みチェック =====
+// 入場画面のファイルが足りないときは、画面の下に、何が足りないかを表示します。
+// アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
+(function () {
+  const RELEASE = 'R31';   // このファイル一式の番号
+  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-hud', 'hero'];
+  function run() {
+    const loaded = window.OC_LOADED || [], tags = [...document.scripts].map((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '')).filter(Boolean);
+    const H = window.OC_HERO, msg = [], vers = (H && H.vers) || [];
+    const notTag = NEED.filter((n) => !tags.includes(n)), notLoaded = NEED.filter((n) => tags.includes(n) && !loaded.includes(n));
+    if (notTag.length) msg.push('index.html が古いみたい（新しい index.html を入れてね）');
+    if (notLoaded.length) msg.push('読み込めていないファイル：' + notLoaded.map((n) => n + '.js').join('、'));
+    if (H && !H.vers) msg.push('hero.js が古いみたい（新しい hero.js を入れてね）');
+    if (window.OC_HERO_ERR) msg.push('バージョンを作るときにエラー：' + window.OC_HERO_ERR);
+    const full = /[?&]check/.test(location.search);
+    if (!msg.length && !full) return;
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:6px;white-space:pre-wrap;max-height:60vh;overflow:auto';
+    const lines = ['入場画面チェック（' + RELEASE + '）'].concat(msg.length ? msg : ['問題なし！']);
+    if (full) lines.push('', '使えるバージョン：' + (vers.join(' / ') || '?'), '今のバージョン：' + ((H && H.version) || '?'), '', NEED.map((n) => (loaded.includes(n) ? '✓ ' : '✗ ') + n + '.js').join('\n'));
+    box.textContent = lines.join('\n');
+    box.addEventListener('click', () => box.remove());
+    document.body.appendChild(box);
+  }
+  if (document.readyState === 'complete') setTimeout(run, 300); else window.addEventListener('load', () => setTimeout(run, 300));
+})();
