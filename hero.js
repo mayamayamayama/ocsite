@@ -2,7 +2,11 @@
 // 3Dの空間に置いた物体のまわりを、カメラがいつもぐるぐる回り続ける、1本の長いループです。
 // 真上から見ると平らなポスター、横から見ると立体…という、2Dと3Dの入れ替えをくり返します。
 // いつもカメラの方を向く平らな板（bill）と、本物の立体が、同じ空間に混ざっています。
-// 物体の一覧とショット 1〜4 は hero-scenes.js、ショット 5〜8 は hero-scenes2.js、3Dの部品は hero-parts.js、飾りは hero-hud.js にあります。
+// バージョンは7つ。入場するたびに、前回と違うものがランダムで選ばれます。
+//   いつもの：hero-scenes.js と 2　抽象：hero-abstract.js と 2　山：hero-mountain.js と 2
+//   空：hero-sky.js と 2　ゲーム：hero-game.js と 2　創作：hero-create.js と 2　インダストリアル：hero-industrial.js と 2
+//   （アドレスの最後に ?hero=sky などをつけると、そのバージョンを選べます。名前：main / abstract / mountain / sky / game / create / industrial）
+// 3Dの部品は hero-parts.js と hero-parts2.js、飾りは hero-hud.js にあります。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
 (function () {
@@ -21,9 +25,9 @@
 
   // ===== ここの数字を変えると、見た目が変わります =====
   const SHOT_SEC = 5.2;       // 1つのショットの長さ（秒）
-  const ORBIT_SEC = 11;       // カメラがまわりを1周する秒数（小さくすると速く回る。マイナスにすると逆回り）
+  const ORBIT_SEC = 22;       // カメラがまわりを1周する秒数（小さくすると速く回る。マイナスにすると逆回り）
   const MOVE_SEC = 1.5;       // 次のショットへ、物体が動くのにかける時間（秒）
-  const TILT = 5;             // マウスや傾きで、カメラが回り込む強さ（0で動かない）
+  const TILT = 1;             // マウスや傾きで、カメラが回り込む強さ（0で動かない）
   const CHROMA = 1.3;         // 色収差（ふちの水色と桃色のずれ）の幅。0で無し
   const GRAIN = 0.32;         // フィルムの粒子の強さ（0で無し）
   const VIGNETTE = 0.22;      // 画面のふちを、少し暗くする強さ（0で無し）
@@ -47,6 +51,7 @@
   const eIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const eBack = (t) => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
   const col = (c) => PAL[c] || c;
+  const lum = (h) => { const n = parseInt(String(h).slice(1), 16) || 0; return (0.3 * ((n >> 16) & 255) + 0.59 * ((n >> 8) & 255) + 0.11 * (n & 255)) / 255; };
 
   // ---------- 大きな文字（1文字ずつ、下からせり上がる） ----------
   hero.querySelectorAll('[data-t]').forEach((line) => {
@@ -80,8 +85,17 @@
 
   // ---------- 部品とショットを読み込む ----------
   const T = window.OC_HERO_PARTS(G);
-  const SH = [].concat(window.OC_HERO_SCENES(), typeof window.OC_HERO_SCENES2 === 'function' ? window.OC_HERO_SCENES2() : []);
-  const ACT = window.OC_HERO_ACTORS || {};
+  const T2 = typeof window.OC_HERO_PARTS2 === 'function' ? window.OC_HERO_PARTS2(G, T) : null;
+  const T3 = typeof window.OC_HERO_PARTS3 === 'function' ? window.OC_HERO_PARTS3(G, T) : null;
+  const VERS = [{ id: 'main', make: () => ({ shots: [].concat(window.OC_HERO_SCENES(), typeof window.OC_HERO_SCENES2 === 'function' ? window.OC_HERO_SCENES2() : []), actors: window.OC_HERO_ACTORS || {} }) }];
+  if (T2) Object.keys(window.OC_HERO_VERSIONS || {}).forEach((id) => VERS.push({ id, make: window.OC_HERO_VERSIONS[id] }));
+  let V = VERS.find((v) => v.id === (location.search.match(/[?&]hero=(\w+)/) || [])[1]), last = '';
+  try { last = localStorage.getItem('oc-hero-ver') || ''; } catch (e) {}
+  if (!V) { const pool = VERS.length > 1 ? VERS.filter((v) => v.id !== last) : VERS; V = pool[Math.floor(Math.random() * pool.length)]; }   // 前回と違うものを、ランダムに
+  try { localStorage.setItem('oc-hero-ver', V.id); } catch (e) {}
+  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
+  const SH = made.shots, ACT = made.actors;
+  const shp = (v) => (typeof v === 'string' ? T.SHAPES[v] : v && v.length === T.N ? v : null) || T.SHAPES.circle;   // 形の名前、または形そのもの
   const NS = SH.length, LOOP = NS * SHOT_SEC;
   const E = { W: 0, FH: 0, fw, NS, LOOP, SHOT_SEC };   // 飾り（hero-hud.js）に渡す情報
   const HUD = typeof window.OC_HERO_HUD === 'function' ? window.OC_HERO_HUD(G, T, E) : null;
@@ -111,7 +125,7 @@
   }
 
   // ---------- 2つの状態のあいだを、なめらかにつなぐ ----------
-  const ANG = { sa: 1, ga: 1, a0: 1 };
+  const ANG = { sa: 1, ga: 1 };   // 角度として、近い方へ回す値
   function full(id, st) { return st ? Object.assign({ p: [0, 0, 0], r: [0, 0, 0], s: 1, w: 1, sx: 1, sy: 1, ga: 0, sa: 0, bill: 0, scr: [0, 0, 0] }, ACT[id], st) : null; }
   const numArr = (a, b) => Array.isArray(a) && Array.isArray(b) && a.length === b.length && typeof b[0] === 'number' && typeof a[0] === 'number';
   function blend(A, B, p, pc) {
@@ -126,7 +140,7 @@
     for (const k in A) if (!(k in o)) o[k] = pc < 0.5 ? A[k] : undefined;   // 前のショットだけにある設定は、途中で消す
     return o;
   }
-  function camAt(shot, tb, T0) { return Object.assign({ yaw: 0, pitch: 0, dist: 10, zoom: 1, t: [0, 0, 0], roll: 0 }, shot.cam(tb, T0)); }
+  function camAt(shot, tb, T0) { return Object.assign({ yaw: 0, pitch: 0, dist: 10, zoom: 1, t: [0, 0, 0], roll: 0, tilt: 1, wob: 1 }, shot.cam(tb, T0)); }   // tilt・wob：マウスの傾きと、距離のゆれの強さ
 
   // ---------- 1つの物体を描く ----------
   function draw(o, T0) {
@@ -139,26 +153,29 @@
     else if (o.type === 'aster') T.asterisk(o);
     else if (o.type === 'text') T.text(o);
     else if (o.type === 'strip') T.strip(o, T0);
+    else if (T2 && T2[o.type]) T2[o.type](o, T0);   // 追加の部品（hero-parts2.js）
+    else if (T3 && T3[o.type]) T3[o.type](o, T0);   // さらに追加の部品（hero-parts3.js）
   }
 
   // ---------- 1コマを描く ----------
   let start = performance.now(), lastGrain = 0, gx = 0, gy = 0, inkNow = '', strokeNow = '';
   // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子・ふちの暗さ・色のずれを省く → 2：解像度を下げる）
   let Q = 0, autoQ = true, dtAvg = 16.7, lastNow = 0, runT = 0;
-  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS };   // （確認用）
+  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id) };   // （確認用）
   function frame(now) {
     if (!W) return;
     const T0 = REDUCE ? SHOT_SEC * 1 + 3 : Math.max(0, (now - start) / 1000);
     updateTilt(now, T0);
     const loopT = ((T0 % LOOP) + LOOP) % LOOP, k = Math.min(NS - 1, Math.floor(loopT / SHOT_SEC)), tb = loopT - k * SHOT_SEC;
     const cur = SH[k], prv = SH[(k - 1 + NS) % NS], wipe = prv.bg !== cur.bg && tb < 0.9;
-    const bgShow = wipe && tb < 0.4 ? prv.bg : cur.bg, ink = INK[bgShow] || PAL.navy;   // 色が広がりきる少し前に、文字の色を変える
+    const bgShow = wipe && tb < 0.4 ? prv.bg : cur.bg, ink = INK[bgShow] || (lum(col(bgShow)) > 0.5 ? PAL.navy : PAL.cream);   // 色が広がりきる少し前に、文字の色を変える
 
     // カメラ：横の向き（yaw）は、いつも同じ速さで回り続ける。高さ・距離・見る場所は、ショットごとに、なめらかに変わる
     const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = eIO(clamp01(tb / 2.2));
-    const cam = { yaw: (T0 * TAU) / ORBIT_SEC + lerp(ca.yaw, cb.yaw, qc), pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)) * (1 + 0.05 * Math.sin(T0 * 0.37)),
+    const tl = lerp(ca.tilt, cb.tilt, qc), wb = lerp(ca.wob, cb.wob, qc);
+    const cam = { yaw: (T0 * TAU) / ORBIT_SEC + lerp(ca.yaw, cb.yaw, qc), pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)) * (1 + 0.05 * wb * Math.sin(T0 * 0.37)),
       zoom: lerp(ca.zoom, cb.zoom, qc), t: ca.t.map((v, n) => lerp(v, cb.t[n], qc)), roll: lerp(ca.roll, cb.roll, qc) };
-    cam.yaw += G.tx * 0.3; cam.pitch = Math.max(-0.25, Math.min(1.45, cam.pitch + G.ty * 0.1));
+    cam.yaw += G.tx * 0.3 * tl; cam.pitch = Math.max(-0.25, Math.min(1.45, cam.pitch + G.ty * 0.1 * tl));
     setCam(cam);
 
     // 背景（色が変わるときは、真ん中から丸く広がる）
@@ -182,14 +199,14 @@
       o.s = Math.max(0, lerp(A.s, B.s, appear ? eBack(q) : vanish ? eIn(q) : p));
       if (o.type === 'flat') {
         o.shapeName = p < 0.5 ? A.shape : B.shape;
-        const ra = T.SHAPES[A.shape] || T.SHAPES.circle, rb = T.SHAPES[B.shape] || T.SHAPES.circle, r = morph[id];
+        const ra = shp(A.shape), rb = shp(B.shape), r = morph[id];
         for (let i = 0; i < T.N; i++) r[i] = ra[i] + (rb[i] - ra[i]) * p;
         o.shape = r;
       }
       if (o.scr[0] || o.scr[1] || o.scr[2]) { const d = o.scr; o.p = [0, 1, 2].map((i) => o.p[i] + rt[i] * d[0] + up[i] * d[1] - fw[i] * d[2]); }   // カメラから見た向きで、ずらす
       if (o.bill > 0) { const b = Math.min(1, o.bill), rb = [-cam.pitch, cam.yaw]; o.r = [o.r[0] + wrapD(rb[0] - o.r[0]) * b, o.r[1] + wrapD(rb[1] - o.r[1]) * b, o.r[2]]; }   // カメラの方を向く
       o.id = id;
-      items.push({ z: G.proj(o.p)[2] - (o.z || 0), o });
+      items.push({ z: G.proj(o.zp || o.p)[2] - (o.z || 0), o });   // zp：前後の順番を決めるための点（無ければ p）
     });
     if (BIG_NUM) {   // ずっと奥に浮かぶ、ショット番号（いつもカメラの方を向く）
       const bp = [0, 1, 2].map((i) => cam.t[i] + fw[i] * 7 + rt[i] * 1.6 + up[i] * 0.6);
@@ -203,7 +220,7 @@
     if (HUD && GIZMO && !REDUCE) {
       if (cam.dist < 20) HUD.gizmo(ink);
       if (CALLOUT && tb > 1.9) {
-        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && ACT[id].type !== 'lines' && ACT[id].type !== 'text' && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
+        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && !['lines', 'text', 'path', 'contour', 'terrain'].includes(ACT[id].type) && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
         [ks[1], ks[ks.length - 2]].forEach((id, n) => { const it = id && items.find((q) => q.o.id === id); if (it) HUD.callout(it.o, ink, it.o.p[0] > cam.t[0] - 0.3 ? 1 : -1, fade); });
       }
       if (MINIMAP) HUD.minimap(items, ink, cam);
