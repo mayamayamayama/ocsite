@@ -146,7 +146,9 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
     // 読み込めなかったファイルが、GitHub にあるのか・無いのかを、確かめて書き足す
     notLoaded.forEach((n) => {
       const el = [...document.scripts].find((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '') === n); if (!el || !window.fetch) return;
-      fetch(el.src, { cache: 'no-store' }).then((r) => (r.ok ? r.text().then((tx) => '→ ' + n + '.js は GitHub にあるけど、動かない（' + (tx.length / 1024).toFixed(1) + 'KB）。もう一度アップロードしてね')
+      fetch(el.src, { cache: 'no-store' }).then((r) => (r.ok ? r.text().then((tx) => { const m = tx.match(/push\('([\w-]+)'\)/), who = m && m[1];
+          return who && who !== n ? '→ ' + n + '.js の中身が、' + who + '.js になっている！ 正しい ' + n + '.js をアップロードしてね'
+            : '→ ' + n + '.js は GitHub にあるけど、途中で切れているか、こわれている（' + (tx.length / 1024).toFixed(1) + 'KB）。もう一度アップロードしてね'; })
         : '→ ' + n + '.js が GitHub に見つからない（' + r.status + '）。名前がちょうど「' + n + '.js」か確かめて、アップロードしてね'))
         .catch(() => '→ ' + n + '.js を確かめられませんでした').then((t) => { box.textContent += '\n' + t; });
     });
