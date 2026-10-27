@@ -124,15 +124,15 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 // 入場画面のファイルが足りないときは、画面の下に、何が足りないかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R32';   // このファイル一式の番号
-  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-hud', 'hero'];
+  const RELEASE = 'R33';   // このファイル一式の番号
+  const NEED = ['hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-hud', 'hero'];
   function run() {
     const loaded = window.OC_LOADED || [], tags = [...document.scripts].map((s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '')).filter(Boolean);
     const H = window.OC_HERO, msg = [], vers = (H && H.vers) || [];
     const notTag = NEED.filter((n) => !tags.includes(n)), notLoaded = NEED.filter((n) => tags.includes(n) && !loaded.includes(n));
     if (notTag.length) msg.push('index.html が古いみたい（新しい index.html を入れてね）');
     if (notLoaded.length) msg.push('読み込めていないファイル：' + notLoaded.map((n) => n + '.js').join('、'));
-    if (H && !H.vers) msg.push('hero.js が古いみたい（新しい hero.js を入れてね）');
+    if (H && (!H.vers || !('p4' in H))) msg.push('hero.js が古いみたい（新しい hero.js を入れてね）');
     if (window.OC_HERO_ERR) msg.push('バージョンを作るときにエラー：' + window.OC_HERO_ERR);
     const full = /[?&]check/.test(location.search);
     if (!msg.length && !full) return;
