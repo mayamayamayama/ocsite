@@ -1,12 +1,9 @@
 // hero.js — 入場画面のメインビジュアル（3Dエンジンの本体）
-// 3Dの空間に置いた物体のまわりを、カメラがいつもぐるぐる回り続ける、1本の長いループです。
-// 真上から見ると平らなポスター、横から見ると立体…という、2Dと3Dの入れ替えをくり返します。
-// いつもカメラの方を向く平らな板（bill）と、本物の立体が、同じ空間に混ざっています。
+// 3Dの空間の物体のまわりを、カメラが回り続ける1本の長いループです。
 // バージョンはいくつかあり、入場するたびに、前回と違うものがランダムで選ばれます。
-//   いつもの：hero-scenes.js と 2　抽象：hero-abstract.js と 2　山：hero-mountain.js と 2
-//   ゲーム：hero-game.js と 2　物理：hero-physics.js と 2・3　古代：hero-ancient.js と 2・3
-//   （アドレスの最後に ?hero=ancient などをつけると、そのバージョンを選べます。名前：main / abstract / mountain / game / physics / ancient）
+//   アドレスの最後に ?hero=名前（main / abstract / mountain / game / physics / ancient / elder）で選べます。
 // 3Dの部品は hero-parts.js〜hero-parts4.js、飾りは hero-hud.js にあります。
+// バージョンは opts で、背景・飾り・質感を差し替えられます（elder が使います）。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
 (function () {
@@ -94,8 +91,8 @@
   try { last = localStorage.getItem('oc-hero-ver') || ''; } catch (e) {}
   if (!V) { const pool = VERS.length > 1 ? VERS.filter((v) => v.id !== last) : VERS; V = pool[Math.floor(Math.random() * pool.length)]; }   // 前回と違うものを、ランダムに
   try { localStorage.setItem('oc-hero-ver', V.id); } catch (e) {}
-  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC, P4: !!T4 }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
-  const SH = made.shots, ACT = made.actors;
+  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC, P4: !!T4, HOOKS: true }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
+  const SH = made.shots, ACT = made.actors, O = made.opts || {};   // O：バージョンごとの差し替え（背景・切り抜き・飾り・質感）
   const shp = (v) => (typeof v === 'string' ? T.SHAPES[v] : v && v.length === T.N ? v : null) || T.SHAPES.circle;   // 形の名前、または形そのもの
   const NS = SH.length, LOOP = NS * SHOT_SEC;
   const E = { W: 0, FH: 0, fw, NS, LOOP, SHOT_SEC };   // 飾り（hero-hud.js）に渡す情報
@@ -154,6 +151,7 @@
     else if (o.type === 'aster') T.asterisk(o);
     else if (o.type === 'text') T.text(o);
     else if (o.type === 'strip') T.strip(o, T0);
+    else if (o.type === 'custom') { if (o.draw) o.draw(ctx, G, o, T0, T); }   // バージョンが自分で描く物
     else if (T2 && T2[o.type]) T2[o.type](o, T0);   // 追加の部品（hero-parts2.js）
     else if (T3 && T3[o.type]) T3[o.type](o, T0);   // さらに追加の部品（hero-parts3.js）
     else if (T4 && T4[o.type]) T4[o.type](o, T0);   // 古代の部品（hero-parts4.js）
@@ -163,7 +161,7 @@
   let start = performance.now(), lastGrain = 0, gx = 0, gy = 0, inkNow = '', strokeNow = '';
   // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子・ふちの暗さ・色のずれを省く → 2：解像度を下げる）
   let Q = 0, autoQ = true, dtAvg = 16.7, lastNow = 0, runT = 0;
-  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id), p4: !!T4 };   // （確認用）
+  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id), p4: !!T4, hooks: true };   // （確認用）
   function frame(now) {
     if (!W) return;
     const T0 = REDUCE ? SHOT_SEC * 1 + 3 : Math.max(0, (now - start) / 1000);
@@ -172,8 +170,8 @@
     const cur = SH[k], prv = SH[(k - 1 + NS) % NS], wipe = prv.bg !== cur.bg && tb < 0.9;
     const bgShow = wipe && tb < 0.4 ? prv.bg : cur.bg, ink = INK[bgShow] || (lum(col(bgShow)) > 0.5 ? PAL.navy : PAL.cream);   // 色が広がりきる少し前に、文字の色を変える
 
-    // カメラ：横の向き（yaw）は、いつも同じ速さで回り続ける。高さ・距離・見る場所は、ショットごとに、なめらかに変わる
-    const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = eIO(clamp01(tb / 2.2));
+    // カメラ：横の向きは、いつも同じ速さで回り続ける。高さ・距離・見る場所は、ショットごとに変わる
+    const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = O.hard ? 1 : eIO(clamp01(tb / 2.2));   // hard：ショットの切り替えで、すぱっと切る
     const tl = lerp(ca.tilt, cb.tilt, qc), wb = lerp(ca.wob, cb.wob, qc);
     const cam = { yaw: (T0 * TAU) / ORBIT_SEC + lerp(ca.yaw, cb.yaw, qc), pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)) * (1 + 0.05 * wb * Math.sin(T0 * 0.37)),
       zoom: lerp(ca.zoom, cb.zoom, qc), t: ca.t.map((v, n) => lerp(v, cb.t[n], qc)), roll: lerp(ca.roll, cb.roll, qc) };
@@ -182,19 +180,22 @@
 
     // 背景（色が変わるときは、真ん中から丸く広がる）
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; G.CA = Q >= 1 ? 0 : CHROMA;   // 重い端末では、色のずれも省く
-    if (wipe) {
+    const I = { W, H, FH, CX, CY, T0, tb, k, cur, prv, cam, Q, G, dpr };
+    if (O.bg) O.bg(ctx, I);
+    else if (wipe) {
       ctx.fillStyle = col(prv.bg); ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = col(cur.bg); ctx.beginPath(); ctx.arc(CX, CY, eIO(tb / 0.9) * Math.hypot(W, H), 0, TAU); ctx.fill();
     } else { ctx.fillStyle = col(cur.bg); ctx.fillRect(0, 0, W, H); }
 
     // 物体（前のショットの状態から、今のショットの状態へ）
-    const SA = tb < MOVE_SEC + 0.75 ? prv.act(T0, tb + SHOT_SEC) || {} : {}, SB = cur.act(T0, tb) || {}, items = [];   // 前のショットは、動き終わったら計算しない（軽くする）
+    if (O.clip) { ctx.save(); O.clip(ctx, I); }
+    const SA = !O.hard && tb < MOVE_SEC + 0.75 ? prv.act(T0, tb + SHOT_SEC) || {} : {}, SB = cur.act(T0, tb) || {}, items = [];   // 前のショットは、動き終わったら計算しない（軽くする）
     let n = 0;
     new Set(Object.keys(SA).concat(Object.keys(SB))).forEach((id) => {
       if (!ACT[id]) return;
       let A = full(id, SA[id]), B = full(id, SB[id]);
       const appear = !A, vanish = !B;
-      if (appear) A = Object.assign({}, B, { s: 0 });
+      if (appear) A = O.hard ? B : Object.assign({}, B, { s: 0 });
       if (vanish) B = Object.assign({}, A, { s: 0 });
       const q = clamp01((tb - Math.min(0.6, n++ * 0.03)) / MOVE_SEC), p = eIO(q);
       const o = blend(A, B, p, p);
@@ -210,39 +211,44 @@
       o.id = id;
       items.push({ z: G.proj(o.zp || o.p)[2] - (o.z || 0), o });   // zp：前後の順番を決めるための点（無ければ p）
     });
-    if (BIG_NUM) {   // ずっと奥に浮かぶ、ショット番号（いつもカメラの方を向く）
+    if (BIG_NUM && O.bigNum !== false) {   // ずっと奥に浮かぶ、ショット番号（いつもカメラの方を向く）
       const bp = [0, 1, 2].map((i) => cam.t[i] + fw[i] * 7 + rt[i] * 1.6 + up[i] * 0.6);
       const bn = { type: 'text', str: pad(k + 1), p: bp, r: [-cam.pitch, cam.yaw, 0], s: 7, c: ink, alpha: 0.35, id: 'num' };
       items.push({ z: G.proj(bn.p)[2] + 100, o: bn });
     }
-    if (HUD && GRID) HUD.grid(ink, cam.dist);
+    if (HUD && GRID && O.grid !== false) HUD.grid(ink, cam.dist);
     items.sort((a, b) => b.z - a.z);
     items.forEach((it) => draw(it.o, T0));
 
-    if (HUD && GIZMO && !REDUCE) {
+    if (HUD && GIZMO && !REDUCE && O.gizmo !== false) {
       if (cam.dist < 20) HUD.gizmo(ink);
       if (CALLOUT && tb > 1.9) {
-        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && !['lines', 'text', 'path', 'contour', 'terrain', 'cubes', 'tiles', 'glow', 'beam', 'ribbon', 'dust', 'shadow'].includes(ACT[id].type) && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
+        const ks = Object.keys(SB).filter((id) => id !== cur.sel && ACT[id] && !['lines', 'text', 'path', 'contour', 'terrain', 'cubes', 'tiles', 'glow', 'beam', 'ribbon', 'dust', 'shadow', 'custom'].includes(ACT[id].type) && !ACT[id].z), fade = clamp01((tb - 1.9) / 0.4) * clamp01((SHOT_SEC - tb) / 0.3);
         [ks[1], ks[ks.length - 2]].forEach((id, n) => { const it = id && items.find((q) => q.o.id === id); if (it) HUD.callout(it.o, ink, it.o.p[0] > cam.t[0] - 0.3 ? 1 : -1, fade); });
       }
       if (MINIMAP) HUD.minimap(items, ink, cam);
       if (cur.sel && tb > 1.7) { const it = items.find((q) => q.o.id === cur.sel); if (it && it.o.s > 0.9) HUD.selBox(it.o, cur.sel, ink, col(cur.bg)); }
     }
 
+    if (O.inner) O.inner(ctx, I);   // 切り抜きの中の質感
+    if (O.clip) ctx.restore();
+    if (O.post) O.post(ctx, I);   // 切り抜きの外の飾り
     // 画面全体の質感：ふちを暗く、フィルムの粒子
-    if (VIGNETTE > 0 && Q < 1) {
+    if (VIGNETTE > 0 && Q < 1 && O.vignette !== 0) {
       const g = ctx.createRadialGradient(W / 2, FH * 0.45, Math.min(W, FH) * 0.35, W / 2, FH * 0.45, Math.hypot(W, FH) * 0.65);
       g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${VIGNETTE})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
-    if (HUD) {   // 少し下にスクロールしたとき、サイトの上の文字と重ならないように、その下にもぐらせる
+    if (HUD && O.hud === false) {}
+    else if (HUD) {   // 少し下にスクロールしたとき、サイトの上の文字と重ならないように、その下にもぐらせる
       const sy = window.scrollY || 0; ctx.save();
       if (sy > 0) { ctx.beginPath(); ctx.rect(0, sy + 46, W, H); ctx.clip(); }
       HUD.hud(cur, k, tb, loopT, ink, T0, cam); ctx.restore();
     }
     else T.label('hero-hud.js が読み込めていません', 20, 60, ink, 10);   // 飾りのファイルが無いときの知らせ
     if (GRAIN > 0 && grainPat && Q < 1) {
+      const GA = O.grain === undefined ? GRAIN : O.grain;
       if (now - lastGrain > 70) { gx = Math.random() * 256; gy = Math.random() * 256; lastGrain = now; }
-      ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = GRAIN; ctx.translate(-gx, -gy); ctx.fillStyle = grainPat; ctx.fillRect(0, 0, W + 256, H + 256); ctx.restore();
+      ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = GA; ctx.translate(-gx, -gy); ctx.fillStyle = grainPat; ctx.fillRect(0, 0, W + 256, H + 256); ctx.restore();
     }
     // 大きな文字の色。大きな物体と重なっても読めるよう、背景の色でふちを取る
     if (ink !== inkNow) { inkNow = ink; titleEls.forEach((el) => { el.style.color = ink; }); }
@@ -256,6 +262,7 @@
     if (!W || !H || H > 4000 || W > 5000) { W = 0; return; }   // 異常に大きいときは動かさない
     FH = H - (parseFloat(getComputedStyle(hero).paddingBottom) || NOISE_H);
     E.W = W; E.FH = FH; M = Math.min(W, FH); SC = W < FH ? SCALE_TALL : SCALE_WIDE; CX = W > FH * 1.1 ? W * 0.6 : W * 0.5; CY = FH * 0.4;
+    if (O.center) [CX, CY] = O.center(W, FH, CX, CY);   // バージョンが、画面の中心を決めることもできる
     dpr = Q >= 2 ? 1 : Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(4e6 / (W * H))); G.dpr = dpr; G.CA = CHROMA;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!grainPat) {   // フィルムの粒子（灰色のまだら模様を、重ね方「オーバーレイ」で重ねる）
