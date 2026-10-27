@@ -168,4 +168,3 @@ window.OC_HERO_SCENES = function () {
   window.OC_HERO_ACTORS = A;
   return shots;
 };
-
