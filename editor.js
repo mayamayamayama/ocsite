@@ -62,6 +62,13 @@ const characters = {
     description: "Age:35/Height:166\nBirthday:10/02\nHobbys:料理/バイク\nInformation:ワカとの夫妻設定です。\n誘拐してHな絵を生成していただく際はご留意いただけると幸いです。",
     prompt: "girl,white hair, messy hair, medium hair, looped hair, hair loop, folded hair, hair clip, hair clamp, claw clip, Hair at the back, folded over once, hair spouting,  long sidelocks, facial hairlocks, antenna hair,green eyes,cool eyes,Upward-slanting eyes,A smile that suggested exasperation,Midriff-baring fashion,30s,black short Cropped tops,An unapproachable atmosphere\n,Upward-slanting ,low-ponytail ,1.4::black jacket::, looking worn and bedraggled,They have a checkered garment wrapped around their waist,sneakers,A ring on the ring finger,Mature woman,strong women,competitive personality,Married woman,Cool atmosphere,A smile that suggested exasperation,A bad-boy vibe,"
   },
+　"Ghazal": {
+    name: "Ghazal",
+    tag: "MALE/NON-HUMAN",
+    image: "ghazal.png",
+    description: "Age:29/Height:257\nBirthday:06/09\nHobbys:H\nInformation:読み方は「ガザル」です。出力難度高めです。",
+    prompt: "White Frame,\nboy, scalie, anthro, monster guy, \nstylized, anime style, sharp features,0.45::tyrantrum\n::,grey skin, black scales, 2::white crown-like six crest and horns on the forehead::,1.8::six medium short horn growing vertically::,2::The bases of the horns connect like a crest, covering the forehead::,six horns arranged side by side,sharp horns on head,white spiky short fur collar, white beard-like spiky fur, jaw fangs, sharp teeth, \nmonstrous physique, colossal muscle, extremely muscular, abs, massive biceps, hyper muscular, broad shoulders, massive legs, claws, sharp black claws, tail, spiky tail,A straight line of white hair growing between the pectoral and abdominal muscles,-2::orange crown-like crest on the forehead::,training wear,#c6ff00 eyes,Black sclera,The five toes of the foot,An unpleasant personality,Five digits on both hands and feet,High sex drive,"
+  },
 };
 
 // 一覧カードの描画
