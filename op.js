@@ -15,7 +15,7 @@
   const SITE_BEHIND_WALL = true;     // 壁のうしろにサイトを置く（false にすると、動画の最後の色）
   const LOGO_ON_WALL = true;         // 動画の最後の1コマを、壁の表に貼る（ロゴごと割れる）
   const SKIP_STILL = true;           // glb の最初の「まだ動いていない時間」をとばして、すぐに割れ始める
-  const CAM_LIFT = 0.3;              // 割れたあと、カメラを上げる量（画面の高さの何倍か）。下に残るかけらが画面から出ていく（0 で動かさない）
+  const CAM_LIFT = 2.5;              // 割れたあと、カメラを上げる量（画面の高さの何倍か）。下に残るかけらが画面から出ていく（0 で動かさない）
   const FADE_SEC = 0.6;              // 最後に、残ったかけらが消える時間（秒）
   const TONE = 'agx';                // 色の見え方：'agx'（Blender 4 の標準）／'filmic'（Blender 3 の標準）／'standard'
   const EXPOSURE = 1.0;              // 3D の明るさ（1.2 で明るく、0.8 で暗く）
