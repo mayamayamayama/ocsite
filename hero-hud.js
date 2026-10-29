@@ -127,9 +127,9 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 // 入場画面のファイルが足りない・古い・入れ替わっているときは、画面の下に、どのファイルをどうすればいいかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R50';   // このファイル一式の番号
+  const RELEASE = 'R51';   // このファイル一式の番号
   const NEED = ['op', 'hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-elder', 'hero-elder2', 'hero-elder3', 'hero-elder4', 'hero-elder5', 'hero-elder6', 'hero-elder7', 'hero-hud', 'hero'];
-  const SIZE = { 'op': 16998, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 13844, 'hero': 19122 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
+  const SIZE = { 'op': 18935, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 17251, 'hero': 19122 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
   const nameOf = (s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '');
   const look = (src, mode) => fetch(src, { cache: mode }).then((r) => (r.ok ? r.text().then((tx) => ({ len: tx.length, who: (tx.match(/push\('([\w-]+)'\)/) || [])[1] })) : { len: -r.status })).catch(() => null);
   function run() {
@@ -149,7 +149,7 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
     };
     if (msg.length) show(msg.join('\n'));
     if (full) show((msg.length ? '' : '問題なし！\n') + '\n使えるバージョン：' + (vers.join(' / ') || '?') + '\n今のバージョン：' + ((H && H.version) || '?') + '\n\n' + NEED.map((n) => (loaded.includes(n) ? '✓ ' : '✗ ') + n + '.js').join('\n'));
-    if (full && window.OC_OP && window.OC_OP.inspect) window.OC_OP.inspect().then(show, () => {});   // OP の動画と glb の中身
+    if (full) opInspect((window.OC_OP && window.OC_OP.cfg) || { VIDEO: 'op.mp4', MODEL: 'kabeban.glb', SKIP_STILL: true }).then(show, () => {});   // OP の動画と glb の中身
     // ファイルの中身を確かめる（まず、今動いているもの。おかしければ、GitHub にあるものも）
     if (!window.fetch || location.protocol === 'file:') return;
     Promise.all(NEED.map((n) => (els[n] ? look(els[n].src, 'default') : Promise.resolve(null)))).then((got) => {
@@ -166,6 +166,51 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
         }).join('\n'));
       });
     });
+  }
+  // ---------- OP（op.js）の動画と glb の中身の確認 ----------
+  async function opInspect(cfg) {
+    const { VIDEO, MODEL, SKIP_STILL } = cfg;
+    const L = ['', 'OP（最初の動画と壁のアニメーション）：'], kb = (n) => (n >= 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB');
+    const miss = (f) => '見つからない。名前がちょうど「' + f + '」か、index.html と同じ場所にあるか確かめてね';
+    const big = (n) => (n > 5 * 1048576 ? '\n  ⚠ 大きいので、スマホだと始まるまで時間がかかるかも（5MB くらいまでがおすすめ）' : '');
+    try {
+      const r = await fetch(VIDEO, { cache: 'no-store' }), n = +r.headers.get('content-length') || 0;
+      if (r.body && r.body.cancel) r.body.cancel().catch(() => {});
+      if (!r.ok) L.push('・' + VIDEO + '：' + miss(VIDEO));
+      else {
+        const m = await new Promise((ok) => { const v = document.createElement('video'); v.muted = true; v.preload = 'metadata';
+          const t = setTimeout(() => ok(null), 8000); v.onloadedmetadata = () => { clearTimeout(t); ok(v.videoWidth + '×' + v.videoHeight + '・' + v.duration.toFixed(1) + '秒'); v.removeAttribute('src'); v.load(); };
+          v.onerror = () => { clearTimeout(t); ok(false); }; v.src = VIDEO; });
+        L.push('・' + VIDEO + '：あり（' + (n ? kb(n) + '・' : '') + (m || (m === false ? 'このブラウザでは再生できない形式。H.264 の mp4 で書き出してね' : '長さは確かめられませんでした')) + '）' + big(n));
+      }
+    } catch (e) { L.push('・' + VIDEO + '：確かめられませんでした'); }
+    try {
+      const r = await fetch(MODEL, { cache: 'no-store' });
+      if (!r.ok) L.push('・' + MODEL + '：' + miss(MODEL));
+      else {
+        const buf = await r.arrayBuffer(), j = glbJson(buf);
+        if (!j) L.push('・' + MODEL + '：中身が glb ではないみたい。Blender で「glTF バイナリー（.glb）」を選んで書き出してね');
+        else {
+          const an = j.animations || [], ks = an.flatMap((a) => (a.samplers || []).map((s) => j.accessors[s.input] || {}));
+          const sec = Math.max(0, ...ks.map((a) => (a.max || [0])[0])), st = ks.length ? Math.min(...ks.map((a) => (a.min || [0])[0])) : 0;
+          L.push('・' + MODEL + '：あり（' + kb(buf.byteLength) + '・パーツ ' + (j.nodes || []).filter((n) => n.mesh !== undefined).length + '・動き ' + an.length + '・長さ ' + sec.toFixed(1) + '秒・カメラ ' + ((j.cameras || []).length ? 'あり' : 'なし→正面から画面いっぱいに写します') + '）' + big(buf.byteLength));
+          if (SKIP_STILL && st > 0.05) L.push('  最初の ' + st.toFixed(1) + '秒は止まっているので、とばして、すぐ割れ始めます');
+          if (!an.length) L.push('  ⚠ 動きが入っていません。書き出すとき「アニメーション」にチェック。物理演算のときは、先に「オブジェクト → 剛体 → キーフレームに焼き込み」をしてね');
+        }
+      }
+    } catch (e) { L.push('・' + MODEL + '：確かめられませんでした'); }
+    try { const T = await import('three'); L.push('・3D の部品（three.js）：読み込めた（r' + T.REVISION + '）'); } catch (e) { L.push('・3D の部品（three.js）：読み込めない（index.html が古いか、ネットの問題）'); }
+    const g = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+    L.push('・この端末の 3D：' + (g ? '使える' : '使えない（動画のあとは、そのままサイトを出します）'));
+    if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext();
+    return L.join('\n');
+  }
+  function glbJson(buf) {
+    try {
+      const d = new DataView(buf);
+      if (buf.byteLength < 20 || d.getUint32(0, true) !== 0x46546c67 || d.getUint32(16, true) !== 0x4e4f534a) return null;   // 「glTF」と「JSON」の印
+      return JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, d.getUint32(12, true))));
+    } catch (e) { return null; }
   }
   if (document.readyState === 'complete') setTimeout(run, 300); else window.addEventListener('load', () => setTimeout(run, 300));
 })();
