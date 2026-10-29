@@ -15,6 +15,7 @@
   const SITE_BEHIND_WALL = true;     // 壁のうしろにサイトを置く（false にすると、動画の最後の色）
   const LOGO_ON_WALL = true;         // 動画の最後の1コマを、壁の表に貼る（ロゴごと割れる）
   const SKIP_STILL = true;           // glb の最初の「まだ動いていない時間」をとばして、すぐに割れ始める
+  const CAM_LIFT = 0.3;              // 割れたあと、カメラを上げる量（画面の高さの何倍か）。下に残るかけらが画面から出ていく（0 で動かさない）
   const FADE_SEC = 0.6;              // 最後に、残ったかけらが消える時間（秒）
   const TONE = 'agx';                // 色の見え方：'agx'（Blender 4 の標準）／'filmic'（Blender 3 の標準）／'standard'
   const EXPOSURE = 1.0;              // 3D の明るさ（1.2 で明るく、0.8 で暗く）
@@ -29,7 +30,6 @@
   const root = document.documentElement, box = document.getElementById('op');
   const OP = (window.OC_OP = { cfg: { VIDEO, MODEL, SKIP_STILL }, log: [] });   // cfg は ?check 用
   const log = (s) => OP.log.push([s, Math.round(performance.now())]);
-  guardPull();
   if (!box) return;
   if (!root.classList.contains('op-on')) { box.remove(); return; }
   try { sessionStorage.setItem('oc-op', '1'); } catch (e) { /* 保存できなくても動く */ }
@@ -180,10 +180,10 @@
       if (isFinite(s0)) t = s0;
     }
     mixer.update(t); model.updateMatrixWorld(true);
-    const end = Math.max(dur, t + 1);   // 動きがないときは、1秒見せる
+    const end = Math.max(dur, t + 1), t1 = t;   // 動きがないときは、1秒見せる
 
     // カメラ：glb のカメラ。なければ正面（Blender の「前」）から、壁が画面いっぱいに
-    let cam = (gltf.cameras || []).find((c) => c.isPerspectiveCamera || c.isOrthographicCamera), baseA, zoom = 1;
+    let cam = (gltf.cameras || []).find((c) => c.isPerspectiveCamera || c.isOrthographicCamera), baseA, zoom = 1, camY = 0, camD = 0;
     if (cam) baseA = cam.isPerspectiveCamera ? (cam.aspect && cam.aspect !== 1 ? cam.aspect : video.videoWidth ? video.videoWidth / video.videoHeight : cam.aspect || 16 / 9) : (cam.right - cam.left) / (cam.top - cam.bottom);
     else {
       const bb = new THREE.Box3().setFromObject(model);
@@ -191,7 +191,7 @@
       const s = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3()), h = Math.max(s.y, 1e-3), d = h / 2 / Math.tan((15 * Math.PI) / 180) + s.z / 2;
       cam = new THREE.PerspectiveCamera(30, 1, d / 100, d * 100 + s.z);
       cam.position.set(c.x, c.y, c.z + d); cam.lookAt(c); scene.add(cam);
-      baseA = Math.max(s.x, 1e-3) / h; zoom = 1.04;   // はしに、すき間ができないように、少し寄る
+      baseA = Math.max(s.x, 1e-3) / h; zoom = 1.04; camY = cam.position.y; camD = d - s.z / 2;   // はしに、すき間ができないように、少し寄る
     }
     let lit = false; model.traverse((o) => { if (o.isLight) lit = true; });
     if (!lit && LIGHT > 0) {   // ライトがないときは、カメラの右上うしろから当てる
@@ -246,6 +246,7 @@
         const tick = (now) => {
           if (!running) return;
           const dt = last < 0 ? 1 / 60 : Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; t += dt;   // 重くても飛ばない
+          if (camD && CAM_LIFT) { const x = Math.min(1, (t - t1) / (end - t1) / 0.65); cam.position.y = camY + CAM_LIFT * 2 * camD * Math.tan((cam.fov * Math.PI) / 360) * x * x * (3 - 2 * x); }   // カメラを、ゆっくり上へ
           mixer.update(dt); renderer.render(scene, cam); onFrame(t, end);
           raf = requestAnimationFrame(tick);
         };
@@ -283,20 +284,6 @@
     if (player) player.dispose();
     shown || showSite(); box.remove(); root.classList.remove('op-on', 'op-hold');
     window.dispatchEvent(new Event('oc-op-end'));
-  }
-
-  // ---------- スマホで、画面の上を引っぱって読み込み直す動きを止める ----------
-  // ふつうは index.html の CSS で止まる。効かない古いスマホだけ、ここで止める
-  function guardPull() {
-    if (window.CSS && CSS.supports && CSS.supports('overscroll-behavior-y', 'none')) return;
-    let x = 0, y = 0, top = false;
-    const scrolled = (el) => { for (; el && el !== document.body && el !== root; el = el.parentElement) if (el.scrollTop > 0) return true; return false; };
-    document.addEventListener('touchstart', (e) => { const p = e.touches[0]; top = e.touches.length === 1 && (window.scrollY || 0) <= 0 && !scrolled(e.target); if (p) { x = p.clientX; y = p.clientY; } }, { passive: true });
-    document.addEventListener('touchmove', (e) => {
-      const p = e.touches[0]; if (!top || !p || e.touches.length !== 1) return;
-      const dy = p.clientY - y, dx = p.clientX - x; x = p.clientX; y = p.clientY;
-      if ((window.scrollY || 0) > 0) top = false; else if (dy > 0 && dy >= Math.abs(dx) && e.cancelable) e.preventDefault();
-    }, { passive: false });
   }
 
 })();
