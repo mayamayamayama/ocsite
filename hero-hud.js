@@ -127,9 +127,10 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 // 入場画面のファイルが足りない・古い・入れ替わっているときは、画面の下に、どのファイルをどうすればいいかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R52';   // このファイル一式の番号
+  const RELEASE = 'R53';   // このファイル一式の番号
   const NEED = ['op', 'hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-elder', 'hero-elder2', 'hero-elder3', 'hero-elder4', 'hero-elder5', 'hero-elder6', 'hero-elder7', 'hero-hud', 'hero'];
-  const SIZE = { 'op': 18284, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 17251, 'hero': 19122 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
+  const SIZE = { 'op': 18391, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 17384, 'hero': 19122 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
+  const near = (n, len) => (n === 'op' ? Math.abs(len - SIZE[n]) <= 120 : len === SIZE[n]);   // op.js は、いちばん上の数字を書きかえても大丈夫なように、少しの差はゆるす
   const nameOf = (s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '');
   const look = (src, mode) => fetch(src, { cache: mode }).then((r) => (r.ok ? r.text().then((tx) => ({ len: tx.length, who: (tx.match(/push\('([\w-]+)'\)/) || [])[1] })) : { len: -r.status })).catch(() => null);
   function run() {
@@ -153,7 +154,7 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
     // ファイルの中身を確かめる（まず、今動いているもの。おかしければ、GitHub にあるものも）
     if (!window.fetch || location.protocol === 'file:') return;
     Promise.all(NEED.map((n) => (els[n] ? look(els[n].src, 'default') : Promise.resolve(null)))).then((got) => {
-      const bad = NEED.filter((n, i) => got[i] && (got[i].len !== SIZE[n] || got[i].who !== n));
+      const bad = NEED.filter((n, i) => got[i] && (!near(n, got[i].len) || got[i].who !== n));
       if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
       Promise.all(bad.map((n) => look(els[n].src, 'no-store'))).then((srv) => {
         const kb = (v) => (v / 1024).toFixed(1) + 'KB';
@@ -161,7 +162,7 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
           if (!q) return f + '確かめられませんでした';
           if (q.len < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '.js」か確かめて、アップロードしてね';
           if (q.who && q.who !== n) return f + '中身が ' + q.who + '.js になっている！ 正しい ' + n + '.js をアップロードしてね';
-          if (q.len !== SIZE[n]) return f + '中身が古いか、途中で切れている（' + kb(q.len) + '、正しくは ' + kb(SIZE[n]) + '）。もう一度アップロードしてね';
+          if (!near(n, q.len)) return f + '中身が古いか、途中で切れている（' + kb(q.len) + '、正しくは ' + kb(SIZE[n]) + '）。もう一度アップロードしてね';
           return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね';
         }).join('\n'));
       });
