@@ -4,19 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OC ARCHIVE</title>
+  <!-- OP（op.mp4 → kabeban.glb）を出すかどうか。同じタブで読み込み直したときは出さない。アドレスの最後に ?op をつけると、いつでも出る -->
+  <script>
+    (function () {
+      var h = document.documentElement, q = location.search, seen = false;
+      try { seen = !!sessionStorage.getItem('oc-op'); } catch (e) {}
+      var on = /[?&]op(=|&|$)/.test(q) || !(seen || /[?&](check|hero=)/.test(q) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches));
+      if (!on) return;
+      h.classList.add('op-on', 'op-hold');
+      var off = function () { if (!window.OC_OP) h.classList.remove('op-on', 'op-hold'); };   // op.js が無い・こわれているときは、サイトを出す
+      setTimeout(off, 6000); window.addEventListener('load', off);
+    })();
+  </script>
+  <!-- 3D の部品（three.js）の場所。op.js が使います -->
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <style>
+    /* スマホで、画面のいちばん上を下に引っぱって読み込み直す動きを止める */
+    html, body { overscroll-behavior-y: none; }
+    /* OP（op.js が動かします） */
+    #op { display: none; }
+    html.op-on #op { display: block; position: fixed; inset: 0; z-index: 2147483000; background: #000; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    #op > video, #op > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; }
+    #op > video { background: #000; }   /* 動画のうしろに用意してある 3D を、動画のあいだは見せない */
+    #op button { position: absolute; padding: 12px 14px; border: 0; background: none; color: #fff; mix-blend-mode: difference; font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .22em; cursor: pointer; }
+    #op .op-skip { right: 10px; bottom: 10px; opacity: 0; transition: opacity .5s; }
+    #op .op-skip.on { opacity: .7; }
+    #op .op-tap { left: 50%; top: 50%; transform: translate(-50%, -50%); animation: opBlink 1.4s ease-in-out infinite; }
+    #op [hidden] { display: none !important; }
+    @keyframes opBlink { 50% { opacity: .35; } }
+    html.op-hold .hero-main { transform: translateY(-300vh); }   /* OP のあいだは、入場画面を止めておく */
+  </style>
   <!-- 文字（Google Fonts）。読み込めなくても、ほかの文字で表示されます -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- デザイン（style.css）と、追加の演出（effects.css）を読み込み -->
-  <link rel="stylesheet" href="style.css?v=49">
-  <link rel="stylesheet" href="design.css?v=49">
-  <link rel="stylesheet" href="motion.css?v=49">
-  <link rel="stylesheet" href="effects.css?v=49">
-  <link rel="stylesheet" href="bridge.css?v=49">
-  <link rel="stylesheet" href="profile.css?v=49">
+  <link rel="stylesheet" href="style.css?v=50">
+  <link rel="stylesheet" href="design.css?v=50">
+  <link rel="stylesheet" href="motion.css?v=50">
+  <link rel="stylesheet" href="effects.css?v=50">
+  <link rel="stylesheet" href="bridge.css?v=50">
+  <link rel="stylesheet" href="profile.css?v=50">
 </head>
 <body>
+
+  <!-- OP：ロゴの動画（op.mp4）→ 壁のアニメーション（kabeban.glb）。op.js が動かします -->
+  <div id="op" aria-hidden="true"><canvas></canvas><video muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video></div>
+  <script src="op.js?v=50"></script>
 
   <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
   <canvas id="dot-bg" aria-hidden="true"></canvas>
@@ -118,40 +153,40 @@
 
   <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 入場画面（hero.js）→ 最後の文字（reel.js）→ ノイズなどの演出（effects.js） -->
   <script src="editor.js"></script>
-  <script src="site.js?v=49"></script>
-  <script src="hero-parts.js?v=49"></script>
-  <script src="hero-parts2.js?v=49"></script>
-  <script src="hero-parts3.js?v=49"></script>
-  <script src="hero-parts4.js?v=49"></script>
-  <script src="hero-kit.js?v=49"></script>
-  <script src="hero-scenes.js?v=49"></script>
-  <script src="hero-scenes2.js?v=49"></script>
-  <script src="hero-abstract.js?v=49"></script>
-  <script src="hero-abstract2.js?v=49"></script>
-  <script src="hero-mountain.js?v=49"></script>
-  <script src="hero-mountain2.js?v=49"></script>
-  <script src="hero-game.js?v=49"></script>
-  <script src="hero-game2.js?v=49"></script>
-  <script src="hero-physics.js?v=49"></script>
-  <script src="hero-physics2.js?v=49"></script>
-  <script src="hero-physics3.js?v=49"></script>
-  <script src="hero-ancient.js?v=49"></script>
-  <script src="hero-ancient2.js?v=49"></script>
-  <script src="hero-ancient3.js?v=49"></script>
-  <script src="hero-ancient4.js?v=49"></script>
-  <script src="hero-elder.js?v=49"></script>
-  <script src="hero-elder2.js?v=49"></script>
-  <script src="hero-elder3.js?v=49"></script>
-  <script src="hero-elder4.js?v=49"></script>
-  <script src="hero-elder5.js?v=49"></script>
-  <script src="hero-elder6.js?v=49"></script>
-  <script src="hero-elder7.js?v=49"></script>
-  <script src="hero-hud.js?v=49"></script>
-  <script src="hero.js?v=49"></script>
-  <script src="reel.js?v=49"></script>
-  <script src="effects.js?v=49"></script>
-  <script src="bridge.js?v=49"></script>
-  <script src="trans.js?v=49"></script>
-  <script src="profile.js?v=49"></script>
+  <script src="site.js?v=50"></script>
+  <script src="hero-parts.js?v=50"></script>
+  <script src="hero-parts2.js?v=50"></script>
+  <script src="hero-parts3.js?v=50"></script>
+  <script src="hero-parts4.js?v=50"></script>
+  <script src="hero-kit.js?v=50"></script>
+  <script src="hero-scenes.js?v=50"></script>
+  <script src="hero-scenes2.js?v=50"></script>
+  <script src="hero-abstract.js?v=50"></script>
+  <script src="hero-abstract2.js?v=50"></script>
+  <script src="hero-mountain.js?v=50"></script>
+  <script src="hero-mountain2.js?v=50"></script>
+  <script src="hero-game.js?v=50"></script>
+  <script src="hero-game2.js?v=50"></script>
+  <script src="hero-physics.js?v=50"></script>
+  <script src="hero-physics2.js?v=50"></script>
+  <script src="hero-physics3.js?v=50"></script>
+  <script src="hero-ancient.js?v=50"></script>
+  <script src="hero-ancient2.js?v=50"></script>
+  <script src="hero-ancient3.js?v=50"></script>
+  <script src="hero-ancient4.js?v=50"></script>
+  <script src="hero-elder.js?v=50"></script>
+  <script src="hero-elder2.js?v=50"></script>
+  <script src="hero-elder3.js?v=50"></script>
+  <script src="hero-elder4.js?v=50"></script>
+  <script src="hero-elder5.js?v=50"></script>
+  <script src="hero-elder6.js?v=50"></script>
+  <script src="hero-elder7.js?v=50"></script>
+  <script src="hero-hud.js?v=50"></script>
+  <script src="hero.js?v=50"></script>
+  <script src="reel.js?v=50"></script>
+  <script src="effects.js?v=50"></script>
+  <script src="bridge.js?v=50"></script>
+  <script src="trans.js?v=50"></script>
+  <script src="profile.js?v=50"></script>
 </body>
 </html>
