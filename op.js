@@ -1,289 +1,192 @@
-// op.js — サイトを開いたときのオープニング（OP）
-// ① op.mp4（ロゴの動画）→ ② 終わった瞬間に kabeban.glb（壁が割れる）→ 割れた壁のうしろに、サイト
-// ・動画の最後の1コマを壁の表に貼るので、ロゴの画面が、そのまま割れて飛び散ります
-// ・同じタブで読み込み直したときは出しません。もう一度見たいときは、アドレスの最後に ?op
-// ・見つからない・読み込めないときは、そこをとばします
-// ・?check で、op.mp4 と kabeban.glb の中身も表示します
-(window.OC_LOADED = window.OC_LOADED || []).push('op');
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OC ARCHIVE</title>
+  <!-- OP（op.mp4 → kabeban.glb）を出すかどうか。同じタブで読み込み直したときは出さない。アドレスの最後に ?op をつけると、いつでも出る -->
+  <script>
+    (function () {
+      var h = document.documentElement, q = location.search, seen = false;
+      try { seen = !!sessionStorage.getItem('oc-op'); } catch (e) {}
+      var on = /[?&]op(=|&|$)/.test(q) || !(seen || /[?&](check|hero=)/.test(q) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches));
+      if (!on) return;
+      h.classList.add('op-on', 'op-hold');
+      var off = function () { if (!window.OC_OP) h.classList.remove('op-on', 'op-hold'); };   // op.js が無い・こわれているときは、サイトを出す
+      setTimeout(off, 6000); window.addEventListener('load', off);
+    })();
+  </script>
+  <!-- 3D の部品（three.js）の場所。op.js が使います -->
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <style>
+    /* スマホで、画面のいちばん上を下に引っぱって読み込み直す動きを止める（html だけにつける。body につけるとスクロールできなくなる） */
+    html { overscroll-behavior-y: none; }
+    /* OP（op.js が動かします） */
+    #op { display: none; }
+    html.op-on #op { display: block; position: fixed; inset: 0; z-index: 2147483000; background: #000; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+    #op > video, #op > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; }
+    #op > video { background: #000; }   /* 動画のうしろに用意してある 3D を、動画のあいだは見せない */
+    #op button { position: absolute; padding: 12px 14px; border: 0; background: none; color: #fff; mix-blend-mode: difference; font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .22em; cursor: pointer; }
+    #op .op-skip { right: 10px; bottom: 10px; opacity: 0; transition: opacity .5s; }
+    #op .op-skip.on { opacity: .7; }
+    #op .op-tap { left: 50%; top: 50%; transform: translate(-50%, -50%); animation: opBlink 1.4s ease-in-out infinite; }
+    #op [hidden] { display: none !important; }
+    @keyframes opBlink { 50% { opacity: .35; } }
+    html.op-hold .hero-main { transform: translateY(-300vh); }   /* OP のあいだは、入場画面を止めておく */
+  </style>
+  <!-- 文字（Google Fonts）。読み込めなくても、ほかの文字で表示されます -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- デザイン（style.css）と、追加の演出（effects.css）を読み込み -->
+  <link rel="stylesheet" href="style.css?v=53">
+  <link rel="stylesheet" href="design.css?v=53">
+  <link rel="stylesheet" href="motion.css?v=53">
+  <link rel="stylesheet" href="effects.css?v=53">
+  <link rel="stylesheet" href="bridge.css?v=53">
+  <link rel="stylesheet" href="profile.css?v=53">
+</head>
+<body>
 
-(function () {
-  // ===== 変えてもいいところ =====
-  const VIDEO = 'op.mp4';            // ロゴの動画（index.html と同じ場所に置く）
-  const MODEL = 'kabeban.glb';       // 壁のアニメーション（同じく）
-  const FIT = 'cover';               // 'cover'＝画面いっぱい／'contain'＝動画のはしまで全部見せる
-  const VIDEO_SAFE = 0.3;            // cover でも、動画のまん中のこの割合は、かならず見せる（ロゴが切れないように）
-  const SITE_BEHIND_WALL = true;     // 壁のうしろにサイトを置く（false にすると、動画の最後の色）
-  const LOGO_ON_WALL = true;         // 動画の最後の1コマを、壁の表に貼る（ロゴごと割れる）
-  const SKIP_STILL = true;           // glb の最初の「まだ動いていない時間」をとばして、すぐに割れ始める
-  const CAM_LIFT = 2.5;              // 割れたあと、カメラを上げる量（画面の高さの何倍か）。下に残るかけらが画面から出ていく（0 で動かさない）
-  const FADE_SEC = 0.6;              // 最後に、残ったかけらが消える時間（秒）
-  const TONE = 'agx';                // 色の見え方：'agx'（Blender 4 の標準）／'filmic'（Blender 3 の標準）／'standard'
-  const EXPOSURE = 1.0;              // 3D の明るさ（1.2 で明るく、0.8 で暗く）
-  const LIGHT = 1.0;                 // glb にライトがないときの、ライトの強さ（0 で、なし）
-  const SKIP_BUTTON = true;          // 動画のあいだ、右下に SKIP を出す
-  const SOUND = false;               // true にすると、動画の音を出す（最初に、画面をタップしてもらう）
-  const MAX_TEX = 2048;              // glb の中の画像は、この大きさまで縮める（スマホのため）
-  // ============================
-  const CDN = 'https://cdn.jsdelivr.net/npm/three@0.160.0/';   // index.html の importmap と同じ番号にする
-  const MODEL_WAIT = 8, STALL = 10, MAX_SEC = 90;               // 待つ秒数
+  <!-- OP：ロゴの動画（op.mp4）→ 壁のアニメーション（kabeban.glb）。op.js が動かします -->
+  <div id="op" aria-hidden="true"><canvas></canvas><video muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video></div>
+  <script src="op.js?v=53"></script>
 
-  const root = document.documentElement, box = document.getElementById('op');
-  const OP = (window.OC_OP = { cfg: { VIDEO, MODEL, SKIP_STILL }, log: [] });   // cfg は ?check 用
-  const log = (s) => OP.log.push([s, Math.round(performance.now())]);
-  if (!box) return;
-  if (!root.classList.contains('op-on')) { box.remove(); return; }
-  try { sessionStorage.setItem('oc-op', '1'); } catch (e) { /* 保存できなくても動く */ }
+  <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
+  <canvas id="dot-bg" aria-hidden="true"></canvas>
 
-  const video = box.querySelector('video'), cv = box.querySelector('canvas'), T0 = performance.now();
-  const shot = document.createElement('canvas');   // 動画の最後の1コマ（壁の表に貼る）
-  let phase = 'video', player = null, tap = null, shown = false, lastMove = T0, lastT = -1, lastPaint = 0, dog = 0, vbox = null, kept = false;
-  Object.defineProperty(OP, 'phase', { get: () => phase });
+  <!-- 画面の四隅に出る、飾りの文字と図形（site.js が動かします） -->
+  <div class="hud" aria-hidden="true">
+    <span class="hud-tl">OC ARCHIVE &copy;2026</span>
+    <span class="hud-tr" id="hud-clock">00:00:00</span>
+    <span class="hud-bl"><b id="hud-scroll">000</b>% / <b id="hud-sec">INDEX</b></span>
+    <span class="hud-br" id="hud-xy">X 0000 Y 0000</span>
+    <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+    <i class="hud-x" id="hud-x"></i><i class="hud-y" id="hud-y"></i><i class="hud-ring" id="hud-ring"></i>
+  </div>
 
-  // ---------- ① 動画 ----------
-  const ready = loadModel().then((p) => { if (phase === 'done') { if (p) p.dispose(); return null; } player = p; log('model-ready'); return p; },
-    (err) => { console.warn('[OP] ' + MODEL + ' を使えません：', err); log('model-fail'); return null; });
-  try {
-    video.muted = video.defaultMuted = !SOUND; video.playsInline = true;
-    video.addEventListener('loadedmetadata', place); window.addEventListener('resize', place);
-    video.addEventListener('ended', () => { log('video-end'); toModel(); });
-    video.addEventListener('error', () => { console.warn('[OP] ' + VIDEO + ' を再生できません'); log('video-fail'); toModel(); });
-    video.addEventListener('playing', () => { log('video-play'); hideTap(); place(); paint(); });
-    if (video.requestVideoFrameCallback) {
-      const f = (now) => {
-        if (phase !== 'video') return;
-        if (now - lastPaint > 90) { lastPaint = now; paint(); }
-        if (LOGO_ON_WALL && video.duration && video.currentTime > video.duration - 0.4) keep();   // 最後のコマをとっておく
-        video.requestVideoFrameCallback(f);
-      };
-      video.requestVideoFrameCallback(f);
-    } else video.addEventListener('timeupdate', paint);
-    video.src = VIDEO;
-    if (SOUND) showTap(); else play();
-    if (SKIP_BUTTON) { const b = btn('op-skip', 'SKIP'); b.addEventListener('click', (e) => { e.stopPropagation(); finish(true); }); setTimeout(() => b.classList.add('on'), 1200); }
-    box.addEventListener('click', () => { if (tap && !tap.hidden) { hideTap(); play(); } });
-    const stop = (e) => { if (e.cancelable) e.preventDefault(); };   // うしろのページを動かさない
-    box.addEventListener('wheel', stop, { passive: false }); box.addEventListener('touchmove', stop, { passive: false });
-    window.addEventListener('keydown', (e) => {
-      if (phase === 'done' || phase === 'out' || (phase === 'model' && SITE_BEHIND_WALL)) return;
-      if (e.key === 'Escape') finish(true); else if ([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) e.preventDefault();
-    });
-  } catch (e) { console.error('[OP]', e); done(); }
+  <!-- 画面を切り替えるときの幕（site.js が動かします） -->
+  <div id="curtain" class="curtain" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i></div>
 
-  // 見張り：動画が進まない・終わったのに合図が来ない・長すぎる、ときは先へ進む
-  dog = setInterval(() => {
-    const now = performance.now();
-    if (tap && !tap.hidden) lastMove = now;
-    if (phase === 'video') {
-      if (video.currentTime !== lastT) { lastT = video.currentTime; lastMove = now; }
-      if (video.duration && video.paused && video.currentTime >= video.duration - 0.1) toModel();
-      else if (now - lastMove > STALL * 1000) { console.warn('[OP] 動画が進まないので、とばします'); toModel(); }
-    }
-    if (now - T0 > MAX_SEC * 1000) finish(true);
-  }, 500);
+  <!-- ==========================================
+       ビュー1：入場画面 ＋ キャラクター一覧画面
+       ========================================== -->
+  <div id="index-screen" class="view active">
 
-  function play() {
-    let p; try { p = video.play(); } catch (e) { showTap(); return; }
-    if (p && p.catch) p.catch((e) => { if (phase === 'video' && e && e.name === 'NotAllowedError') showTap(); });   // 省電力モードなど
-  }
-  function btn(cls, txt) { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = txt; box.appendChild(b); return b; }
-  function showTap() { if (!tap) tap = btn('op-tap', 'TAP TO START'); tap.hidden = false; log('tap'); }
-  function hideTap() { if (tap) tap.hidden = true; }
+    <!-- 入場画面（メインビジュアル。hero.js が動かします） -->
+    <section class="hero-main" id="hero-main">
+      <canvas id="hero-cv" aria-hidden="true"></canvas>
+      <div class="hm-text">
+        <h1 class="hm-title" aria-label="OC ARCHIVE"><span class="hm-l1" data-t="OC"></span><span class="hm-l2" data-t="ARCHIVE"></span></h1>
+        <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+      </div>
+    </section>
 
-  // 動画の大きさ：cover は画面いっぱい。まん中（VIDEO_SAFE）が切れるときは、少し小さく
-  function place() {
-    const vw = video.videoWidth, vh = video.videoHeight, W = box.clientWidth, H = box.clientHeight; if (!vw || !W) return;
-    const c = Math.min(W / vw, H / vh); let s = c;
-    if (FIT === 'cover') s = Math.max(c, Math.min(Math.max(W / vw, H / vh), W / (vw * VIDEO_SAFE), H / (vh * VIDEO_SAFE)));
-    video.style.transform = s > c * 1.001 ? 'scale(' + (s / c).toFixed(4) + ')' : '';
-    vbox = { x: (W - vw * s) / 2, y: (H - vh * s) / 2, w: vw * s, h: vh * s };
-  }
-  function keep() {
-    const vw = video.videoWidth, vh = video.videoHeight; if (!vw) return;
-    const s = Math.min(1, 2048 / Math.max(vw, vh)), w = Math.round(vw * s), h = Math.round(vh * s);
-    if (shot.width !== w || shot.height !== h) { shot.width = w; shot.height = h; }
-    try { shot.getContext('2d').drawImage(video, 0, 0, w, h); kept = true; } catch (e) { /* なにもしない */ }
-  }
+    <!-- 一度キャラクターを開いて戻ったあとの、入場画面の代わりの空間 -->
+    <section class="hero-after" aria-hidden="true">
+      <h1>OC ARCHIVE</h1>
+      <div class="subtitle">CHARACTER INDEX / VOL. 01</div>
+    </section>
 
-  // 動画のまわり（上下や左右のあき）を、動画のはしの色に合わせる
-  const sm = document.createElement('canvas'); sm.width = sm.height = 12;
-  const sc = sm.getContext('2d', { willReadFrequently: true });
-  function edge() {
-    if (!video.videoWidth) return null;
-    try {
-      sc.drawImage(video, 0, 0, 12, 12); const d = sc.getImageData(0, 0, 12, 12).data; let r = 0, g = 0, b = 0, n = 0;
-      for (let i = 0; i < 144; i++) { const x = i % 12, y = (i / 12) | 0; if (x && y && x < 11 && y < 11) continue; r += d[i * 4]; g += d[i * 4 + 1]; b += d[i * 4 + 2]; n++; }
-      return 'rgb(' + Math.round(r / n) + ',' + Math.round(g / n) + ',' + Math.round(b / n) + ')';
-    } catch (e) { return null; }
-  }
-  function paint() { if (phase !== 'video') return; const c = edge(); if (c) video.style.backgroundColor = box.style.backgroundColor = c; }   // うしろの 3D は、まだ隠す
+    <!-- ノイズのグラデーション（effects.js が描きます） -->
+    <canvas id="noise-divider" aria-hidden="true"></canvas>
 
-  // ---------- ② 壁のアニメーション ----------
-  function toModel() {
-    if (phase !== 'video') return;
-    phase = 'wait'; hideTap();
-    const c = edge(); if (c) box.style.backgroundColor = c;
-    if (LOGO_ON_WALL && !kept) keep();
-    if (player) return startModel();
-    ready.then((p) => { if (phase === 'wait') { if (p) startModel(); else finish(); } });
-    setTimeout(() => { if (phase === 'wait') { console.warn('[OP] ' + MODEL + ' の読み込みが間に合わないので、とばします'); finish(); } }, MODEL_WAIT * 1000);
-  }
-  function startModel() {
-    phase = 'model'; log('model-start');
-    player.start((t, end) => { if (phase === 'model' && t >= end - FADE_SEC) finish(); }, LOGO_ON_WALL && kept && vbox ? { canvas: shot, rect: vbox } : null);
-    video.style.visibility = 'hidden';
-    if (SITE_BEHIND_WALL) {   // 壁のうしろは、もうサイト（さわれる）
-      box.style.backgroundColor = 'transparent'; box.style.pointerEvents = 'none';
-      box.querySelectorAll('button').forEach((b) => { b.hidden = true; });
-      showSite();
-    }
-  }
+    <!-- 流れる文字の帯 -->
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
 
-  async function loadModel() {
-    const file = fetch(MODEL, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(MODEL + ' が見つからない（' + r.status + '）'); return r.arrayBuffer(); });
-    file.catch(() => {});
-    const [THREE, { GLTFLoader }, { DRACOLoader }, { RoomEnvironment }] = await Promise.all([import('three'), import('three/addons/loaders/GLTFLoader.js'),
-      import('three/addons/loaders/DRACOLoader.js'), import('three/addons/environments/RoomEnvironment.js')]);
-    const buf = await file;
-    if (phase === 'done') return null;
-    const loader = new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath(CDN + 'examples/jsm/libs/draco/gltf/'));
-    const gltf = await loader.parseAsync(buf, '');
-    if (phase === 'done') return null;
+    <section class="list-head" id="list-head">
+      <p class="mono kicker"><span>( 01 — INDEX )</span><span class="anim-icons" aria-hidden="true"><i class="ai a1"></i><i class="ai a2"></i><i class="ai a3"></i><i class="ai a4"><b></b><b></b><b></b><b></b></i></span><span id="serial">SER. 0000</span></p>
+      <h2 class="big" id="list-title">CHARACTER</h2>
+      <p class="mono meta"><span><b id="count">00</b> ENTRIES</span><span class="rule"></span><span id="hexline">0x0000</span></p>
+    </section>
 
-    const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setClearColor(0x000000, 0);   // 色をぬらない（うしろのサイトが見える）
-    renderer.toneMapping = TONE === 'standard' ? THREE.NoToneMapping : (TONE === 'agx' && THREE.AgXToneMapping) || THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = EXPOSURE;
-    const scene = new THREE.Scene(), model = gltf.scene || gltf.scenes[0], extra = [];
-    scene.add(model);
-    const pm = new THREE.PMREMGenerator(renderer), env = pm.fromScene(new RoomEnvironment(renderer), 0.04).texture;   // まわりの明るさ
-    pm.dispose(); scene.environment = env;
+    <!-- 飾りの帯：広がる波紋、回る文字の輪、散らばる小さな文字 -->
+    <section class="deco-band">
+      <svg class="ripples" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <circle class="rp" cx="50" cy="40" r="2"/><circle class="rp" cx="50" cy="40" r="2" style="animation-delay:-2.3s"/><circle class="rp" cx="50" cy="40" r="2" style="animation-delay:-4.6s"/>
+      </svg>
+      <div class="scatter" id="scatter-band" aria-hidden="true"></div>
+      <div class="rings" id="rings" aria-hidden="true"></div>
+      <a class="bracket" id="go-grid" href="#character-grid">ファイルを開く &darr;</a>
+    </section>
 
-    // 大きすぎる画像は縮める（スマホの 3D のメモリが足りなくならないように）
-    const big = new Set();
-    model.traverse((o) => [].concat(o.material || []).forEach((m) => Object.values(m).forEach((v) => { if (v && v.isTexture && v.image && Math.max(v.image.width || 0, v.image.height || 0) > MAX_TEX) big.add(v); })));
-    big.forEach((tx) => {
-      const im = tx.image, s = MAX_TEX / Math.max(im.width, im.height), c = document.createElement('canvas');
-      c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-      tx.image = c; tx.needsUpdate = true;
-    });
+    <main class="character-grid" id="character-grid"></main>
 
-    // 動き：glb に入っている動きを、ぜんぶ同時に1回だけ再生（最後の形で止める）
-    const mixer = new THREE.AnimationMixer(model); let dur = 0, t = 0;
-    gltf.animations.forEach((clip) => { const a = mixer.clipAction(clip); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; a.play(); dur = Math.max(dur, clip.duration); });
-    if (SKIP_STILL && gltf.animations.length) {   // どれかが動き始める時刻を探す
-      let s0 = Infinity;
-      gltf.animations.forEach((clip) => clip.tracks.forEach((tr) => {
-        const n = tr.getValueSize(), v = tr.values, T = tr.times;
-        for (let k = 1; k < T.length; k++) { let d = 0; for (let c = 0; c < n; c++) d = Math.max(d, Math.abs(v[k * n + c] - v[c])); if (d > 1e-4) { s0 = Math.min(s0, T[k - 1]); break; } }
-      }));
-      if (isFinite(s0)) t = s0;
-    }
-    mixer.update(t); model.updateMatrixWorld(true);
-    const end = Math.max(dur, t + 1), t1 = t;   // 動きがないときは、1秒見せる
+    <!-- 最後の文字：場面が横にスライドして切り替わる（reel.js が動かします） -->
+    <section class="reel" id="reel" aria-hidden="true">
+      <div class="rs" data-i="0">
+        <p class="rs-small" data-sp="1.15">Your Characters, Our Archive.<br>We Are OC ARCHIVE.</p>
+        <div class="rs-giant" data-sp="1" data-fit="0.97"><b>OC'S</b></div>
+        <div class="rs-cols" data-sp="1.45" data-list="0"></div>
+      </div>
+      <div class="rs" data-i="1">
+        <p class="rs-small" data-sp="1.15">OC's Creative Birth.</p>
+        <div class="rs-giant" data-sp="1" data-fit="0.97"><b>WORLD</b></div>
+        <div class="rs-cols" data-sp="1.45" data-list="1"></div>
+      </div>
+      <div class="rs" data-i="2">
+        <div class="rs-multi" data-sp="1" data-fit="0.97"><div style="--n:0">OC ARCHIVE</div><div style="--n:1">OC ARCHIVE</div><div style="--n:2">OC ARCHIVE</div><div style="--n:3">OC ARCHIVE</div></div>
+        <i class="rs-line" data-sp="1"></i>
+        <div class="rs-thumbs" data-sp="1.7"></div>
+      </div>
+      <div class="reel-hud mono"><span id="reel-no">01 / 03</span><span class="reel-bar"><i id="reel-bar"></i></span><span>TAP &rarr;</span></div>
+    </section>
 
-    // カメラ：glb のカメラ。なければ正面（Blender の「前」）から、壁が画面いっぱいに
-    let cam = (gltf.cameras || []).find((c) => c.isPerspectiveCamera || c.isOrthographicCamera), baseA, zoom = 1, camY = 0, camD = 0;
-    if (cam) baseA = cam.isPerspectiveCamera ? (cam.aspect && cam.aspect !== 1 ? cam.aspect : video.videoWidth ? video.videoWidth / video.videoHeight : cam.aspect || 16 / 9) : (cam.right - cam.left) / (cam.top - cam.bottom);
-    else {
-      const bb = new THREE.Box3().setFromObject(model);
-      if (bb.isEmpty()) throw new Error(MODEL + ' の中に、形がない');
-      const s = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3()), h = Math.max(s.y, 1e-3), d = h / 2 / Math.tan((15 * Math.PI) / 180) + s.z / 2;
-      cam = new THREE.PerspectiveCamera(30, 1, d / 100, d * 100 + s.z);
-      cam.position.set(c.x, c.y, c.z + d); cam.lookAt(c); scene.add(cam);
-      baseA = Math.max(s.x, 1e-3) / h; zoom = 1.04; camY = cam.position.y; camD = d - s.z / 2;   // はしに、すき間ができないように、少し寄る
-    }
-    let lit = false; model.traverse((o) => { if (o.isLight) lit = true; });
-    if (!lit && LIGHT > 0) {   // ライトがないときは、カメラの右上うしろから当てる
-      const sun = new THREE.DirectionalLight(0xffffff, 1.5 * LIGHT); sun.position.set(1.5, 2.5, 1); sun.target.position.set(0, 0, -6);
-      cam.add(sun); cam.add(sun.target); if (!cam.parent) scene.add(cam);
-    }
-    const persp = !!cam.isPerspectiveCamera, fov0 = cam.fov, by0 = (cam.top - cam.bottom) / 2;
-    let running = false, raf = 0, last = 0;
-    function fit() {
-      const w = cv.clientWidth || window.innerWidth, h = cv.clientHeight || window.innerHeight, a = w / h, wide = a > baseA;
-      renderer.setSize(w, h, false);
-      const k = (FIT === 'cover' ? (wide ? baseA / a : 1) : wide ? 1 : baseA / a) / zoom;   // 縦の広さ
-      if (persp) { cam.fov = (2 * Math.atan(Math.tan((fov0 * Math.PI) / 360) * k) * 180) / Math.PI; cam.aspect = a; }
-      else { cam.top = by0 * k; cam.bottom = -by0 * k; cam.right = by0 * k * a; cam.left = -by0 * k * a; }
-      cam.updateProjectionMatrix();
-    }
-    // 動画の最後の1コマを、見えている位置のまま、壁の表（カメラを向いた面）に貼る
-    const p = new THREE.Vector3(), q = new THREE.Vector3(), n = new THREE.Vector3(), nm = new THREE.Matrix3(), eye = new THREE.Vector3(), front = [];
-    const facing = (o, i) => { p.fromBufferAttribute(o.geometry.attributes.position, i).applyMatrix4(o.matrixWorld); n.fromBufferAttribute(o.geometry.attributes.normal, i).applyMatrix3(nm).normalize(); return n.dot(q.copy(eye).sub(p).normalize()) > 0.5; };
-    const logoMat = LOGO_ON_WALL ? new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shot), toneMapped: false }) : null;
-    fit(); scene.updateMatrixWorld(true); eye.setFromMatrixPosition(cam.matrixWorld);
-    if (logoMat) {
-      logoMat.map.colorSpace = THREE.SRGBColorSpace; extra.push(logoMat);
-      model.traverse((o) => { if (!o.isMesh || !o.geometry.attributes.normal) return; nm.getNormalMatrix(o.matrixWorld); for (let i = 0; i < o.geometry.attributes.position.count; i++) if (facing(o, i)) { front.push(o); return; } });
-    }
-    function logo(f) {
-      const W = cv.clientWidth || window.innerWidth, H = cv.clientHeight || window.innerHeight;
-      scene.updateMatrixWorld(true); eye.setFromMatrixPosition(cam.matrixWorld);
-      front.forEach((o) => {
-        const P = o.geometry.attributes.position, uv = new Float32Array(P.count * 2);
-        nm.getNormalMatrix(o.matrixWorld);
-        for (let i = 0; i < P.count; i++) {
-          if (facing(o, i)) { p.project(cam); uv[i * 2] = (((p.x + 1) / 2) * W - f.rect.x) / f.rect.w; uv[i * 2 + 1] = 1 - (((1 - p.y) / 2) * H - f.rect.y) / f.rect.h; }
-          else uv[i * 2] = uv[i * 2 + 1] = 0.002;   // 横や裏は、動画のすみの色
-        }
-        o.geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-        [].concat(o.material).forEach((m) => extra.includes(m) || extra.push(m)); o.material = logoMat;
-      });
-      logoMat.map.needsUpdate = true;
-    }
-    const dummy = logoMat && new THREE.Mesh(new THREE.PlaneGeometry(1e-4, 1e-4), logoMat);   // 貼る瞬間に止まらないよう、先に準備
-    if (dummy) scene.add(dummy);
-    if (renderer.compileAsync) await renderer.compileAsync(scene, cam); else renderer.compile(scene, cam);
-    if (dummy) { scene.remove(dummy); dummy.geometry.dispose(); }
-    renderer.render(scene, cam);   // 1枚目を、動画の下に用意しておく
-    const ro = new ResizeObserver(() => { fit(); if (!running) renderer.render(scene, cam); }); ro.observe(cv);
+    <footer>
+      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+    </footer>
+  </div>
 
-    return {
-      start(onFrame, frame) {
-        if (frame && logoMat && front.length) { try { logo(frame); } catch (e) { console.warn('[OP] ロゴを壁に貼れませんでした', e); } }
-        running = true; last = -1; renderer.render(scene, cam);   // 切りかわる瞬間の1枚
-        const tick = (now) => {
-          if (!running) return;
-          const dt = last < 0 ? 1 / 60 : Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; t += dt;   // 重くても飛ばない
-          if (camD && CAM_LIFT) { const x = Math.min(1, (t - t1) / (end - t1) / 0.65); cam.position.y = camY + CAM_LIFT * 2 * camD * Math.tan((cam.fov * Math.PI) / 360) * x * x * (3 - 2 * x); }   // カメラを、ゆっくり上へ
-          mixer.update(dt); renderer.render(scene, cam); onFrame(t, end);
-          raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-      },
-      dispose() {
-        running = false; cancelAnimationFrame(raf); ro.disconnect(); mixer.stopAllAction();
-        const kill = (m) => { Object.values(m).forEach((v) => { if (v && v.isTexture) v.dispose(); }); m.dispose(); };
-        model.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.skeleton) o.skeleton.dispose(); [].concat(o.material || []).forEach(kill); });
-        extra.forEach(kill); env.dispose(); renderer.dispose(); renderer.forceContextLoss();
-      },
-      get time() { return t; }, dur
-    };
-  }
+  <!-- ==========================================
+       ビュー2：詳細画面
+       ========================================== -->
+  <div id="detail-screen" class="view">
+    <div class="container">
+      <button class="back-btn" id="back-btn"><span>&larr;</span> INDEX</button>
+      <div id="profile-box"></div>
+    </div>
+    <footer>
+      &copy; 2026 MY OC NOTE. ALL RIGHTS RESERVED.
+    </footer>
+  </div>
 
-  // ---------- ③ サイトへ ----------
-  function showSite() {   // 入場画面を動かし始める（最初から）
-    if (shown) return; shown = true;
-    root.classList.remove('op-hold');
-    const H = window.OC_HERO; if (H && H.seek) H.seek(0);
-    const hero = document.getElementById('hero-main');
-    if (hero && hero.classList.contains('is-in')) { hero.classList.remove('is-in'); void hero.offsetWidth; hero.classList.add('is-in'); }   // 大きな文字も、もう一度
-  }
-  function finish(fast) {
-    if (phase === 'out' || phase === 'done') return;
-    phase = 'out'; log('finish'); hideTap(); showSite();
-    const s = fast ? 0.3 : FADE_SEC;
-    box.style.pointerEvents = 'none'; box.style.transition = 'opacity ' + s + 's ease'; box.style.opacity = '0';
-    setTimeout(done, s * 1000 + 60);
-  }
-  function done() {
-    if (phase === 'done') return;
-    phase = 'done'; log('done'); clearInterval(dog);
-    try { video.pause(); video.removeAttribute('src'); video.load(); } catch (e) { /* なにもしない */ }
-    if (player) player.dispose();
-    shown || showSite(); box.remove(); root.classList.remove('op-on', 'op-hold');
-    window.dispatchEvent(new Event('oc-op-end'));
-  }
-
-})();
+  <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 入場画面（hero.js）→ 最後の文字（reel.js）→ ノイズなどの演出（effects.js） -->
+  <script src="editor.js"></script>
+  <script src="site.js?v=53"></script>
+  <script src="hero-parts.js?v=53"></script>
+  <script src="hero-parts2.js?v=53"></script>
+  <script src="hero-parts3.js?v=53"></script>
+  <script src="hero-parts4.js?v=53"></script>
+  <script src="hero-kit.js?v=53"></script>
+  <script src="hero-scenes.js?v=53"></script>
+  <script src="hero-scenes2.js?v=53"></script>
+  <script src="hero-abstract.js?v=53"></script>
+  <script src="hero-abstract2.js?v=53"></script>
+  <script src="hero-mountain.js?v=53"></script>
+  <script src="hero-mountain2.js?v=53"></script>
+  <script src="hero-game.js?v=53"></script>
+  <script src="hero-game2.js?v=53"></script>
+  <script src="hero-physics.js?v=53"></script>
+  <script src="hero-physics2.js?v=53"></script>
+  <script src="hero-physics3.js?v=53"></script>
+  <script src="hero-ancient.js?v=53"></script>
+  <script src="hero-ancient2.js?v=53"></script>
+  <script src="hero-ancient3.js?v=53"></script>
+  <script src="hero-ancient4.js?v=53"></script>
+  <script src="hero-elder.js?v=53"></script>
+  <script src="hero-elder2.js?v=53"></script>
+  <script src="hero-elder3.js?v=53"></script>
+  <script src="hero-elder4.js?v=53"></script>
+  <script src="hero-elder5.js?v=53"></script>
+  <script src="hero-elder6.js?v=53"></script>
+  <script src="hero-elder7.js?v=53"></script>
+  <script src="hero-hud.js?v=53"></script>
+  <script src="hero.js?v=53"></script>
+  <script src="reel.js?v=53"></script>
+  <script src="effects.js?v=53"></script>
+  <script src="bridge.js?v=53"></script>
+  <script src="trans.js?v=53"></script>
+  <script src="profile.js?v=53"></script>
+</body>
+</html>
