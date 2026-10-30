@@ -1,0 +1,143 @@
+/* mv.css — 入場したときのメインビジュアル（mv.js が動かします） */
+
+/* 入場したときは、この画面。プロフィールから戻ったあとは、モーショングラフィックス（hero-main）に替わる */
+body.is-after .mv { display: none; }
+body:not(.is-after) .hero-main, body:not(.is-after) .hero-after { display: none !important; }
+html body.is-after:not(.oc-no-hero) .hero-main { display: block !important; }
+html body.is-after:not(.oc-no-hero) .hero-after { display: none !important; }
+
+.mv {
+  --ink: #1d1b1b; --u: 4px;
+  position: relative; box-sizing: border-box; flex-shrink: 0; overflow: hidden;
+  width: 100vw; height: calc(100vh + 240px); height: calc(100svh + 240px); min-height: 660px; padding-bottom: 240px;
+  background: var(--bg, #ecebe6); color: var(--ink);
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y;
+}
+.mv-grid, .mv-confetti { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.mv-confetti { z-index: 6; }
+.mv-stage { position: absolute; left: 0; right: 0; top: 0; bottom: 240px; z-index: 2; --mx: 0; --my: 0; }
+
+/* 部品の置き場所（mv.js が left・top・大きさを決める）。奥行き --z の分だけ、マウスや指でずれる */
+.mv-p { position: absolute; z-index: 5; line-height: 1; transform: translate(-50%, -50%) translate(calc(var(--mx) * var(--z) * -16px), calc(var(--my) * var(--z) * -12px)) rotate(var(--r, 0deg)); }
+.mv-p svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mv-big-p, .mv-band-p { z-index: 0; }
+.mv-rb1-p, .mv-rb2-p, .mv-panel-p, .mv-tape1-p, .mv-tape2-p, .mv-head-p, .mv-num-p, .mv-badge-p, .mv-bl1-p, .mv-bl2-p, .mv-bl3-p { z-index: 1; }
+.mv-chara-p { z-index: 2; pointer-events: auto; cursor: pointer; }
+.mv-pola-p, .mv-tape2-p { z-index: 3; }
+.mv-pola-p { pointer-events: auto; cursor: pointer; }
+.mv-script-p { z-index: 3; }
+.mv-e, .mv-i { height: 100%; }
+
+/* ---------- 登場のしかた ---------- */
+.mv:not(.in) .mv-e:not(.e-none) { opacity: 0; }
+.mv.in .e-fade { animation: mvFade 1.4s var(--d) both; }
+.mv.in .e-pop { animation: mvPop .8s calc(var(--d) + .5s) both cubic-bezier(.2, 1.7, .4, 1); }
+.mv.in .e-slam { animation: mvSlam .7s var(--d) both cubic-bezier(.2, 1.5, .4, 1); }
+.mv.in .e-drop { animation: mvDrop .8s var(--d) both cubic-bezier(.2, 1.5, .4, 1); }
+.mv.in .e-up { animation: mvUp .7s calc(var(--d) + .3s) both cubic-bezier(.2, 1.4, .4, 1); }
+.mv.in .e-right { animation: mvRight .8s calc(var(--d) + .3s) both cubic-bezier(.2, 1.3, .4, 1); }
+.mv.in .e-rise { animation: mvRise 1s .25s both cubic-bezier(.2, 1.3, .4, 1); }
+.mv.in .e-float { animation: mvFloatIn 1.8s calc(var(--d) + .2s) both cubic-bezier(.15, 1, .3, 1); }
+.mv.in .e-wipe { animation: mvWipe 1s var(--d) both cubic-bezier(.6, 0, .2, 1); }
+.mv.in .e-write { animation: mvWrite 1.5s .7s both cubic-bezier(.45, 0, .35, 1); }
+.mv .e-draw .rb { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.mv.in .e-draw .rb { animation: mvDraw 1.8s var(--d) both cubic-bezier(.5, 0, .2, 1); }
+@keyframes mvFade { from { opacity: 0; } }
+@keyframes mvPop { from { opacity: 0; transform: scale(.15) rotate(-50deg); } }
+@keyframes mvSlam { from { opacity: 0; transform: scale(1.6) rotate(12deg); } }
+@keyframes mvDrop { from { opacity: 0; transform: translateY(-140%); } }
+@keyframes mvUp { from { opacity: 0; transform: translateY(90%); } }
+@keyframes mvRight { from { opacity: 0; transform: translateX(70%); } }
+@keyframes mvRise { from { opacity: 0; transform: translateY(40%) scale(.8); } }
+@keyframes mvFloatIn { from { opacity: 0; transform: translateY(70vh) rotate(20deg); } }
+@keyframes mvWipe { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes mvWrite { from { clip-path: inset(-30% 100% -30% -5%); } to { clip-path: inset(-30% -10% -30% -5%); } }
+@keyframes mvDraw { to { stroke-dashoffset: 0; } }
+
+/* ---------- ずっと続く動き ---------- */
+.mv .mv-i { animation-delay: var(--ph); }
+.i-bob { animation: mvBob 3.2s ease-in-out infinite alternate; }
+.i-sway { animation: mvSway 2.6s ease-in-out infinite alternate; }
+.i-float { animation: mvFloat 3.8s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.i-tw { animation: mvTw 1.5s ease-in-out infinite alternate; }
+.i-spin { animation: mvSpinS 5s ease-in-out infinite alternate; }
+.i-wig { animation: mvWig .9s steps(2, jump-none) infinite; }
+.i-wave { animation: mvWave 5s ease-in-out infinite alternate; }
+.i-breathe { animation: mvBreathe 3.4s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.i-rot { animation: mvTurn 16s linear infinite; }
+.i-sway2 { animation: mvSway2 4s ease-in-out infinite alternate; }
+@keyframes mvSway2 { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+.i-pulse { animation: mvPulse .8s ease-in-out infinite alternate; }
+@keyframes mvTurn { to { transform: rotate(360deg); } }
+@keyframes mvPulse { from { transform: scale(.9) rotate(-5deg); } to { transform: scale(1.06) rotate(4deg); } }
+@keyframes mvBob { from { transform: translateY(-5%); } to { transform: translateY(5%); } }
+@keyframes mvSway { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+@keyframes mvFloat { from { transform: translateY(-4%) rotate(-5deg); } to { transform: translateY(4%) rotate(5deg); } }
+@keyframes mvTw { from { transform: scale(.6) rotate(-12deg); } to { transform: scale(1.15) rotate(12deg); } }
+@keyframes mvSpinS { from { transform: rotate(-16deg) scale(.94); } to { transform: rotate(16deg) scale(1.06); } }
+@keyframes mvWig { from { transform: translate(0, 0) rotate(0); } to { transform: translate(3%, -6%) rotate(4deg); } }
+@keyframes mvWave { from { transform: rotate(-2.5deg) scale(1); } to { transform: rotate(2.5deg) scale(1.05); } }
+@keyframes mvBreathe { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-1.2%) scale(1.012, 1.018); } }
+
+/* タップしたとき：シールはびよーん、キャラはジャンプ */
+.mv-p.boing > .mv-e { animation: mvBoing .7s cubic-bezier(.2, 1.8, .4, 1) both !important; }
+.mv-chara-p.boing > .mv-e { animation: mvHop .75s cubic-bezier(.3, 1.4, .5, 1) both !important; }
+@keyframes mvBoing { 0% { transform: scale(.6) rotate(-25deg); } 100% { transform: none; } }
+@keyframes mvHop { 0% { transform: scale(1.06, .92); } 35% { transform: translateY(-9%) scale(.96, 1.05); } 70% { transform: translateY(0) scale(1.04, .96); } 100% { transform: none; } }
+
+/* ---------- 写真のような四角（うしろに色のずれ、中で模様が回る） ---------- */
+.mv-panel { position: relative; width: 100%; aspect-ratio: 1.42; }
+.mv-panel::before { content: ''; position: absolute; inset: 0; background: var(--violet); transform: translate(5%, -7%) rotate(3deg); }
+.mv-panel .pn { position: absolute; inset: 0; overflow: hidden; background: var(--pink); border: calc(var(--u) * 1.3) solid #fff; outline: 2px solid var(--ink); }
+.mv-sun { position: absolute; left: 50%; top: 50%; width: 260%; aspect-ratio: 1; translate: -50% -50%; background: repeating-conic-gradient(#ff6aa8 0 8deg, var(--pink) 8deg 16deg); animation: mvRot 50s linear infinite; }
+.mv-panel .mv-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, .5) 24%, transparent 26%); background-size: calc(var(--u) * 2.4) calc(var(--u) * 2.4); }
+@keyframes mvRot { to { rotate: 360deg; } }
+
+/* ---------- 立ち絵（白いふちのシール風。保存されにくくする） ---------- */
+.mv-chara { height: 100%; }
+.mv-chara img, .mv-ghost svg { display: block; height: 100%; width: auto; pointer-events: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+.mv-ghost { height: 100%; }
+.mv-chara img { --o: calc(var(--u) * .7); filter: drop-shadow(var(--o) 0 0 #fff) drop-shadow(calc(var(--o) * -1) 0 0 #fff) drop-shadow(0 var(--o) 0 #fff) drop-shadow(0 calc(var(--o) * -1) 0 #fff) drop-shadow(calc(var(--u) * 1.8) calc(var(--u) * 1.6) 0 var(--violet)); }
+
+/* ---------- 文字 ---------- */
+.mv-big { font: 900 1em/1.02 "M PLUS Rounded 1c", sans-serif; color: rgba(29, 27, 27, .075); white-space: nowrap; letter-spacing: -.02em; }
+.mv-head { display: flex; flex-direction: column; align-items: center; gap: .55em; font-family: "Space Grotesk", sans-serif; }
+.mv-head small { font-size: .62em; font-weight: 700; letter-spacing: .28em; }
+.mv-head b { display: block; padding: .55em 2.4em; letter-spacing: .3em; white-space: nowrap; background: #fff; border: .16em solid var(--ink); box-shadow: .35em .35em 0 var(--ink); }
+.mv-num { font: 600 1em/.86 "Oswald", sans-serif; color: transparent; -webkit-text-stroke: .022em var(--ink); letter-spacing: -.04em; }
+.mv-script { padding: 0 .1em; font: 400 1em/1.2 "Sacramento", cursive; color: var(--violet); white-space: nowrap; text-shadow: 0 0 .05em #fff, 0 0 .05em #fff, .03em .04em 0 #fff; }
+.mv-title { font: 400 1em/1 "Lilita One", sans-serif; color: var(--pink); white-space: nowrap; transform: skewX(-9deg); }
+.mv-title .l, .mv-catch .c { display: inline-block; }
+.mv-title .l b { display: inline-block; font-weight: 400; animation: mvLtr 2.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.16s);
+  text-shadow: .05em 0 #fff, -.05em 0 #fff, 0 .05em #fff, 0 -.05em #fff, .036em .036em #fff, -.036em -.036em #fff, .036em -.036em #fff, -.036em .036em #fff, .06em .08em 0 var(--ink), .09em .11em 0 var(--ink), .11em .13em 0 var(--ink); }
+.mv:not(.in) .mv-title .l, .mv:not(.in) .mv-catch .c { opacity: 0; }
+.mv.in .mv-title .l { animation: mvLetter .65s calc(1s + var(--i) * .06s) both cubic-bezier(.2, 1.8, .4, 1); }
+.mv.in .mv-catch .c { animation: mvType .3s calc(1.7s + var(--i) * .07s) both; }
+@keyframes mvLetter { from { opacity: 0; transform: translateY(-70%) scale(.2) rotate(-30deg); } }
+@keyframes mvLtr { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7%) rotate(-2deg); } }
+@keyframes mvType { from { opacity: 0; transform: translateY(50%); } }
+.mv-pill { display: inline-block; padding: .55em 1.5em .5em; font: 800 1em/1 "M PLUS Rounded 1c", sans-serif; letter-spacing: .3em; white-space: nowrap; background: #fff; border: .14em solid var(--ink); border-radius: 99px; box-shadow: .32em .32em 0 -.04em #fff, .32em .32em 0 .1em var(--ink); }
+.mv-catch { margin: 0; font: 800 1em/1 "M PLUS Rounded 1c", sans-serif; letter-spacing: .42em; white-space: nowrap; }
+.mv-tags { display: flex; gap: .7em; }
+.mv.wide .mv-tags { flex-direction: column; align-items: flex-end; }
+.mv-tags span { display: block; padding: .5em 1.4em .45em; font: 500 1em/1 "Oswald", sans-serif; letter-spacing: .14em; white-space: nowrap; background: #fff; border: .12em solid var(--ink); border-radius: 99px; box-shadow: .25em .25em 0 var(--ink); animation: mvBob 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.7s); }
+.mv-dots3 { display: flex; gap: .4em; }
+.mv-dots3 i { width: 1em; height: 1em; box-sizing: border-box; border-radius: 50%; border: .2em solid var(--ink); animation: mvDot 1.5s infinite steps(1); }
+.mv-dots3 i:nth-child(2) { animation-delay: .5s; } .mv-dots3 i:nth-child(3) { animation-delay: 1s; }
+@keyframes mvDot { 0% { background: var(--ink); } 66% { background: transparent; } }
+
+/* ---------- 写真（うちの子たちが、順番に入れ替わる） ---------- */
+.mv-pola { padding: 7% 7% 0; background: #fff; box-shadow: 0 0 0 2px var(--ink), calc(var(--u) * 1.4) calc(var(--u) * 1.6) 0 rgba(29, 27, 27, .16); }
+.mv-pola .ph { position: relative; overflow: hidden; aspect-ratio: 1 / 1.1; background: var(--teal); }
+.mv-pola .ph i { position: absolute; inset: 0; background: center 18% / cover no-repeat; opacity: 0; transition: opacity .5s; }
+.mv-pola .ph i.on { opacity: 1; animation: mvKen 3.6s linear both; }
+.mv-pola .fl { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.mv-pola.flash .fl { animation: mvFlash .5s ease-out; }
+.mv-pola .cap { display: block; padding: .15em 0 .3em; overflow: hidden; text-align: center; white-space: nowrap; text-overflow: ellipsis; font: 400 calc(var(--u) * 6.5)/1.25 "Sacramento", cursive; color: var(--ink); }
+@keyframes mvKen { from { transform: scale(1.14); } to { transform: scale(1); } }
+@keyframes mvFlash { from { opacity: .95; } to { opacity: 0; } }
+
+/* ---------- いちばん下を流れる帯 ---------- */
+.mv-band { overflow: hidden; padding: .55em 0 .5em; background: var(--ink); color: #fff; border-top: .25em solid var(--yellow); border-bottom: .25em solid var(--pink); }
+.mv-band div { display: inline-block; white-space: nowrap; font: 800 1em/1 "M PLUS Rounded 1c", sans-serif; letter-spacing: .18em; animation: mvMarq 26s linear infinite; }
+@keyframes mvMarq { to { transform: translateX(-50%); } }
