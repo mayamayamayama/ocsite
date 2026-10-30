@@ -74,6 +74,9 @@ window.OC_MV_PARTS = (function () {
       '<text transform="translate(191 56) rotate(-90)" text-anchor="middle" font-size="15" textLength="66" lengthAdjust="spacingAndGlyphs">' + t[3] + '</text></g>'),
     // プラスの記号
     plus: () => svg(100, 100, '<path d="M30 10 V46 M12 28 H48 M74 50 V78 M60 64 H88 M38 74 V92 M29 83 H47" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/>'),
+    // キャラの名前リスト（パソコンの入場画面。6人まで。押すとプロフィールへ）
+    roster: (CL, title, esc, pad) => '<div class="mv-roster"><p class="rh">' + title + '<b>' + pad(CL.length) + '</b></p><ul>' + CL.slice(0, 6).map(([id, c], i) => '<li data-id="' + esc(id) + '"><i>' + pad(i + 1) + '</i><span>' + esc(c.name || id) + '</span><small>' + esc(c.tag || '') + '</small></li>').join('') +
+      (CL.length > 6 ? '<li class="more">+' + (CL.length - 6) + ' MORE</li>' : '') + '</ul></div>',
     // 立ち絵がまだないときの、仮の人影
     ghost: () => svg(200, 420, '<g fill="#d9d6cc" stroke="' + INK + '" stroke-width="4" stroke-dasharray="10 8" stroke-linejoin="round"><circle cx="100" cy="70" r="46"/><path d="M40 410 L52 200 C56 150 76 130 100 130 C124 130 144 150 148 200 L160 410Z"/></g>' +
       '<text x="100" y="290" text-anchor="middle" font-size="22" font-weight="700" fill="' + INK + '">立ち絵</text><text x="100" y="320" text-anchor="middle" font-size="14" fill="' + INK + '">mv-chara1.png</text>'),
@@ -132,5 +135,11 @@ window.OC_MV_PARTS = (function () {
     ['blue', 'teal', 2, 2, [[-0.12, 0.64], [0.03, 0.59], [0.12, 0.64], [0.07, 0.7], [0.01, 0.65], [0.09, 0.56], [0.22, 0.52]], [[-0.06, 0.6], [0.03, 0.54], [0.09, 0.6], [0.05, 0.66], [0.01, 0.6], [0.07, 0.51], [0.17, 0.47]]],
   ];
 
-  return { S, land, INK, RIB };
+  // ---------- キャラの名前リストの動き：押すとプロフィールへ。順番に光る（ok() が true のときだけ） ----------
+  function wire(rl, ok) {
+    rl.addEventListener('click', (e) => { const li = e.target.closest('li'); if (!li) return; if (li.dataset.id && window.showDetail) window.showDetail(li.dataset.id, true); else document.getElementById('character-grid').scrollIntoView({ behavior: 'smooth' }); });
+    let ri = 0; setInterval(() => { if (!ok()) return; const li = rl.querySelectorAll('li[data-id]'); li.forEach((el, i) => el.classList.toggle('on', i === ri % li.length)); ri++; }, 1500);
+  }
+
+  return { S, land, INK, RIB, wire };
 })();
