@@ -7,7 +7,7 @@ html.nv-arrive body::after {
   content: ""; position: fixed; top: 0; bottom: 0; left: -25vw; width: 150vw; z-index: 2147483600; pointer-events: none;
   background:
     linear-gradient(#1d1d1d, #1d1d1d) 0 0 / 100% 6% no-repeat,                                      /* 屋根 */
-    linear-gradient(#111, #111) 0 100% / 100% 8% no-repeat,                                          /* 床下 */
+    linear-gradient(#111, #111) 0 100% / 100% 12% no-repeat,                                         /* 床下 */
     linear-gradient(#111, #111) 0 84.5% / 100% .8% no-repeat,                                        /* 細い線 */
     linear-gradient(var(--nv-o), var(--nv-o)) 0 76% / 100% 8% no-repeat,                            /* オレンジの帯 */
     repeating-linear-gradient(90deg, transparent 0 7vmin, #26343e 7vmin 37vmin, transparent 37vmin 47vmin) 0 22% / 100% 30% no-repeat,   /* 窓 */
