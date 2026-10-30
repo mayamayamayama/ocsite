@@ -1,0 +1,93 @@
+/* nav.css — メニュー（MT. MAYAMA 登山鉄道の発車標）と、ページを移るときの電車（nav.js が動かします） */
+:root { --nv-y: #ffd21f; --nv-o: #ff6b2c; --nv-ink: #141414; --nv-led: #ffb21f; --nv-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+/* ---------- 電車の車体（ページを移るとき、画面をおおう） ---------- */
+.nv-car, html.nv-arrive body::after {
+  background:
+    linear-gradient(#1d1d1d, #1d1d1d) 0 0 / 100% 6% no-repeat,                                      /* 屋根 */
+    linear-gradient(#111, #111) 0 100% / 100% 8% no-repeat,                                          /* 床下 */
+    linear-gradient(#111, #111) 0 84.5% / 100% .8% no-repeat,                                        /* 細い線 */
+    linear-gradient(var(--nv-o), var(--nv-o)) 0 76% / 100% 8% no-repeat,                            /* オレンジの帯 */
+    repeating-linear-gradient(90deg, transparent 0 7vmin, #26343e 7vmin 37vmin, transparent 37vmin 47vmin) 0 22% / 100% 30% no-repeat,   /* 窓 */
+    repeating-linear-gradient(90deg, transparent 0 46.6vmin, rgba(0, 0, 0, .28) 46.6vmin 47vmin) 0 0 / 100% 100%,                      /* 車体のつなぎ目 */
+    var(--nv-y);
+  border-radius: 34vmin 0 0 34vmin / 50vh 0 0 50vh;   /* 先頭（左）は丸い */
+}
+html.nv-arrive body::after { content: ""; position: fixed; top: 0; bottom: 0; left: -45vw; width: 175vw; z-index: 2147483600; pointer-events: none; }
+html.nv-arrive, html.nv-arrive body { overflow: hidden; }
+.nv-train { position: fixed; top: 0; bottom: 0; left: -45vw; width: 175vw; z-index: 2147483600; pointer-events: none; will-change: transform; }
+.nv-car { position: absolute; inset: 0; }
+.nv-car::after {   /* 走っているときの、すじ */
+  content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .2s; border-radius: inherit;
+  background: repeating-linear-gradient(0deg, transparent 0 3.1vh, rgba(255, 255, 255, .22) 3.1vh 3.3vh, transparent 3.3vh 7.7vh);
+}
+.nv-train.run .nv-car::after { opacity: 1; }
+.nv-car::before { content: "MT. MAYAMA LINE ◆ 2026"; position: absolute; left: calc(45vw + 6vw); top: 65.5%; font: 800 clamp(12px, 3.4vw, 20px)/1 var(--nv-mono); letter-spacing: .28em; color: var(--nv-ink); white-space: nowrap; }
+/* 行き先の表示（オレンジ色の光る文字） */
+.nv-sign { position: absolute; left: calc(45vw + 50vw); top: 54%; transform: translate(-50%, -50%); width: min(84vw, 560px); padding: 14px 18px 16px; background: #090909; border: 3px solid #2b2b2b; border-radius: 6px; box-shadow: 0 0 0 4px #111, 0 10px 40px rgba(0, 0, 0, .5); text-align: center; color: var(--nv-led); font-family: var(--nv-mono); }
+.nv-sign small { display: block; font-size: 11px; letter-spacing: .3em; opacity: .75; }
+.nv-sign b { display: block; margin: 6px 0 2px; font-size: clamp(26px, 8vw, 46px); letter-spacing: .12em; text-shadow: 0 0 10px rgba(255, 178, 31, .7); }
+.nv-sign span { display: block; font-size: 14px; letter-spacing: .2em; color: #fff3d6; }
+.nv-sign::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(circle, transparent 0 1px, rgba(0, 0, 0, .55) 1.4px) 0 0 / 3px 3px; }   /* 光る点の粒 */
+
+/* ---------- メニューのボタン（画面の下のまん中） ---------- */
+.nv-btn {
+  position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2147483400;
+  display: flex; align-items: center; gap: 9px; padding: 9px 18px 9px 12px; border: 2px solid var(--nv-y); border-radius: 999px;
+  background: var(--nv-ink); color: var(--nv-y); font: 700 12px/1 var(--nv-mono); letter-spacing: .26em; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35); -webkit-tap-highlight-color: transparent; transition: transform .3s cubic-bezier(.2, 1.6, .4, 1);
+}
+.nv-btn svg { width: 22px; height: 22px; display: block; }
+.nv-btn:hover, .nv-btn:active { transform: translateX(-50%) scale(1.06); }
+html.op-on .nv-btn, html.nv-open .nv-btn { display: none; }
+
+/* ---------- 発車標（メニュー） ---------- */
+html.nv-open, html.nv-open body { overflow: hidden; }
+.nv-menu {
+  position: fixed; inset: 0; z-index: 2147483500; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  background: radial-gradient(120% 60% at 50% 0, #1a1a1c, #0a0a0b 70%); color: #f4f1e8; font-family: var(--nv-mono);
+  transform: translateY(-104%); visibility: hidden; transition: transform .55s cubic-bezier(.7, 0, .2, 1), visibility 0s .55s;
+}
+.nv-menu.open { transform: none; visibility: visible; transition: transform .55s cubic-bezier(.7, 0, .2, 1); }
+.nv-menu::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px); }
+.nv-in { position: relative; max-width: 760px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom)); }
+.nv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11px; letter-spacing: .22em; color: var(--nv-y); }
+.nv-clock { color: var(--nv-led); text-shadow: 0 0 8px rgba(255, 178, 31, .6); font-size: 13px; }
+.nv-close { padding: 8px 12px; border: 1px solid #3a3a3a; border-radius: 999px; background: none; color: #f4f1e8; font: 600 11px/1 var(--nv-mono); letter-spacing: .2em; cursor: pointer; }
+.nv-title { margin: 22px 0 4px; font-size: clamp(30px, 9vw, 54px); line-height: 1; letter-spacing: .04em; font-weight: 800; }
+.nv-title small { display: block; margin-top: 8px; font-size: 12px; letter-spacing: .3em; color: #8d8a83; font-weight: 600; }
+.nv-head { display: grid; grid-template-columns: 4.6em 1fr 2.6em; gap: 10px; margin-top: 22px; padding: 0 10px 8px; border-bottom: 1px solid #2c2c2c; font-size: 9px; letter-spacing: .2em; color: #77746d; }
+.nv-head span:last-child { text-align: right; }
+.nv-row {
+  position: relative; display: grid; grid-template-columns: 4.6em 1fr 2.6em; gap: 10px; align-items: start; padding: 14px 10px 13px;
+  border-bottom: 1px solid #222; color: inherit; text-decoration: none; cursor: pointer; transition: background .25s;
+}
+.nv-row:hover, .nv-row:focus-visible { background: #141416; outline: none; }
+.nv-row::before { content: "▶"; position: absolute; left: -6px; top: 20px; font-size: 10px; color: var(--nv-y); opacity: 0; transform: translateX(-6px); transition: opacity .2s, transform .2s; }
+.nv-row:hover::before { opacity: 1; transform: none; }
+.nv-time { font-size: 13px; padding-top: 4px; }
+.nv-dest { min-width: 0; }
+.nv-en { font-size: clamp(17px, 5.2vw, 28px); line-height: 1; white-space: nowrap; }
+.nv-jp { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 7px; font-size: 12px; letter-spacing: .14em; color: #cfcac0; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+.nv-st { padding: 3px 7px 2px; border-radius: 3px; font: 700 9px/1.2 var(--nv-mono); letter-spacing: .14em; color: #0b0b0b; background: #5fe08a; }
+.nv-st.here { background: var(--nv-y); }
+.nv-st.soon { background: #ff4d3d; color: #fff; }
+.nv-st.go { background: #5fe08a; animation: nvBlink .32s steps(1) infinite; }
+.nv-track { text-align: right; font-size: clamp(20px, 6vw, 30px); }
+.nv-row.soon .nv-en, .nv-row.soon .nv-time, .nv-row.soon .nv-track { opacity: .38; }
+.nv-row.nope { animation: nvShake .4s; }
+/* パタパタめくれる文字 */
+.fl { display: inline-block; width: .86em; height: 1.32em; margin-right: .1em; line-height: 1.32em; text-align: center; vertical-align: top; position: relative; border-radius: 2px; color: var(--nv-y); font-weight: 700;
+  background: linear-gradient(#232326 0 49%, #000 49% 51%, #1b1b1d 51%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+.nv-time .fl, .nv-track .fl { color: #f4f1e8; }
+.nv-row.soon .fl { color: #ff6f61; }
+.nv-ann { margin-top: 26px; overflow: hidden; white-space: nowrap; padding: 8px 0; border-top: 1px solid #2c2c2c; border-bottom: 1px solid #2c2c2c; color: var(--nv-led); font-size: 11px; letter-spacing: .14em; text-shadow: 0 0 6px rgba(255, 178, 31, .5); }
+.nv-ann span { display: inline-block; padding-left: 100%; animation: nvAnn 28s linear infinite; }
+.nv-note { margin-top: 14px; font-size: 10px; letter-spacing: .14em; color: #66635d; line-height: 1.7; }
+@keyframes nvBlink { 50% { opacity: .25; } }
+@keyframes nvShake { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+@keyframes nvAnn { to { transform: translateX(-100%); } }
+.nv-toast { position: fixed; left: 50%; bottom: calc(70px + env(safe-area-inset-bottom)); z-index: 2147483560; transform: translate(-50%, 20px); opacity: 0; padding: 10px 16px; border-radius: 6px; background: #ff4d3d; color: #fff; font: 700 12px/1.4 var(--nv-mono); letter-spacing: .1em; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap; }
+.nv-toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 700px) { .nv-in { padding-top: 36px; } .nv-row { padding: 16px 14px; } .nv-head { padding: 0 14px 8px; } }
+@media (prefers-reduced-motion: reduce) { .nv-menu, .nv-menu.open { transition: none; } .nv-ann span { animation: none; padding-left: 0; } }
