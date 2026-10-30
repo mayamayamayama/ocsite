@@ -79,6 +79,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     let covered = false;
     const top = heroEl && heroEl.offsetParent !== null ? heroEl : mvEl && mvEl.offsetParent !== null ? mvEl : null;
     if (top) { const r = top.getBoundingClientRect(); covered = r.top <= 0 && r.bottom >= window.innerHeight * 0.8; }
+    if (covered !== canvas.hidden) canvas.style.visibility = (canvas.hidden = covered) ? 'hidden' : '';   // おおわれているあいだは、画面に重ねない（軽くする）
     if (!document.hidden && !covered && t - lastDraw > 32) { draw(t); lastDraw = t; }
     requestAnimationFrame(loop);
   }
