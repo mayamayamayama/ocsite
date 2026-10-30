@@ -7,7 +7,7 @@
 (function () {
   // ===== 変えてもいいところ =====
   const DATA = 'data/prompts.json';                       // 展示のリスト（書きこみ帳が作って、更新します）
-  const LOBBY = ['museum-lobby.jpg', 'museum-lobby.png'];  // ロビーに飾る作品（書きこみ帳で選んでいないときは、この名前の画像をさがす）
+  const LOBBY = ['museum-lobby.gif', 'museum-lobby.mp4', 'museum-lobby.webm', 'museum-lobby.png', 'museum-lobby.jpg'];  // ロビーで流す GIF・動画（書きこみ帳で選んでいないときは、この名前をさがす）
   const MEDIUM = 'NovelAI — Base Prompt';                  // 作品の札の「技法」の行
   // ============================
   const $ = (s, r) => (r || document).querySelector(s), body = document.body, root = document.documentElement;
@@ -24,15 +24,17 @@
     lobby(d && d.lobby); render();
   });
   setTimeout(() => body.classList.add('mu-in'), REDUCE ? 0 : 450);   // 上下の黒い幕がひらく
+  try { const w = JSON.parse(localStorage.getItem('oc-write')); if (w && w.token) { const a = document.createElement('a'); a.className = 'mu-own'; a.href = 'write.html'; a.textContent = '＋ 展示する'; body.appendChild(a); } } catch (e) { /* なにもしない */ }   // 書きこみ帳で鍵を入れた端末だけに出るボタン
 
   // ---------- ロビー ----------
-  function lobby(L) {
-    const mat = $('.mu-hero .mu-mat'), list = (L && L.image ? [L.image] : []).concat(LOBBY);
+  function lobby(L) {   // GIF・画像・動画（mp4・webm）のどれでも。額縁なしで、ふちがやみに溶ける
+    const box = $('.mu-screen'), list = (L && L.image ? [L.image] : []).concat(LOBBY);
     const next = (i) => {
       if (i >= list.length) return;
-      const im = new Image(); im.alt = (L && L.title) || ''; im.draggable = false;
-      im.onload = () => { mat.replaceChildren(im, shield()); $('.mu-tap').hidden = false; };
-      im.onerror = () => next(i + 1); im.src = list[i];
+      const u = list[i], vid = /\.(mp4|webm|mov)(\?|$)/i.test(u), m = document.createElement(vid ? 'video' : 'img');
+      if (vid) { m.muted = m.loop = m.autoplay = m.playsInline = true; m.setAttribute('playsinline', ''); m.setAttribute('muted', ''); m.disablePictureInPicture = true; } else { m.alt = ''; m.draggable = false; }
+      m.addEventListener(vid ? 'loadeddata' : 'load', () => { box.replaceChildren(m, shield()); box.classList.add('on'); $('.mu-tap').hidden = false; if (vid && m.play) m.play().catch(() => {}); }, { once: true });
+      m.addEventListener('error', () => next(i + 1), { once: true }); m.src = u;
     };
     next(0);
   }
@@ -85,7 +87,7 @@
     const p = e.target.closest('.mu-piece, .mu-more'); if (p) return view(+p.dataset.i);
     const g = e.target.closest('.mu-grid button'); if (g) { overlay(cat, false); const r = document.getElementById('room-' + (+g.dataset.i + 1)); if (r) r.scrollIntoView(); }
   });
-  document.addEventListener('contextmenu', (e) => { if (e.target.closest('.mu-mat')) e.preventDefault(); });
+  document.addEventListener('contextmenu', (e) => { if (e.target.closest('.mu-mat, .mu-screen')) e.preventDefault(); });
 
   // ---------- 目録・近づいて見る ----------
   const cat = $('.mu-cat'), vw = $('.mu-view'), vin = $('.mu-view-in');
