@@ -193,7 +193,7 @@
   new IntersectionObserver((en) => { vis = en[0].isIntersecting; if (!body.classList.contains('is-after')) body.classList.toggle('on-light', vis); }, { threshold: 0.3 }).observe(mv);
   function loop(now) {
     requestAnimationFrame(loop);
-    if (!vis || !W || root.classList.contains('op-hold') || body.classList.contains('is-after')) { last = 0; return; }
+    if (!vis || !W || root.classList.contains('op-hold') || root.classList.contains('nv-open') || body.classList.contains('is-after')) { last = 0; return; }
     const dt = last ? Math.min(3, (now - last) / 16.7) : 1, t = now / 1000, s = t0 ? (now - t0) / 1000 : 0; last = now;
     if (now - pt > 2500) { tx *= 0.96; ty *= 0.96; }   // しばらく動かさないと、まん中にもどる
     mx += (tx - mx) * 0.06 * dt; my += (ty - my) * 0.06 * dt; pw += ((now - pt < 1500 ? 1 : 0) - pw) * 0.05 * dt;
