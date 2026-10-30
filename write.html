@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>書きこみ帳 - OC ARCHIVE</title>
+  <!-- OC ARCHIVE 書きこみ帳：スマホで書いて「公開」を押すと、サイトが更新されます（write.js が動かします）。このページはメニューには出ません。ブックマークしておいてね -->
+  <style>
+    :root { --bg: #f3efe6; --card: #fffdf8; --ink: #1d1a16; --sub: #7a7266; --line: #ddd5c6; --acc: #ff6b2c; --ok: #12925a; --bad: #d23b2b; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.7 "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: calc(20px + env(safe-area-inset-top)) 16px calc(60px + env(safe-area-inset-bottom)); }
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: .04em; }
+    h1 small { display: block; font: 600 10px/1 var(--mono); letter-spacing: .3em; color: var(--acc); margin-bottom: 6px; }
+    header a { font: 600 11px/1 var(--mono); letter-spacing: .14em; color: var(--sub); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 16px; margin-bottom: 16px; box-shadow: 0 2px 0 var(--line); }
+    h2 { margin: 0 0 10px; font-size: 16px; }
+    label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 700; }
+    input[type=text], input[type=password], textarea { width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font: 15px/1.5 inherit; }
+    textarea { min-height: 150px; font: 13px/1.6 var(--mono); resize: vertical; }
+    input:focus, textarea:focus { outline: none; border-color: var(--acc); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--ink); color: #fff; font: 700 14px/1 inherit; letter-spacing: .06em; cursor: pointer; }
+    .btn.acc { background: var(--acc); } .btn.ghost { background: none; color: var(--ink); border: 1.5px solid var(--line); } .btn.wide { width: 100%; margin-top: 16px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .steps { margin: 6px 0 0; padding-left: 1.4em; font-size: 13px; color: #3c372f; } .steps li { margin: 6px 0; }
+    .steps b { background: #ffe9d9; padding: 0 4px; border-radius: 3px; }
+    .small { font-size: 12px; color: var(--sub); }
+    .note { margin: 0 0 16px; padding: 12px 14px; border-radius: 8px; font-size: 14px; font-weight: 700; }
+    .note.ok { background: #e3f5ea; color: var(--ok); } .note.bad { background: #fde6e3; color: var(--bad); }
+    .who { font: 12px/1.5 var(--mono); color: var(--sub); word-break: break-all; }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px 16px; padding: 0 16px; scrollbar-width: none; }
+    .tabs button { flex: none; padding: 9px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: none; color: var(--sub); font: 700 12px/1 inherit; }
+    .tabs button.on { background: var(--ink); border-color: var(--ink); color: #fff; } .tabs button:disabled { opacity: .45; }
+    .pick { display: block; padding: 18px; border: 2px dashed var(--line); border-radius: 10px; text-align: center; color: var(--sub); font-size: 13px; cursor: pointer; background: #fff; }
+    .pick input { display: none; }
+    #f-prev, #lobby-img { display: block; max-width: 100%; max-height: 300px; margin: 12px auto 0; border-radius: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, .15); }
+    #f-hint { margin: 8px 0 0; font-size: 12px; color: var(--ok); font-weight: 700; }
+    #list { list-style: none; margin: 0; padding: 0; }
+    #list li { display: grid; grid-template-columns: 64px 1fr; gap: 6px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+    #list li.empty { display: block; color: var(--sub); font-size: 13px; }
+    #list img { width: 64px; height: 80px; object-fit: cover; border-radius: 4px; background: #e8e1d3; grid-row: span 2; }
+    #list .t b { display: block; font-size: 14px; line-height: 1.4; } #list .t small { font: 11px/1.4 var(--mono); color: var(--sub); }
+    #list .b { display: flex; gap: 6px; flex-wrap: wrap; }
+    #list .b button { min-width: 40px; height: 34px; padding: 0 10px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font: 700 12px/1 inherit; }
+    #list .b .danger { color: var(--bad); }
+    #busy { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(243, 239, 230, .86); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+    #busy div { text-align: center; font-weight: 700; } #busy i { display: block; width: 36px; height: 36px; margin: 0 auto 14px; border: 4px solid var(--line); border-top-color: var(--acc); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><h1><small>OC ARCHIVE</small>書きこみ帳</h1><a href="composition.html">サイトを見る →</a></header>
+    <p class="note" id="note" hidden></p>
+
+    <!-- はじめの1回だけ：GitHub の鍵 -->
+    <section class="card" id="setup">
+      <h2>はじめの準備（1回だけ）</h2>
+      <p class="small">このページから GitHub に保存できるように、「書きこみ用の鍵」を作って、ここに貼ります。鍵は、この端末の中だけに保存されます。</p>
+      <ol class="steps">
+        <li>GitHub にログインした状態で <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">鍵を作る画面</a> を開く</li>
+        <li><b>Token name</b> はなんでもOK（例：oc-archive-write）。<b>Expiration</b> は好きな期限（切れたら作りなおす）</li>
+        <li><b>Repository access</b> で「Only select repositories」を選んで、サイトのリポジトリを1つだけ選ぶ</li>
+        <li><b>Permissions</b> の「Repository permissions」で、<b>Contents</b> を「Read and write」にする</li>
+        <li>いちばん下の <b>Generate token</b> を押して、出てきた「github_pat_…」をコピーして、下に貼る</li>
+      </ol>
+      <label for="repo">リポジトリ（ふつうは自動で入ります）</label>
+      <input type="text" id="repo" placeholder="あなたの名前/リポジトリの名前" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label for="token">鍵（github_pat_ から始まる文字）</label>
+      <input type="password" id="token" placeholder="github_pat_..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button type="button" class="btn acc wide" id="connect">つなぐ</button>
+      <p class="small" style="margin-top:12px">※ 鍵は人に見せないでね。この端末をなくしたときは、GitHub の同じ画面から鍵を消せば大丈夫です。</p>
+    </section>
+
+    <div id="app" hidden>
+      <section class="card">
+        <p class="who">つながっています：<span id="who"></span></p>
+        <div class="row"><button type="button" class="btn ghost" id="reconnect">鍵を入れなおす</button><button type="button" class="btn ghost" id="forget">この端末から鍵を消す</button></div>
+      </section>
+
+      <nav class="tabs"><button type="button" class="on">構図置き場</button><button type="button" disabled>ガイドライン（準備中）</button><button type="button" disabled>サウンドトラック（準備中）</button><button type="button" disabled>質問解答（準備中）</button><button type="button" disabled>コラム（準備中）</button></nav>
+
+      <button type="button" class="btn acc wide" id="newbtn" style="margin:0 0 16px">＋ 新しい作品を展示する</button>
+      <section class="card" id="form" hidden>
+        <h2 id="f-head">新しい作品を展示する</h2>
+        <label class="pick">画像を選ぶ（NovelAI の画像なら、プロンプトも自動で入ります）<input type="file" id="f-img" accept="image/*"></label>
+        <img id="f-prev" alt="" hidden>
+        <p id="f-hint"></p>
+        <label for="f-title">タイトル</label>
+        <input type="text" id="f-title" placeholder="例：振り向き・夕方の教室" maxlength="60">
+        <label for="f-prompt">ベースプロンプト</label>
+        <textarea id="f-prompt" placeholder="ここに貼りつけ" spellcheck="false"></textarea>
+        <div class="row"><button type="button" class="btn acc" id="f-go">公開する</button><button type="button" class="btn ghost" id="f-cancel">やめる</button></div>
+      </section>
+
+      <section class="card">
+        <h2>展示中の作品（<span id="count">0</span>）</h2>
+        <p class="small">上にあるものほど、展示室の手前（ROOM 01）に飾られます。↑↓で並べかえたら「並び順を公開する」を押してね。</p>
+        <ul id="list"></ul>
+        <button type="button" class="btn wide" id="saveorder" hidden>並び順を公開する</button>
+      </section>
+
+      <section class="card">
+        <h2>ロビーに飾る作品</h2>
+        <p class="small">構図置き場の入り口に、大きく飾る1枚です（コラージュ作品など）。</p>
+        <img id="lobby-img" alt="" hidden><p class="small" id="lobby-none">まだ選んでいません</p>
+        <label class="pick" style="margin-top:12px">画像を選んで、ロビーに飾る<input type="file" id="lobby-file" accept="image/*"></label>
+      </section>
+    </div>
+  </div>
+  <div id="busy" hidden><div><i></i><span id="busy-t">しばらくお待ちください…</span></div></div>
+  <script src="write.js?v=61"></script>
+</body>
+</html>
