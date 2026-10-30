@@ -21,7 +21,7 @@ html body.is-after:not(.oc-no-hero) .hero-after { display: none !important; }
 .mv-topo, .mv-chips { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .mv-topo { opacity: 0; transition: opacity 1.4s; }
 .mv.in .mv-topo { opacity: 1; }
-.mv-chips { z-index: 6; }
+.mv-chips { display: none; }   /* 紙吹雪は、リボンのキャンバスに描く（重なりをへらすため） */
 .mv-stage { position: absolute; inset: 0; z-index: 2; --mx: 0; --my: 0; }
 /* 入場画面のときは、下のノイズのグラデーションを出さない（プロフィールから戻ったあとの、モーショングラフィックスのときだけ出る） */
 body:not(.is-after) #noise-divider { display: none !important; }
@@ -141,7 +141,8 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mv-ghost { height: 100%; }
 
 /* 重い端末（なめらかに動かないとき、mv.js が lite をつける）：小さな飾りの、ずっと続く動きを止めて軽くする */
-.mv.lite .i-tw, .mv.lite .i-wig, .mv.lite .i-spin, .mv.lite .i-rot, .mv.lite .i-drift, .mv.lite .i-drift2, .mv.lite .i-fly, .mv.lite .mv-sun i, .mv.lite .trail, .mv.lite .bd, .mv.lite .ndl, .mv.lite .dr, .mv.lite .wing, .mv.lite .flg, .mv.lite .sping { animation: none !important; }
+.mv.lite .i-tw, .mv.lite .i-wig, .mv.lite .i-spin, .mv.lite .i-rot, .mv.lite .i-drift, .mv.lite .i-drift2, .mv.lite .i-fly, .mv.lite .mv-sun i, .mv.lite .trail, .mv.lite .bd, .mv.lite .ndl, .mv.lite .dr, .mv.lite .wing, .mv.lite .flg, .mv.lite .sping,
+.mv.lite .i-bob, .mv.lite .i-float, .mv.lite .i-breathe, .mv.lite .mv-title .l b, .mv.lite .mv-tags span { animation: none !important; }
 
 /* ---------- 文字 ---------- */
 .mv-big { font: 400 1em/1 "Dela Gothic One", "Noto Sans JP", sans-serif; color: rgba(22, 22, 22, .07); white-space: nowrap; }
