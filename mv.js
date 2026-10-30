@@ -1,14 +1,14 @@
-// mv.js — 入場したときのメインビジュアル（テーマは「山」。ポップに。部品は mv-parts.js、キャンバスの動きは mv-fx.js）
-// ・うしろの方眼が地形のようにうねり、ねじれるリボンが流れ、シールみたいな山が、ぽよんと飛び出します
-// ・立ち絵は、用意した中からランダムで1枚（mv-chara1.png、mv-chara2.png …の名前でアップロード）
-// ・画面をタップすると紙吹雪がはじけて、そこが山のようにもり上がる。キャラはジャンプ、山はぷるん。道しるべを押すとキャラ一覧へ
+// mv.js — 入場したときのメインビジュアル（テーマは「山」。部品は mv-parts.js、キャンバスは mv-fx.js）
+// ・方眼が地形のようにうねり、リボンが流れ、シールみたいな山が、ぽよんと飛び出します
+// ・立ち絵は、ランダムで1枚（mv-chara1.webp か .png、mv-chara2 …の名前で。webp が軽い）
+// ・タップで紙吹雪。キャラはジャンプ、山はぷるん。道しるべを押すとキャラ一覧へ
 // ・OP があるときは、壁が割れた瞬間に登場します
-// ・キャラのプロフィールから戻ると、ここはモーショングラフィックス（hero.js）に替わり、戻るたびにランダムで選ばれます
+// ・プロフィールから戻ると、モーショングラフィックス（hero.js）に替わります（毎回ランダム）
 (window.OC_LOADED = window.OC_LOADED || []).push('mv');
 
 (function () {
   // ===== 変えてもいいところ =====
-  const CHARAS = [];                                   // 立ち絵の名前を ['a.png', 'b.png'] のように書くと、その中からランダム。空なら mv-chara1.png〜mv-chara12.png を自動でさがす
+  const CHARAS = [];                                   // 立ち絵の名前を ['a.png', 'b.png'] と書くと、その中からランダム。空なら mv-chara1〜12 を自動でさがす
   const LINE = 0.7, LINE_COLOR = '#ffffff';            // 立ち絵の白いふちの太さ（0 でなし。1.4 で倍）と色
   const SHADOW = [1.8, 1.6], SHADOW_COLOR = '#2ec4b6'; // 立ち絵の影のずれ（右へ, 下へ。0, 0 でなし）と色
   const NAME = 'MAYAMA';                                // 活動名
@@ -97,7 +97,7 @@
   // ---------- 立ち絵：用意したものの中から、前回と違うものをランダムに ----------
   let art = null, artKey = '';
   const ghost = () => { art = null; charaEl.innerHTML = '<div class="mv-ghost">' + S.ghost() + '</div>'; charaEl.classList.add('ready'); };
-  function paintChara() {   // 立ち絵に、ふちと影をつけて、表示する大きさの絵にする（画面の大きさが変わったときだけ作り直す）
+  function paintChara() {   // 立ち絵に、ふちと影をつけた絵にする（画面の大きさが変わったときだけ）
     if (!art || !H) return; const h = (H * L[ci][wide ? 6 : 5][2]) / 100, key = Math.round(h) + ':' + u.toFixed(2);
     if (key === artKey) return; artKey = key;
     try { charaEl.replaceChildren(FX.outline(art, h, LINE * u, SHADOW[0] * u, SHADOW[1] * u, LINE_COLOR, SHADOW_COLOR)); } catch (e) { charaEl.replaceChildren(art); }
@@ -105,11 +105,11 @@
   }
   function findCharas() {
     if (CHARAS.length) return Promise.resolve(CHARAS);
-    let got = null; try { got = JSON.parse(sessionStorage.getItem('oc-mv-charas')); } catch (e) { /* なにもしない */ }
+    let got = null; try { got = JSON.parse(sessionStorage.getItem('oc-mv-charas2')); } catch (e) { /* なにもしない */ }
     if (Array.isArray(got) && got.length) return Promise.resolve(got);
-    const names = ['mv-chara.png'].concat(Array.from({ length: 12 }, (_, i) => 'mv-chara' + (i + 1) + '.png'));
+    const names = ['mv-chara'].concat(Array.from({ length: 12 }, (_, i) => 'mv-chara' + (i + 1))).flatMap((b) => [b + '.webp', b + '.png']);   // 同じ番号に両方あれば webp を使う
     return Promise.all(names.map((n) => fetch(n, { method: 'HEAD', cache: 'no-cache' }).then((r) => (r.ok ? n : null), () => null))).then((ok) => {
-      const list = ok.filter(Boolean); try { if (list.length) sessionStorage.setItem('oc-mv-charas', JSON.stringify(list)); } catch (e) { /* なにもしない */ }
+      const list = ok.filter((n) => n && !(n.endsWith('.png') && ok.includes(n.replace('.png', '.webp')))); try { if (list.length) sessionStorage.setItem('oc-mv-charas2', JSON.stringify(list)); } catch (e) { /* なにもしない */ }
       return list; });
   }
   function pickChara(list) {
@@ -119,7 +119,7 @@
     try { localStorage.setItem('oc-mv-last', name); } catch (e) { /* なにもしない */ }
     const img = new Image(); img.alt = ''; img.draggable = false;
     img.onload = () => (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { art = img; artKey = ''; paintChara(); });   // 全部読みこんでから出す（半分だけ見えないように）
-    img.onerror = () => { const rest = list.filter((n) => n !== name); try { sessionStorage.removeItem('oc-mv-charas'); } catch (e) { /* なにもしない */ } if (rest.length) pickChara(rest); else ghost(); };
+    img.onerror = () => { const rest = list.filter((n) => n !== name); try { sessionStorage.removeItem('oc-mv-charas2'); } catch (e) { /* なにもしない */ } if (rest.length) pickChara(rest); else ghost(); };
     img.src = name;
   }
   findCharas().then(pickChara, ghost);
@@ -190,7 +190,7 @@
 
   // ---------- 毎フレーム：方眼・リボン・紙吹雪・標高の数字・ずれ（見えているときだけ） ----------
   let vis = true, last = 0, odd = false, lx = '', ly = '', fr = [], last0 = 0, n3 = 0, tDone = 0;
-  new IntersectionObserver((en) => { vis = en[0].isIntersecting; if (!body.classList.contains('is-after')) body.classList.toggle('on-light', vis); }, { threshold: 0.3 }).observe(mv);
+  new IntersectionObserver((en) => { vis = en[0].isIntersecting; mv.classList.toggle('off', !vis); if (!body.classList.contains('is-after')) body.classList.toggle('on-light', vis); }, { threshold: 0.3 }).observe(mv);   // 見えないあいだは、動きを止める
   function loop(now) {
     requestAnimationFrame(loop);
     if (!vis || !W || root.classList.contains('op-hold') || root.classList.contains('nv-open') || body.classList.contains('is-after')) { last = 0; return; }
@@ -219,7 +219,7 @@
     wasIn = now;
   }).observe(body, { attributes: true, attributeFilter: ['class'] });
 
-  // ---------- 一覧のカード：クリックしたら、表情違いの絵のまま、プロフィールへ（一瞬もとの絵に戻らないように） ----------
+  // ---------- 一覧のカード：クリックしたら、表情違いの絵のまま、プロフィールへ ----------
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('.card.has-alt');
     if (a && a.matches(':hover')) { a.classList.add('hold'); setTimeout(() => a.classList.remove('hold'), 1700); }
