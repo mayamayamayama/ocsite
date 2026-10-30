@@ -127,9 +127,9 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
 // 入場画面のファイルが足りない・古い・入れ替わっているときは、画面の下に、どのファイルをどうすればいいかを表示します。
 // アドレスの最後に ?check をつけると、問題がなくても、くわしい一覧を表示します。
 (function () {
-  const RELEASE = 'R62';   // このファイル一式の番号
+  const RELEASE = 'R63';   // このファイル一式の番号
   const NEED = ['op', 'hero-parts', 'hero-parts2', 'hero-parts3', 'hero-parts4', 'hero-kit', 'hero-scenes', 'hero-scenes2', 'hero-abstract', 'hero-abstract2', 'hero-mountain', 'hero-mountain2', 'hero-game', 'hero-game2', 'hero-physics', 'hero-physics2', 'hero-physics3', 'hero-ancient', 'hero-ancient2', 'hero-ancient3', 'hero-ancient4', 'hero-elder', 'hero-elder2', 'hero-elder3', 'hero-elder4', 'hero-elder5', 'hero-elder6', 'hero-elder7', 'hero-hud', 'hero', 'mv-parts', 'mv-fx', 'mv', 'list', 'nav'];
-  const SIZE = { 'op': 18687, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 18017, 'hero': 19107, 'mv-parts': 17584, 'mv-fx': 7877, 'mv': 18914, 'list': 1506, 'nav': 14175 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
+  const SIZE = { 'op': 18687, 'hero-parts': 15846, 'hero-parts2': 8339, 'hero-parts3': 4957, 'hero-parts4': 14046, 'hero-kit': 12068, 'hero-scenes': 14206, 'hero-scenes2': 10102, 'hero-abstract': 19663, 'hero-abstract2': 10831, 'hero-mountain': 18752, 'hero-mountain2': 10900, 'hero-game': 10911, 'hero-game2': 9032, 'hero-physics': 12196, 'hero-physics2': 10704, 'hero-physics3': 9333, 'hero-ancient': 13996, 'hero-ancient2': 13458, 'hero-ancient3': 18352, 'hero-ancient4': 11089, 'hero-elder': 11081, 'hero-elder2': 13262, 'hero-elder3': 9738, 'hero-elder4': 9936, 'hero-elder5': 12845, 'hero-elder6': 11506, 'hero-elder7': 8197, 'hero-hud': 18115, 'hero': 19107, 'mv-parts': 17913, 'mv-fx': 7877, 'mv': 18994, 'list': 1506, 'nav': 14175 };   // 正しいファイルの文字数（中身が古い・切れている・入れ替わっている、を見分ける）
   const near = (n, len) => (n === 'op' ? Math.abs(len - SIZE[n]) <= 120 : len === SIZE[n]);   // op.js は、いちばん上の数字を書きかえても大丈夫なように、少しの差はゆるす
   const nameOf = (s) => (s.getAttribute('src') || '').split('?')[0].replace(/^.*\//, '').replace(/\.js$/, '');
   const look = (src, mode) => fetch(src, { cache: mode }).then((r) => (r.ok ? r.text().then((tx) => ({ len: tx.length, who: (tx.match(/push\('([\w-]+)'\)/) || [])[1] })) : { len: -r.status })).catch(() => null);
@@ -204,8 +204,8 @@ window.OC_HERO_HUD = function (G, T, E) {   // E：画面の大きさやカメ�
     const g = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
     L.push('・この端末の 3D：' + (g ? '使える' : '使えない（動画のあとは、そのままサイトを出します）'));
     if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext();
-    const cn = ['mv-chara.png'].concat(Array.from({ length: 12 }, (_, i) => 'mv-chara' + (i + 1) + '.png')), cf = await Promise.all(cn.map((n) => fetch(n, { method: 'HEAD', cache: 'no-store' }).then((r) => r.ok && n, () => false)));
-    const cl = cf.filter(Boolean); L.push('', '入場画面の立ち絵：' + (cl.length ? cl.join('、') + '（' + cl.length + '枚。ランダムで出ます）' : '見つからない。mv-chara1.png、mv-chara2.png …の名前でアップロードしてね'));
+    const cn = ['mv-chara'].concat(Array.from({ length: 12 }, (_, i) => 'mv-chara' + (i + 1))).flatMap((b) => [b + '.webp', b + '.png']), cf = await Promise.all(cn.map((n) => fetch(n, { method: 'HEAD', cache: 'no-store' }).then((r) => r.ok && n, () => false)));
+    const cl = cf.filter((n) => n && !(n.endsWith('.png') && cf.includes(n.replace('.png', '.webp')))); L.push('', '入場画面の立ち絵：' + (cl.length ? cl.join('、') + '（' + cl.length + '枚。ランダムで出ます）' : '見つからない。mv-chara1.png、mv-chara2.png …の名前でアップロードしてね'));
     return L.join('\n');
   }
   function glbJson(buf) {
