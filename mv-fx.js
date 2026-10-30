@@ -2,15 +2,18 @@
 // ・うしろの方眼：山の地形のように、ゆっくりもり上がったり沈んだりする（指やマウスの所が、山のようにもり上がる）
 // ・リボン：表と裏の2色の帯が、ねじれながら、ゆらゆら流れる（登場のときは、のびていく）
 // ・紙吹雪：ふわふわ落ちる。タップすると、そこからはじける
+// ・立ち絵のふちどり：白いふちと影をつけた絵を、表示する大きさで1回だけ作る（CSS のフィルターより、ずっと軽い）
+// （スマホでは、キャンバスのきめを少しだけ下げて、軽くしています）
 (window.OC_LOADED = window.OC_LOADED || []).push('mv-fx');
 
 window.OC_MV_FX = (function () {
+  const MOB = Math.min(screen.width, screen.height) < 700;   // スマホ
   const fit = (cv, max) => { const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, max); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); return [r.width, r.height, dpr]; };
 
   // ---------- 地形の方眼 ----------
   function terrain(cv, col) {
     const ctx = cv.getContext('2d'); let W = 0, H = 0, dpr = 1, cs = 24, cols = 0, rows = 0, F = null;
-    function size() { [W, H, dpr] = fit(cv, 1.5); cs = Math.max(18, Math.min(W, H) / 17); cols = Math.ceil(W / cs) + 3; rows = Math.ceil(H / cs) + 4; F = new Float32Array(cols * rows); }
+    function size() { [W, H, dpr] = fit(cv, MOB ? 1.25 : 1.5); cs = Math.max(18, Math.min(W, H) / 17); cols = Math.ceil(W / cs) + 3; rows = Math.ceil(H / cs) + 4; F = new Float32Array(cols * rows); }
     function draw(t, peaks, px, py, pw) {
       if (!W) return;
       const m = Math.min(W, H), R2 = (m * 0.17) ** 2, A = cs * 0.75;
@@ -34,7 +37,7 @@ window.OC_MV_FX = (function () {
   // R：[{ p: [[x, y], …]（画面の点。この点を通る、なめらかな線）, w: 半分の太さ, a: 表の色, b: 裏の色, tw: ねじれの数, sp: ねじれが流れる速さ, amp: ゆれの大きさ }]
   function ribbons(cv) {
     const ctx = cv.getContext('2d'); let W = 0, H = 0, dpr = 1;
-    function size() { [W, H, dpr] = fit(cv, 2); }
+    function size() { [W, H, dpr] = fit(cv, MOB ? 1.5 : 2); }
     const cr = (a, b, c, d, s) => { const s2 = s * s, s3 = s2 * s; return [0, 1].map((k) => 0.5 * (2 * b[k] + (c[k] - a[k]) * s + (2 * a[k] - 5 * b[k] + 4 * c[k] - d[k]) * s2 + (3 * b[k] - a[k] - 3 * c[k] + d[k]) * s3)); };
     function draw(t, R, grow) {
       if (!W) return;
@@ -66,7 +69,7 @@ window.OC_MV_FX = (function () {
     const make = (x, y, burst) => { const a = Math.random() * Math.PI * 2, v = burst ? 3 + Math.random() * 6 : 0;
       return { x, y, vx: burst ? Math.cos(a) * v : (Math.random() - 0.5) * 0.3, vy: burst ? Math.sin(a) * v - 3 : 0.35 + Math.random() * 0.5, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 0.15,
         w: 4 + Math.random() * 6, h: 3 + Math.random() * 4, c: cols[(Math.random() * cols.length) | 0], s: Math.random() < 0.35, ph: Math.random() * 6.3, life: burst ? 1 : -1 }; };
-    function size() { [W, H, dpr] = fit(cv, 2); const n = Math.round((W * H) / 20000); while (P.filter((p) => p.life < 0).length < n) P.push(make(Math.random() * W, Math.random() * H, false)); }
+    function size() { [W, H, dpr] = fit(cv, MOB ? 1.5 : 2); const n = Math.round((W * H) / 20000); while (P.filter((p) => p.life < 0).length < n) P.push(make(Math.random() * W, Math.random() * H, false)); }
     function burst(x, y, n = 26) { for (let i = 0; i < n; i++) P.push(make(x, y, true)); }
     function draw(t, dt) {
       if (!W) return;
@@ -84,5 +87,20 @@ window.OC_MV_FX = (function () {
     return { size, draw, burst };
   }
 
-  return { terrain, ribbons, confetti };
+  // ---------- 立ち絵のふちどり ----------
+  // img：読み込んだ立ち絵、h：表示する高さ、o：ふちの太さ、sx・sy：影のずれ（どれも画面上の大きさ）
+  function outline(img, h, o, sx, sy, line, shade) {
+    const r = Math.min(window.devicePixelRatio || 1, 2), w = (h * img.naturalWidth) / img.naturalHeight, pd = Math.ceil(o + Math.max(sx, sy, 0) + 2);
+    const mk = (a, b) => { const c = document.createElement('canvas'); c.width = Math.round(a * r); c.height = Math.round(b * r); return c; };
+    const small = mk(w, h); small.getContext('2d').drawImage(img, 0, 0, small.width, small.height);   // まず、表示する大きさに縮める
+    const cv = mk(w + pd * 2, h + pd * 2), sil = mk(w + pd * 2, h + pd * 2), s = sil.getContext('2d'), c = cv.getContext('2d'), P = pd * r;
+    if (o > 0) for (let k = 0; k < 16; k++) { const a = (k / 16) * Math.PI * 2; s.drawImage(small, P + Math.cos(a) * o * r, P + Math.sin(a) * o * r); }   // まわりに少しずつずらして重ねる＝ふち
+    s.drawImage(small, P, P); s.globalCompositeOperation = 'source-in'; s.fillStyle = line; s.fillRect(0, 0, sil.width, sil.height);
+    if (sx || sy) { c.drawImage(sil, sx * r, sy * r); c.globalCompositeOperation = 'source-in'; c.fillStyle = shade; c.fillRect(0, 0, cv.width, cv.height); c.globalCompositeOperation = 'source-over'; }   // 影
+    c.drawImage(sil, 0, 0); c.drawImage(small, P, P);
+    cv.style.cssText = 'width:' + (w + pd * 2).toFixed(1) + 'px;height:' + (h + pd * 2).toFixed(1) + 'px;margin:-' + pd + 'px';
+    return cv;
+  }
+
+  return { terrain, ribbons, confetti, outline };
 })();
