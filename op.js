@@ -10,12 +10,14 @@
   // ===== 変えてもいいところ =====
   const VIDEO = 'op.mp4';            // ロゴの動画（index.html と同じ場所に置く）
   const MODEL = 'kabeban.glb';       // 壁のアニメーション（同じく）
-  const FIT = 'cover';               // 'cover'＝画面いっぱい／'contain'＝動画のはしまで全部見せる
-  const VIDEO_SAFE = 0.3;            // cover でも、動画のまん中のこの割合は、かならず見せる（ロゴが切れないように）
+  const FIT = 'logo';                // 'logo'＝ロゴの大きさで合わせる／'cover'＝画面いっぱい／'contain'＝動画のはしまで全部
+  const LOGO_SIZE = 1.0;             // 'logo' のときのロゴの大きさ（0.8 で小さく、1.2 で大きく）
+  const LOGO_W = 0.56;               // 動画の横はばのうち、ロゴがしめる割合（動画を作り直したときだけ変える）
+  const VIDEO_SAFE = 0.3;            // 'cover' でも、動画のまん中のこの割合は、かならず見せる
   const SITE_BEHIND_WALL = true;     // 壁のうしろにサイトを置く（false にすると、動画の最後の色）
   const LOGO_ON_WALL = true;         // 動画の最後の1コマを、壁の表に貼る（ロゴごと割れる）
   const SKIP_STILL = true;           // glb の最初の「まだ動いていない時間」をとばして、すぐに割れ始める
-  const SPEED = 0.7;                 // 壁が割れる速さ（1＝Blender と同じ。0.5 で半分の速さのスローに、1.5 で速く）
+  const SPEED = 1.0;                 // 壁が割れる速さ（1＝Blender と同じ。0.5 で半分の速さのスローに、1.5 で速く）
   const CAM_LIFT = 0.3;              // 割れたあと、カメラを上げる量（画面の高さの何倍か）。下に残るかけらが画面から出ていく（0 で動かさない）
   const FADE_SEC = 0.6;              // 最後に、残ったかけらが消える時間（秒）
   const TONE = 'agx';                // 色の見え方：'agx'（Blender 4 の標準）／'filmic'（Blender 3 の標準）／'standard'
@@ -90,12 +92,13 @@
   function showTap() { if (!tap) tap = btn('op-tap', 'TAP TO START'); tap.hidden = false; log('tap'); }
   function hideTap() { if (tap) tap.hidden = true; }
 
-  // 動画の大きさ：cover は画面いっぱい。まん中（VIDEO_SAFE）が切れるときは、少し小さく
+  // 動画の大きさ：logo はロゴが画面の横はばの7割くらい（横長の画面では、高さに合わせる）
   function place() {
     const vw = video.videoWidth, vh = video.videoHeight, W = box.clientWidth, H = box.clientHeight; if (!vw || !W) return;
     const c = Math.min(W / vw, H / vh); let s = c;
+    if (FIT === 'logo') s = (LOGO_SIZE * Math.min(W * 0.7, H * 0.47)) / (vw * LOGO_W);
     if (FIT === 'cover') s = Math.max(c, Math.min(Math.max(W / vw, H / vh), W / (vw * VIDEO_SAFE), H / (vh * VIDEO_SAFE)));
-    video.style.transform = s > c * 1.001 ? 'scale(' + (s / c).toFixed(4) + ')' : '';
+    video.style.transform = Math.abs(s / c - 1) > 0.001 ? 'scale(' + (s / c).toFixed(4) + ')' : '';
     vbox = { x: (W - vw * s) / 2, y: (H - vh * s) / 2, w: vw * s, h: vh * s };
   }
   function keep() {
@@ -131,7 +134,7 @@
   function startModel() {
     phase = 'model'; log('model-start');
     player.start((t, end) => { if (phase === 'model' && t >= end - FADE_SEC * SPEED) finish(); }, LOGO_ON_WALL && kept && vbox ? { canvas: shot, rect: vbox } : null);
-    video.style.visibility = 'hidden';
+    video.style.visibility = 'hidden'; box.classList.add('op-3d');
     if (SITE_BEHIND_WALL) {   // 壁のうしろは、もうサイト（さわれる）
       box.style.backgroundColor = 'transparent'; box.style.pointerEvents = 'none';
       box.querySelectorAll('button').forEach((b) => { b.hidden = true; });
@@ -204,7 +207,7 @@
     function fit() {
       const w = cv.clientWidth || window.innerWidth, h = cv.clientHeight || window.innerHeight, a = w / h, wide = a > baseA;
       renderer.setSize(w, h, false);
-      const k = (FIT === 'cover' ? (wide ? baseA / a : 1) : wide ? 1 : baseA / a) / zoom;   // 縦の広さ
+      const k = (FIT !== 'contain' ? (wide ? baseA / a : 1) : wide ? 1 : baseA / a) / zoom;   // 縦の広さ（壁は画面いっぱい）
       if (persp) { cam.fov = (2 * Math.atan(Math.tan((fov0 * Math.PI) / 360) * k) * 180) / Math.PI; cam.aspect = a; }
       else { cam.top = by0 * k; cam.bottom = -by0 * k; cam.right = by0 * k * a; cam.left = -by0 * k * a; }
       cam.updateProjectionMatrix();
@@ -288,4 +291,3 @@
   }
 
 })();
-
