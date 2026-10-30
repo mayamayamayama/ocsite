@@ -83,6 +83,9 @@ body:not(.is-after) #noise-divider { display: none !important; }
 @keyframes mvFly { from { transform: translate(-110%, 10%); } 50% { transform: translate(20%, -12%); } to { transform: translate(150%, 4%); } }
 @keyframes mvBreathe { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-1.2%) scale(1.012, 1.018); } }
 
+/* 登場の動きが終わったもの（mv.js が done をつける）：動きを外して、軽くする */
+.mv.in .done { animation: none !important; }
+
 /* タップしたとき：シールはびよーん、キャラはジャンプ */
 .mv-p.boing > .mv-e { animation: mvBoing .7s cubic-bezier(.2, 1.8, .4, 1) both !important; }
 .mv-chara-p.boing > .mv-e { animation: mvHop .75s cubic-bezier(.3, 1.4, .5, 1) both !important; }
@@ -96,17 +99,15 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mv-sun i { position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(var(--ink) 0 1.4deg, transparent 1.4deg 9deg);
   -webkit-mask: radial-gradient(circle, transparent 0 85%, #000 86% 96%, transparent 97%); mask: radial-gradient(circle, transparent 0 85%, #000 86% 96%, transparent 97%); animation: mvTurn 50s linear infinite; }
 
-/* ---------- 山（mv-parts.js が作る。1つずつ、下からぽよんと飛び出して、ゆっくり伸び縮み） ---------- */
+/* ---------- 山（mv-parts.js が作る。1つずつ、下からぽよんと飛び出す。タップでぷるん） ---------- */
 .mv-land { position: relative; }
 .mt { position: absolute; transform: translate(calc(var(--mx) * var(--lz) * -16px), calc(var(--my) * var(--lz) * -6px)); }
 .mt-a, .mt-b { position: absolute; inset: 0; transform-origin: 50% 100%; }
 .mt svg { position: absolute; left: 0; top: 0; display: block; overflow: visible; }
 .mv:not(.in) .mt-a { opacity: 0; }
 .mv.in .mt-a { animation: mvMtIn .9s calc(.2s + var(--i) * .1s) both cubic-bezier(.2, 1.45, .4, 1); }
-.mv.in .mt-b { animation: mvMtIdle calc(2.6s + var(--i) * .35s) calc(1.3s + var(--i) * .1s) ease-in-out infinite alternate; }
-.mt.boing .mt-a { animation: mvJelly .8s both !important; }
+.mt.boing .mt-a { animation: mvJelly .8s !important; }
 @keyframes mvMtIn { from { opacity: 0; transform: translateY(70%) scale(.8, .4); } 40% { opacity: 1; } }
-@keyframes mvMtIdle { to { transform: scale(.985, 1.03); } }
 @keyframes mvJelly { 0% { transform: scale(1.12, .8); } 30% { transform: scale(.92, 1.12); } 55% { transform: scale(1.05, .95); } 80% { transform: scale(.98, 1.02); } 100% { transform: none; } }
 .mt .mt-top { pointer-events: none; }
 .mt-top .calt { opacity: 0; }
@@ -129,11 +130,15 @@ body:not(.is-after) #noise-divider { display: none !important; }
 @keyframes mvSwing { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 @keyframes mvFlap { from { transform: scaleY(1); } to { transform: scaleY(-.35); } }
 
-/* ---------- 立ち絵（白いふちのシール風。保存されにくくする） ---------- */
-.mv-chara { height: 100%; }
-.mv-chara img, .mv-ghost svg { display: block; height: 100%; width: auto; pointer-events: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+/* ---------- 立ち絵（白いふちと影は、mv.js の LINE・SHADOW で変えられます。絵にしてから出すので、保存されにくい） ---------- */
+.mv-chara { height: 100%; opacity: 0; transition: opacity .35s; }
+.mv-chara.ready { opacity: 1; }
+.mv-chara canvas, .mv-chara img, .mv-ghost svg { display: block; height: 100%; width: auto; pointer-events: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+.mv-chara canvas { height: auto; }
 .mv-ghost { height: 100%; }
-.mv-chara img { --o: calc(var(--u) * .7); filter: drop-shadow(var(--o) 0 0 #fff) drop-shadow(calc(var(--o) * -1) 0 0 #fff) drop-shadow(0 var(--o) 0 #fff) drop-shadow(0 calc(var(--o) * -1) 0 #fff) drop-shadow(calc(var(--u) * 1.8) calc(var(--u) * 1.6) 0 var(--teal)); }
+
+/* 重い端末（なめらかに動かないとき、mv.js が lite をつける）：小さな飾りの、ずっと続く動きを止めて軽くする */
+.mv.lite .i-tw, .mv.lite .i-wig, .mv.lite .i-spin, .mv.lite .i-rot, .mv.lite .i-drift, .mv.lite .i-drift2, .mv.lite .i-fly, .mv.lite .mv-sun i, .mv.lite .trail, .mv.lite .bd, .mv.lite .ndl, .mv.lite .dr { animation: none !important; }
 
 /* ---------- 文字 ---------- */
 .mv-big { font: 400 1em/1 "Dela Gothic One", "Noto Sans JP", sans-serif; color: rgba(22, 22, 22, .07); white-space: nowrap; }
