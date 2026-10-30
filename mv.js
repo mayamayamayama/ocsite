@@ -9,6 +9,7 @@
 (function () {
   // ===== 変えてもいいところ =====
   const CHARAS = [];                                   // 立ち絵の名前を ['a.png', 'b.png'] と書くと、その中からランダム。空なら mv-chara1〜12 を自動でさがす
+  const MOTION = 'auto';                                // 動き：'auto' 重いと自動で少なめ／'lite' いつも少なめ／'full' 全部
   const LINE = 0.7, LINE_COLOR = '#ffffff';            // 立ち絵の白いふちの太さ（0 でなし。1.4 で倍）と色
   const SHADOW = [1.8, 1.6], SHADOW_COLOR = '#2ec4b6'; // 立ち絵の影のずれ（右へ, 下へ。0, 0 でなし）と色
   const NAME = 'MAYAMA';                                // 活動名
@@ -29,16 +30,15 @@
   const mv = document.getElementById('mv'), P = window.OC_MV_PARTS, FX = window.OC_MV_FX;
   if (!mv || !P || !FX) return;
   const root = document.documentElement, body = document.body, REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  Object.entries(C).forEach(([k, v]) => mv.style.setProperty('--' + k, v));
+  Object.entries(C).forEach(([k, v]) => mv.style.setProperty('--' + k, v)); if (MOTION === 'lite') mv.classList.add('lite');
   const stage = mv.querySelector('.mv-stage'), gcv = mv.querySelector('.mv-topo'), ccv = mv.querySelector('.mv-chips');
   const S = P.S, esc = (s) => String(s).replace(/[&<>"]/g, (c) => '&#' + c.charCodeAt(0) + ';');
   const letters = (s, o) => [...s].map((ch, i) => '<span class="l" style="--i:' + (o + i) + '"><b>' + (ch === ' ' ? '&nbsp;' : esc(ch)) + '</b></span>').join('');
   const CL = typeof characters === 'object' && characters ? Object.entries(characters) : [], OCS = CL.length, pad = (n) => String(n).padStart(2, '0');
-  const roster = '<div class="mv-roster"><p class="rh">' + esc(ROSTER) + '<b>' + pad(OCS) + '</b></p><ul>' + CL.slice(0, 6).map(([id, c], i) => '<li data-id="' + esc(id) + '"><i>' + pad(i + 1) + '</i><span>' + esc(c.name || id) + '</span><small>' + esc(c.tag || '') + '</small></li>').join('') +
-    (OCS > 6 ? '<li class="more">+' + (OCS - 6) + ' MORE</li>' : '') + '</ul></div>';
+  const roster = S.roster(CL, esc(ROSTER), esc, pad);
 
-  // 部品：[名前, 中身, 登場のしかた, ずっとの動き, 奥行き（マウスで動く量）, スマホの置き場所 [横%, 縦%, 大きさ, 回転], パソコンの置き場所]
-  // 大きさ：シールは幅、文字は文字の大きさ（どちらも、画面の大きさに合わせた単位）。立ち絵だけは、画面の高さの%。大きさ 0 は、出さない
+  // 部品：[名前, 中身, 登場, ずっとの動き, 奥行き, スマホ [横%, 縦%, 大きさ, 回転], パソコン]
+  // 大きさ：シールは幅、文字は文字の大きさ。立ち絵は画面の高さの%。0 は出さない
   const L = [
     ['big', '<div class="mv-big">' + esc(BIG) + '</div>', 'fade', '', 0.15, [27, 31, 46, 0], [22, 31, 40, 0]],
     ['half', S.halftone(C.pink), 'fade', 'rot', 0.25, [2, 33, 30, 0], [4, 31, 36, 0]],
@@ -89,9 +89,7 @@
   ];
   stage.innerHTML = L.map(([k, html, e, i], n) => '<div class="mv-p mv-' + k + '-p" data-k="' + k + '"><div class="mv-e e-' + e + '" style="--d:' + (0.15 + n * 0.05).toFixed(2) + 's"><div class="mv-i i-' + (i || 'none') + '" style="--ph:-' + ((n * 0.37) % 3).toFixed(2) + 's">' + html + '</div></div></div>').join('');
   const ci = L.findIndex((x) => x[0] === 'chara'), parts = [...stage.children], landEl = stage.querySelector('.mv-land'), charaEl = stage.querySelector('.mv-chara'), altEl = stage.querySelector('.alt');
-  const rl = stage.querySelector('.mv-roster');   // 名前リスト：押すとプロフィールへ。順番に光る
-  rl.addEventListener('click', (e) => { const li = e.target.closest('li'); if (!li) return; if (li.dataset.id && window.showDetail) window.showDetail(li.dataset.id, true); else document.getElementById('character-grid').scrollIntoView({ behavior: 'smooth' }); });
-  let ri = 0; setInterval(() => { if (!vis || REDUCE) return; const li = rl.querySelectorAll('li[data-id]'); li.forEach((el, i) => el.classList.toggle('on', i === ri % li.length)); ri++; }, 1500);
+  P.wire(stage.querySelector('.mv-roster'), () => vis && !REDUCE);   // 名前リスト：押すとプロフィールへ。順番に光る
   stage.querySelector('.mv-sign-p').addEventListener('click', () => { const t = document.getElementById('list-head') || document.getElementById('character-grid'); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
 
   // ---------- 立ち絵：用意したものの中から、前回と違うものをランダムに ----------
@@ -158,7 +156,7 @@
     ribs = P.RIB.map(([a, b, w, tw, pp, lp], i) => ({ a: C[a] || a, b: C[b] || b, w: w * u, tw, sp: 0.9 + i * 0.25, amp: u * 1.4, p: (wide ? lp : pp).map(([x, y]) => [x * W, y * H]) }));
     terrain.size(); rib.size(); conf.size(); paintChara(); tDone = 0;
   }
-  const terrain = FX.terrain(gcv, C.grid), rib = FX.ribbons(stage.querySelector('.mv-rib')), conf = FX.confetti(ccv, [C.orange, C.yellow, C.teal, C.violet, C.blue, C.lime, '#ffffff']);
+  const terrain = FX.terrain(gcv, C.grid), rib = FX.ribbons(stage.querySelector('.mv-rib')), conf = FX.confetti(stage.querySelector('.mv-rib'), [C.orange, C.yellow, C.teal, C.violet, C.blue, C.lime, '#ffffff'], true);   // 紙吹雪はリボンと同じキャンバスに（画面全体の重なりをへらす）
   new ResizeObserver(layout).observe(stage);
   if (document.fonts) document.fonts.addEventListener('loadingdone', layout);   // 文字が読み込めたら、はみ出しを直す
 
@@ -174,14 +172,14 @@
 
   // ---------- マウス・指で、奥行きのあるずれ。タップで、紙吹雪がはじける ----------
   let mx = 0, my = 0, tx = 0, ty = 0, px = -1e4, py = -1e4, pw = 0, pt = 0;
-  const point = (e) => { const r = stage.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top; tx = (px / r.width - 0.5) * 2; ty = (py / r.height - 0.5) * 2; pt = performance.now(); };
-  window.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' || e.buttons) point(e); }, { passive: true });
+  const point = (e, m) => { const r = stage.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top; if (m) { tx = (px / r.width - 0.5) * 2; ty = (py / r.height - 0.5) * 2; } pt = performance.now(); };
+  window.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') point(e, 1); }, { passive: true });   // 奥行きのずれは、マウスだけ（スマホはスクロールのじゃまをしない）
   stage.addEventListener('animationend', (e) => {   // 登場の動きが終わったら外す（動かない部品は、スマホのメモリを使わなくなる）
     const el = e.target, b = /^mv(Boing|Hop|Jelly)$/.test(e.animationName) && el.closest('.boing');
     if (b) b.classList.remove('boing'); else if (el.matches('.mv-e,.mt-a,.l,.mv-label') && !/Boing|Hop|Jelly/.test(e.animationName)) el.classList.add('done');
   });
-  stage.addEventListener('pointerdown', (e) => {
-    point(e); if (REDUCE) return;
+  stage.addEventListener('click', (e) => {   // タップ（スクロールのときは出ない）
+    point(e, 0); if (REDUCE) return;
     const ch = e.target.closest('.mv-chara-p'), st = e.target.closest('.mv-p'), mt = e.target.closest('.mt');
     conf.burst(px, py, ch ? 46 : 24);
     const el = ch || mt || (st && st.querySelector('svg') && !st.matches('.mv-land-p') ? st : null);
@@ -189,7 +187,7 @@
   });
 
   // ---------- 毎フレーム：方眼・リボン・紙吹雪・標高の数字・ずれ（見えているときだけ） ----------
-  let vis = true, last = 0, odd = false, lx = '', ly = '', fr = [], last0 = 0, n3 = 0, tDone = 0;
+  let vis = true, last = 0, odd = false, lx = '', ly = '', fr = [], last0 = 0, n3 = 0, tDone = 0, cdt = 0;
   new IntersectionObserver((en) => { vis = en[0].isIntersecting; mv.classList.toggle('off', !vis); if (!body.classList.contains('is-after')) body.classList.toggle('on-light', vis); }, { threshold: 0.3 }).observe(mv);   // 見えないあいだは、動きを止める
   function loop(now) {
     requestAnimationFrame(loop);
@@ -199,19 +197,21 @@
     mx += (tx - mx) * 0.06 * dt; my += (ty - my) * 0.06 * dt; pw += ((now - pt < 1500 ? 1 : 0) - pw) * 0.05 * dt;
     const nx = mx.toFixed(3), ny = my.toFixed(3);
     if (nx !== lx || ny !== ly) { stage.style.setProperty('--mx', nx); stage.style.setProperty('--my', ny); lx = nx; ly = ny; }   // ずれは、変わったときだけ
-    if (t0 && fr && s > 2.6) { fr.push(now - last0); if (fr.length > 80) { fr.sort((a, b) => a - b); if (fr[40] > 24) mv.classList.add('lite'); fr = null; } }   // 重い端末では、動きをへらす
-    last0 = now; const lite = mv.classList.contains('lite'); n3 = (n3 + 1) % 3;
-    if (((odd = !odd) && !lite) || pw > 0.05 || !tDone) { terrain.draw(REDUCE || lite ? 0 : t, peaks, px, py, pw); tDone = 1; }   // 方眼とリボンは、ゆっくりなので1コマおき（交互に描いて、重さを分ける）
-    if (t0 && (lite ? !n3 : !odd || s < 2)) rib.draw(REDUCE ? 0 : t, ribs, REDUCE ? 1 : Math.max(0, (s - 0.2) / 1.6));   // リボンは、登場のとき、のびていく
-    if (!REDUCE) conf.draw(t, dt);
-    if (t0) {
-      const k = Math.min(1, Math.max(0, (s - 1.3) / 1.8));
-      altEl.textContent = Math.round(ALT * (1 - Math.pow(1 - k, 3))).toLocaleString('en-US');   // 標高が数えあがる
+    let lite = mv.classList.contains('lite'); const f = now - last0; last0 = now;
+    if (t0 && !lite && MOTION === 'auto' && s > 2.6 && f < 100) { fr.push(f); if (fr.length > 90) { fr.sort((a, b) => a - b); if (fr[45] > 22) mv.classList.add('lite'); fr = []; } }   // ずっと見張って、なめらかでなければ動きをへらす
+    n3 = (n3 + 1) % 3; odd = !odd; cdt += dt;
+    if ((!n3 && !lite) || pw > 0.05 || !tDone) { terrain.draw(REDUCE || lite ? 0 : t, peaks, px, py, pw); tDone = 1; }   // 方眼は3コマに1回
+    if (t0 && (lite ? n3 === 1 : !odd || s < 2)) {   // リボンと紙吹雪は、同じキャンバスに2コマに1回（リボンは、登場のとき、のびていく）
+      rib.draw(REDUCE ? 0 : t, ribs, REDUCE ? 1 : Math.max(0, (s - 0.2) / 1.6)); if (!REDUCE) conf.draw(t, Math.min(4, cdt)); cdt = 0;
+    }
+    if (t0 && s < 4) {
+      const k = Math.min(1, Math.max(0, (s - 1.3) / 1.8)), a = Math.round(ALT * (1 - Math.pow(1 - k, 3))).toLocaleString('en-US');
+      if (altEl.textContent !== a) altEl.textContent = a;   // 標高が数えあがる（変わったときだけ書く）
     }
   }
   layout(); requestAnimationFrame(loop);
 
-  // ---------- プロフィールから戻るたびに、上のモーショングラフィックスを、ランダムで選び直す ----------
+  // ---------- プロフィールから戻るたびに、モーショングラフィックスを選び直す ----------
   let wasIn = body.classList.contains('in-detail');
   new MutationObserver(() => {
     const now = body.classList.contains('in-detail');
