@@ -3,7 +3,6 @@
 // バージョンはいくつかあり、入場するたびに、前回と違うものがランダムで選ばれます。
 //   アドレスの最後に ?hero=名前（main / abstract / mountain / game / physics / ancient / elder）で選べます。
 // 3Dの部品は hero-parts.js〜hero-parts4.js、飾りは hero-hud.js にあります。
-// バージョンは opts で、背景・飾り・質感を差し替えられます（elder が使います）。
 // マウスを動かすと（スマホは傾けると）、カメラが少し回り込みます。
 
 (function () {
@@ -12,10 +11,10 @@
   (window.OC_LOADED = window.OC_LOADED || []).push('hero');
   const cssOK = !!getComputedStyle(document.documentElement).getPropertyValue('--oc-css-motion').trim();
   const filesOK = typeof window.OC_HERO_PARTS === 'function' && typeof window.OC_HERO_SCENES === 'function';
-  if (!cssOK || !filesOK) { hero.style.display = 'none'; document.body.classList.add('is-after'); return; }   // 必要なファイルが読み込めていないときは、動かさない
+  if (!cssOK || !filesOK) { hero.style.display = 'none'; document.body.classList.add('oc-no-hero'); return; }   // 必要なファイルが読み込めていないときは、動かさない
   const cv = document.getElementById('hero-cv');
   const ctx = cv.getContext('2d');
-  // style.css が古いままでも暴走しないように、大事な指定はここでも行う
+  // style.css が古くても暴走しないように
   hero.style.cssText += ';position:relative;box-sizing:border-box;overflow:hidden;width:100vw;height:calc(100vh + 240px);height:calc(100svh + 240px);min-height:660px;padding-bottom:240px;background:#fde9dc';
   cv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;display:block';
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -87,26 +86,31 @@
   const T4 = typeof window.OC_HERO_PARTS4 === 'function' ? window.OC_HERO_PARTS4(G, T) : null;
   const VERS = [{ id: 'main', make: () => ({ shots: [].concat(window.OC_HERO_SCENES(), typeof window.OC_HERO_SCENES2 === 'function' ? window.OC_HERO_SCENES2() : []), actors: window.OC_HERO_ACTORS || {} }) }];
   if (T2) Object.keys(window.OC_HERO_VERSIONS || {}).forEach((id) => VERS.push({ id, make: window.OC_HERO_VERSIONS[id] }));
-  let V = VERS.find((v) => v.id === (location.search.match(/[?&]hero=(\w+)/) || [])[1]), last = '';
-  try { last = localStorage.getItem('oc-hero-ver') || ''; } catch (e) {}
-  if (!V) { const pool = VERS.length > 1 ? VERS.filter((v) => v.id !== last) : VERS; V = pool[Math.floor(Math.random() * pool.length)]; }   // 前回と違うものを、ランダムに
-  try { localStorage.setItem('oc-hero-ver', V.id); } catch (e) {}
-  let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC, P4: !!T4, HOOKS: true }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
-  const SH = made.shots, ACT = made.actors, O = made.opts || {};   // O：バージョンごとの差し替え（背景・切り抜き・飾り・質感）
-  const shp = (v) => (typeof v === 'string' ? T.SHAPES[v] : v && v.length === T.N ? v : null) || T.SHAPES.circle;   // 形の名前、または形そのもの
-  const NS = SH.length, LOOP = NS * SHOT_SEC;
-  const E = { W: 0, FH: 0, fw, NS, LOOP, SHOT_SEC };   // 飾り（hero-hud.js）に渡す情報
-  const HUD = typeof window.OC_HERO_HUD === 'function' ? window.OC_HERO_HUD(G, T, E) : null;
-  const morph = {}; Object.keys(ACT).forEach((id) => { morph[id] = new Float32Array(T.N); });
+  // バージョンを選ぶ（なければ、前回と違うものをランダムに）。戻るたびに mv.js が選び直す
+  let V, SH, ACT, O, NS, LOOP, HUD, morph;
+  const shp = (v) => (typeof v === 'string' ? T.SHAPES[v] : v && v.length === T.N ? v : null) || T.SHAPES.circle;
+  const E = { W: 0, FH: 0, fw, SHOT_SEC };   // 飾り（hero-hud.js）に渡す情報
+  function pick(id) {
+    let last = ''; try { last = localStorage.getItem('oc-hero-ver') || ''; } catch (e) {}
+    V = VERS.find((v) => v.id === id);
+    if (!V) { const pool = VERS.length > 1 ? VERS.filter((v) => v.id !== last) : VERS; V = pool[Math.floor(Math.random() * pool.length)]; }
+    try { localStorage.setItem('oc-hero-ver', V.id); } catch (e) {}
+    let made; try { made = V.make({ N: T.N, fromFn: T.fromFn, fromPoly: T.fromPoly, ORBIT_SEC, SHOT_SEC, P4: !!T4, HOOKS: true }); } catch (e) { window.OC_HERO_ERR = V.id + ': ' + (e && e.message); V = VERS[0]; made = VERS[0].make(); }   // 失敗したら、いつもの
+    SH = made.shots; ACT = made.actors; O = made.opts || {};   // O：バージョンごとの差し替え
+    NS = E.NS = SH.length; LOOP = E.LOOP = NS * SHOT_SEC;
+    HUD = typeof window.OC_HERO_HUD === 'function' ? window.OC_HERO_HUD(G, T, E) : null;
+    morph = {}; Object.keys(ACT).forEach((k) => { morph[k] = new Float32Array(T.N); });
+  }
+  pick((location.search.match(/[?&]hero=(\w+)/) || [])[1]);
 
-  // ---------- 傾き（マウス → スマホの傾き → 自動のゆらゆら、の順に使う） ----------
+  // ---------- 傾き（マウス → スマホの傾き → 自動のゆらゆら） ----------
   const tilt = { mx: 0, my: 0, mt: -1e9, ox: 0, oy: 0, ot: -1e9 };
   const cl = (v) => Math.max(-1, Math.min(1, v));
   window.addEventListener('pointermove', (ev) => {
     if (ev.pointerType !== 'mouse') return;
     tilt.mx = cl((ev.clientX / window.innerWidth - 0.5) * 2); tilt.my = cl((ev.clientY / window.innerHeight - 0.5) * 2); tilt.mt = performance.now();
   }, { passive: true });
-  let baseB = null, baseG = 0;   // スマホの「ふだんの持ち方」。傾けた分だけを使う（ゆっくり、今の持ち方に合わせ直す）
+  let baseB = null, baseG = 0;   // スマホのふだんの持ち方（傾けた分だけ使う）
   window.addEventListener('deviceorientation', (ev) => {
     if (ev.gamma == null || ev.beta == null) return;
     if (baseB === null) { baseB = ev.beta; baseG = ev.gamma; }
@@ -159,9 +163,9 @@
 
   // ---------- 1コマを描く ----------
   let start = performance.now(), lastGrain = 0, gx = 0, gy = 0, inkNow = '', strokeNow = '';
-  // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子・ふちの暗さ・色のずれを省く → 2：解像度を下げる）
+  // 重い端末では、自動で質感を軽くする（0：全部 → 1：粒子などを省く → 2：解像度を下げる）
   let Q = 0, autoQ = true, dtAvg = 16.7, lastNow = 0, runT = 0;
-  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, get Q() { return Q; }, SHOT_SEC, NS, version: V.id, vers: VERS.map((v) => v.id), p4: !!T4, hooks: true };   // （確認用）
+  window.OC_HERO = { seek(sec) { start = performance.now() - sec * 1000; }, setQ(q) { Q = q; autoQ = false; build(); }, use(id) { pick(id); start = performance.now(); build(); }, get Q() { return Q; }, SHOT_SEC, get NS() { return NS; }, get version() { return V.id; }, vers: VERS.map((v) => v.id), p4: !!T4, hooks: true };
   function frame(now) {
     if (!W) return;
     const T0 = REDUCE ? SHOT_SEC * 1 + 3 : Math.max(0, (now - start) / 1000);
@@ -170,7 +174,7 @@
     const cur = SH[k], prv = SH[(k - 1 + NS) % NS], wipe = prv.bg !== cur.bg && tb < 0.9;
     const bgShow = wipe && tb < 0.4 ? prv.bg : cur.bg, ink = INK[bgShow] || (lum(col(bgShow)) > 0.5 ? PAL.navy : PAL.cream);   // 色が広がりきる少し前に、文字の色を変える
 
-    // カメラ：横の向きは、いつも同じ速さで回り続ける。高さ・距離・見る場所は、ショットごとに変わる
+    // カメラ：横の向きは同じ速さで回り続け、高さ・距離・見る場所はショットごとに変わる
     const ca = camAt(prv, tb + SHOT_SEC, T0), cb = camAt(cur, tb, T0), qc = O.hard ? 1 : eIO(clamp01(tb / 2.2));   // hard：ショットの切り替えで、すぱっと切る
     const tl = lerp(ca.tilt, cb.tilt, qc), wb = lerp(ca.wob, cb.wob, qc);
     const cam = { yaw: (T0 * TAU) / ORBIT_SEC + lerp(ca.yaw, cb.yaw, qc), pitch: lerp(ca.pitch, cb.pitch, qc), dist: Math.exp(lerp(Math.log(ca.dist), Math.log(cb.dist), qc)) * (1 + 0.05 * wb * Math.sin(T0 * 0.37)),
@@ -187,9 +191,9 @@
       ctx.fillStyle = col(cur.bg); ctx.beginPath(); ctx.arc(CX, CY, eIO(tb / 0.9) * Math.hypot(W, H), 0, TAU); ctx.fill();
     } else { ctx.fillStyle = col(cur.bg); ctx.fillRect(0, 0, W, H); }
 
-    // 物体（前のショットの状態から、今のショットの状態へ）
+    // 物体（前のショット → 今のショット）
     if (O.clip) { ctx.save(); O.clip(ctx, I); }
-    const SA = !O.hard && tb < MOVE_SEC + 0.75 ? prv.act(T0, tb + SHOT_SEC) || {} : {}, SB = cur.act(T0, tb) || {}, items = [];   // 前のショットは、動き終わったら計算しない（軽くする）
+    const SA = !O.hard && tb < MOVE_SEC + 0.75 ? prv.act(T0, tb + SHOT_SEC) || {} : {}, SB = cur.act(T0, tb) || {}, items = [];   // 前のショットは、動き終わったら計算しない
     let n = 0;
     new Set(Object.keys(SA).concat(Object.keys(SB))).forEach((id) => {
       if (!ACT[id]) return;
@@ -239,7 +243,7 @@
       g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${VIGNETTE})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
     if (HUD && O.hud === false) {}
-    else if (HUD) {   // 少し下にスクロールしたとき、サイトの上の文字と重ならないように、その下にもぐらせる
+    else if (HUD) {   // スクロールしたとき、上の文字の下にもぐらせる
       const sy = window.scrollY || 0; ctx.save();
       if (sy > 0) { ctx.beginPath(); ctx.rect(0, sy + 46, W, H); ctx.clip(); }
       HUD.hud(cur, k, tb, loopT, ink, T0, cam); ctx.restore();
@@ -250,7 +254,7 @@
       if (now - lastGrain > 70) { gx = Math.random() * 256; gy = Math.random() * 256; lastGrain = now; }
       ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = GA; ctx.translate(-gx, -gy); ctx.fillStyle = grainPat; ctx.fillRect(0, 0, W + 256, H + 256); ctx.restore();
     }
-    // 大きな文字の色。大きな物体と重なっても読めるよう、背景の色でふちを取る
+    // 大きな文字の色（背景の色でふちを取る）
     if (ink !== inkNow) { inkNow = ink; titleEls.forEach((el) => { el.style.color = ink; }); }
     if (titleEls[0] && col(bgShow) !== strokeNow) { strokeNow = col(bgShow); titleEls[0].style.webkitTextStroke = `2px ${strokeNow}`; titleEls[0].style.paintOrder = 'stroke fill'; }
   }
@@ -265,7 +269,7 @@
     if (O.center) [CX, CY] = O.center(W, FH, CX, CY);   // バージョンが、画面の中心を決めることもできる
     dpr = Q >= 2 ? 1 : Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(4e6 / (W * H))); G.dpr = dpr; G.CA = CHROMA;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (!grainPat) {   // フィルムの粒子（灰色のまだら模様を、重ね方「オーバーレイ」で重ねる）
+    if (!grainPat) {   // フィルムの粒子
       const nc = document.createElement('canvas'); nc.width = nc.height = 256; const c = nc.getContext('2d'), d = c.createImageData(256, 256);
       for (let q = 0; q < d.data.length; q += 4) { const v = 128 + (Math.random() - 0.5) * 200; d.data[q] = d.data[q + 1] = d.data[q + 2] = v; d.data[q + 3] = 255; }
       c.putImageData(d, 0, 0); grainPat = ctx.createPattern(nc, 'repeat');
