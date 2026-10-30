@@ -115,8 +115,9 @@ window.OC_MV_PARTS = (function () {
           '<path class="call" pathLength="1" d="M0 ' + f1(-u * 8.8) + ' V' + f1(-u * 14) + '" fill="none" stroke="' + INK + '" stroke-width="' + f1(u * 0.35) + '"/>' +
           '<text class="calt" x="0" y="' + f1(-u * 15.2) + '" text-anchor="middle" font-family="Oswald, sans-serif" font-weight="600" font-size="' + f1(u * 3.2) + '" letter-spacing="' + f1(u * 0.25) + '" fill="' + INK + '" stroke="#fff" stroke-width="' + f1(u * 0.9) + '" paint-order="stroke">' + label + '</text></svg>';
       }
+      const m = 3 * u, pic = svg(f1(w + m * 2), f1(h + m * 2), '<g transform="translate(' + f1(m) + ' ' + f1(m) + ')">' + out + '</g>');   // 山の絵（影がはみ出す分、まわりに余白）
       return '<div class="mt" style="left:' + f1(cx * W - hw) + 'px;top:' + f1(py * H) + 'px;width:' + f1(w) + 'px;height:' + f1(h) + 'px;--lz:' + lz + ';--i:' + i + '"><div class="mt-a"><div class="mt-b">' +
-        svg(w, h, out, ' width="' + f1(w) + '" height="' + f1(h) + '"') + flag + '</div></div></div>';
+        '<img class="mt-pic" alt="" draggable="false" style="left:-' + f1(m) + 'px;top:-' + f1(m) + 'px;width:' + f1(w + m * 2) + 'px;height:' + f1(h + m * 2) + 'px" src="data:image/svg+xml;charset=utf-8,' + encodeURIComponent(pic) + '">' + flag + '</div></div></div>';
     }).join('');
     return { html, summit };
   }
