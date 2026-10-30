@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>構図置き場 - OC ARCHIVE</title>
+  <meta name="description" content="MAYAMA MUSEUM — NovelAI のベースプロンプトと、そこから生まれた一枚を展示しています。">
+  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします） -->
+  <script>
+    (function () {
+      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); } } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Shippori+Mincho:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css?v=61">
+  <link rel="stylesheet" href="museum.css?v=61">
+</head>
+<body class="mu">
+  <canvas class="mu-dust" aria-hidden="true"></canvas>
+  <div class="mu-vig" aria-hidden="true"></div>
+  <div class="mu-grain" aria-hidden="true"></div>
+  <i class="mu-bar t" aria-hidden="true"></i><i class="mu-bar b" aria-hidden="true"></i>
+  <a class="mu-home" href="index.html">OC ARCHIVE<b>MAYAMA MUSEUM</b></a>
+  <button type="button" class="mu-catbtn">目録 CATALOG</button>
+
+  <!-- ロビー：コラージュ作品を飾る（書きこみ帳で選ぶか、museum-lobby.jpg という名前でアップロード） -->
+  <header class="mu-lobby auto">
+    <div class="mu-spot" aria-hidden="true"></div>
+    <figure class="mu-hero" style="margin:0">
+      <div class="mu-frame"><div class="mu-mat"><div class="mu-empty">MAYAMA<br>MUSEUM</div></div></div>
+      <figcaption class="mu-tap" hidden>TAP — LIGHTS ON / OFF</figcaption>
+    </figure>
+    <div class="mu-ltext">
+      <p class="mu-kicker">MAYAMA MUSEUM — GALLERY 04</p>
+      <h1 class="mu-title">Composition<small>構図置き場</small></h1>
+      <p class="mu-lead">NovelAI のベースプロンプトと、そのプロンプトから生まれた一枚を展示しています。作品の札のボタンで、プロンプトをコピーできます。</p>
+      <dl class="mu-info"><div><dt>展示数</dt><dd id="mu-count">00</dd></div><div><dt>入館料</dt><dd>FREE</dd></div><div><dt>開館</dt><dd>24H</dd></div></dl>
+      <a class="mu-enter" href="#hall">ENTER<i></i></a>
+    </div>
+  </header>
+
+  <!-- 展示室（museum.js が、data/prompts.json から作ります） -->
+  <main class="mu-hall" id="hall"></main>
+
+  <footer class="mu-exit">
+    <a href="index.html"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" fill="none" stroke="#fff" stroke-width="2"/><circle cx="23" cy="8" r="3.4" fill="#fff"/><path d="M14 33l5-9 4 3 2 7M19 24l2-10 6 5 4 1M21 14l-6 2-3 5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>EXIT</b><small>出口 — OC ARCHIVE へ</small></span></a>
+  </footer>
+
+  <!-- 目録 -->
+  <div class="mu-cat" role="dialog" aria-label="目録"><button type="button" class="mu-x">CLOSE ✕</button><div class="mu-cat-in"><h2>Catalogue<small>目録 — 見たい作品を選んでください</small></h2><div class="mu-grid"></div></div></div>
+  <!-- 作品に近づいて見る -->
+  <div class="mu-view" role="dialog" aria-label="作品"><button type="button" class="mu-x">CLOSE ✕</button><div class="mu-view-in"></div></div>
+  <div class="mu-toast" role="status"></div>
+
+  <script src="nav.js?v=61"></script>
+  <script src="museum.js?v=61"></script>
+</body>
+</html>
