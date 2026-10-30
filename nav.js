@@ -49,7 +49,7 @@
 
   // ---------- 電車（キャンバスに描く。5両編成。まん中の3両目に、行き先の表示） ----------
   // 3両目が画面をおおったところで、ページが切りかわります。着いたページでは、ゆっくり加速して走り去ります
-  const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
+  const CARS = 6, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
     const cv = document.createElement('canvas'); cv.className = 'nv-train'; cv.setAttribute('aria-hidden', 'true');
     const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 3.2 * vw;
