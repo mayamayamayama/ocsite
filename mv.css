@@ -14,7 +14,7 @@ html body.is-after:not(.oc-no-hero) .hero-after { display: none !important; }
 .mv {
   --ink: #161616; --u: 4px;
   position: relative; box-sizing: border-box; flex-shrink: 0; overflow: hidden;
-  width: 100vw; height: calc(100vh + 240px); height: calc(100svh + 240px); min-height: 660px; padding-bottom: 240px;
+  width: 100vw; height: 100vh; height: 100svh; min-height: 420px;
   background: var(--bg, #eeede9); color: var(--ink);
   -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: pan-y;
 }
@@ -22,7 +22,9 @@ html body.is-after:not(.oc-no-hero) .hero-after { display: none !important; }
 .mv-topo { opacity: 0; transition: opacity 1.4s; }
 .mv.in .mv-topo { opacity: 1; }
 .mv-chips { z-index: 6; }
-.mv-stage { position: absolute; left: 0; right: 0; top: 0; bottom: 240px; z-index: 2; --mx: 0; --my: 0; }
+.mv-stage { position: absolute; inset: 0; z-index: 2; --mx: 0; --my: 0; }
+/* 入場画面のときは、下のノイズのグラデーションを出さない（プロフィールから戻ったあとの、モーショングラフィックスのときだけ出る） */
+body:not(.is-after) #noise-divider { display: none !important; }
 
 /* 部品の置き場所（mv.js が left・top・大きさを決める）。奥行き --z の分だけ、マウスや指でずれる */
 .mv-p { position: absolute; z-index: 5; line-height: 1; transform: translate(-50%, -50%) translate(calc(var(--mx) * var(--z) * -16px), calc(var(--my) * var(--z) * -12px)) rotate(var(--r, 0deg)); }
@@ -184,3 +186,29 @@ html body.is-after:not(.oc-no-hero) .hero-after { display: none !important; }
 .mv-dots3 i { width: 1em; height: 1em; box-sizing: border-box; border-radius: 50%; border: .2em solid var(--ink); animation: mvDot 1.5s infinite steps(1); }
 .mv-dots3 i:nth-child(2) { animation-delay: .5s; } .mv-dots3 i:nth-child(3) { animation-delay: 1s; }
 @keyframes mvDot { 0% { background: var(--ink); } 66% { background: transparent; } }
+
+/* ---------- キャラクター一覧：スマホだけ「1列／2列」を切り替えられる（list.js がボタンを置きます） ---------- */
+.cols-bar { display: none; }
+@media (max-width: 640px) {
+  .cols-bar { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0 0 24px; color: var(--sub); }
+  .cols-bar > span { font-size: .66rem; letter-spacing: .22em; }
+  .cols-rule { flex: 1; height: 1px; background: var(--line); }
+  .cols-btn { display: inline-flex; align-items: center; gap: 3px; height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--sub); font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .25s, color .25s, border-color .25s; }
+  .cols-btn b { display: block; width: 7px; height: 12px; border: 1.5px solid currentColor; border-radius: 1px; }
+  .cols-btn em { margin-left: 6px; font-style: normal; font-size: .6rem; letter-spacing: .14em; }
+  .cols-btn.on { background: var(--accent); border-color: var(--accent); color: #0d0d0d; }
+  .character-grid.cols-2 { grid-template-columns: 1fr 1fr; gap: 30px 12px; }
+  .cols-2 .plate { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)); }
+  .cols-2 .pl { font-size: .46rem; }
+  .cols-2 .pl.tr { top: 8px; right: 20px; }
+  .cols-2 .pl.bl { display: none; }
+  .cols-2 .card-meta { grid-template-columns: 1fr; gap: 6px; padding-top: 10px; margin-top: 10px; }
+  .cols-2 .cm-top { gap: 8px; }
+  .cols-2 .cm-label { font-size: .5rem; padding-bottom: .35em; }
+  .cols-2 .cm-no { font-size: 1.9rem; }
+  .cols-2 .pills { gap: 4px; }
+  .cols-2 .pills i { padding: 3px 8px; font-size: .52rem; }
+  .cols-2 .card-name { font-size: 1.25rem; overflow-wrap: anywhere; }
+  .cols-2 .card-spec { font-size: .58rem; }
+  .cols-2 .card-badge { display: none; }
+}
