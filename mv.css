@@ -104,6 +104,9 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mt { position: absolute; transform: translate(calc(var(--mx) * var(--lz) * -16px), calc(var(--my) * var(--lz) * -6px)); }
 .mt-a, .mt-b { position: absolute; inset: 0; transform-origin: 50% 100%; }
 .mt svg { position: absolute; left: 0; top: 0; display: block; overflow: visible; }
+.mt-pic { position: absolute; display: block; max-width: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
+/* 画面から外れているあいだは、ぜんぶの動きを止める（mv.js が off をつける） */
+.mv.off *, .mv.off *::before, .mv.off *::after { animation-play-state: paused !important; }
 .mv:not(.in) .mt-a { opacity: 0; }
 .mv.in .mt-a { animation: mvMtIn .9s calc(.2s + var(--i) * .1s) both cubic-bezier(.2, 1.45, .4, 1); }
 .mt.boing .mt-a { animation: mvJelly .8s !important; }
@@ -115,17 +118,17 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mt-top .call { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
 .mv.in .mt-top .call { animation: mvDraw .6s 1.6s both; }
 .mt-top .sping { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.mv.in .mt-top .sping { animation: mvPing 2.6s 2.2s ease-out infinite; }
+.mv.in .mt-top .sping { animation: mvPing 2.6s 2.2s steps(10) infinite; }
 .mv.in .mt-top .sping.s2 { animation-delay: 3.5s; }
-.mt-top .flg { transform-box: fill-box; transform-origin: 0 50%; animation: mvFlag .7s ease-in-out infinite alternate; }
+.mt-top .flg { transform-box: fill-box; transform-origin: 0 50%; animation: mvFlag .7s steps(3) infinite alternate; }
 @keyframes mvPing { from { transform: scale(1); opacity: .9; } to { transform: scale(2.8); opacity: 0; } }
 @keyframes mvFlag { from { transform: skewY(-12deg) scaleX(.82); } to { transform: skewY(8deg) scaleX(1); } }
 
-/* シールの中の動き：方位磁石の針・道しるべの板・鳥の羽 */
-.ndl { transform-origin: 60px 60px; animation: mvNeedle 4.5s ease-in-out infinite; }
-.dr { transform-origin: 60px 60px; animation: mvTurn 30s linear infinite; }
-.bd { animation: mvSwing 2.4s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.7s); }
-.wing { transform-box: fill-box; transform-origin: 50% 70%; animation: mvFlap .42s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.13s); }
+/* シールの中の動き：方位磁石の針・道しるべの板・鳥の羽（SVG の中の動きは重いので、こま送りにしている） */
+.ndl { transform-origin: 60px 60px; animation: mvNeedle 4.5s steps(5) infinite; }
+.dr { transform-origin: 60px 60px; animation: mvTurn 30s steps(60) infinite; }
+.bd { animation: mvSwing 2.4s steps(8) infinite alternate; animation-delay: calc(var(--i) * -.7s); }
+.wing { transform-box: fill-box; transform-origin: 50% 70%; animation: mvFlap .42s steps(2) infinite alternate; animation-delay: calc(var(--i) * -.13s); }
 @keyframes mvNeedle { 0%, 100% { transform: rotate(-28deg); } 30% { transform: rotate(20deg); } 55% { transform: rotate(-9deg); } 78% { transform: rotate(5deg); } }
 @keyframes mvSwing { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 @keyframes mvFlap { from { transform: scaleY(1); } to { transform: scaleY(-.35); } }
@@ -138,7 +141,7 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mv-ghost { height: 100%; }
 
 /* 重い端末（なめらかに動かないとき、mv.js が lite をつける）：小さな飾りの、ずっと続く動きを止めて軽くする */
-.mv.lite .i-tw, .mv.lite .i-wig, .mv.lite .i-spin, .mv.lite .i-rot, .mv.lite .i-drift, .mv.lite .i-drift2, .mv.lite .i-fly, .mv.lite .mv-sun i, .mv.lite .trail, .mv.lite .bd, .mv.lite .ndl, .mv.lite .dr { animation: none !important; }
+.mv.lite .i-tw, .mv.lite .i-wig, .mv.lite .i-spin, .mv.lite .i-rot, .mv.lite .i-drift, .mv.lite .i-drift2, .mv.lite .i-fly, .mv.lite .mv-sun i, .mv.lite .trail, .mv.lite .bd, .mv.lite .ndl, .mv.lite .dr, .mv.lite .wing, .mv.lite .flg, .mv.lite .sping { animation: none !important; }
 
 /* ---------- 文字 ---------- */
 .mv-big { font: 400 1em/1 "Dela Gothic One", "Noto Sans JP", sans-serif; color: rgba(22, 22, 22, .07); white-space: nowrap; }
@@ -181,7 +184,7 @@ body:not(.is-after) #noise-divider { display: none !important; }
 .mv-roster li.on, .mv-roster li:hover { background: var(--yellow); }
 .mv-roster li.on i::before { content: '▸ '; }
 .mv-side { writing-mode: vertical-rl; font: 600 1em/1 "Oswald", sans-serif; letter-spacing: .4em; white-space: nowrap; opacity: .75; }
-.mv .trail { animation: mvTrail 1.2s linear infinite; }
+.mv .trail { animation: mvTrail 1.2s steps(4) infinite; }
 @keyframes mvTrail { to { stroke-dashoffset: -32; } }
 
 /* ---------- 札（パソコンだけ）・まる3つ ---------- */
