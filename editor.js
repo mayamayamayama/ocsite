@@ -1,156 +1,208 @@
-// キャラクターデータ
-const characters = {
-  "Barnard": {
-    name: "Barnard",
-    tag: "Male / Human",
-    image: "1Barnard.png",
-    description: "Age:38/Height:188\nBirthday:08/29\nHobbys:音楽制作,映画鑑賞\nInformation:出力時にプロンプトによっては上手く衣装が反映されないことがあるので、適宜衣装を消して調整をお願いします。",
-    prompt: "boy, 1man,handsome,short blonde hair, slightly messy hair,blue eyes, sunglasses,white hoodie,baseball cap, headphones, watch,thick beard,goatee, dog tags,heavy stubble beard, scruffy chin beard, an incognito actor, cargo pants, ,sneakers,muscular, cool,black oversized jacket, layered distressed streetwear, multiple belts, silver chains, fingerless gloves, metallic accessories,dark Y2K punk aesthetic,bulky frame,An outfit with a well-balanced color scheme that avoids looking too dark,dark yellow and black backpack,A rugged, masculine face,smile,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure"
-  },
-  "Mele": {
-    name: "Mele",
-    tag: "Female / Human",
-    image: "mele.png",
-    description: "Age:16/Height:152\nBirthday:04/15\nHobbys:スケッチ,昼寝\nInformation:気弱なキャラクターを立たせるために表情に関するプロットがいくつか採用されてます。状況によって消していただいて結構です。",
-  prompt: "girl, solo,blonde hair, medium hair, short hair, messy hair, hair bangs, red eyes, black midium size beret, beret, black oversized sweater, brown jacket, dog tags, pendant,white long bottoms,cork sandals,  (((timid))),((down-turned eyes)),-1.0::blush::,puzzled,-1.5::cool::,Slouching,lacking confidence,Drooping outer corners of the eyes,A bewildered look,Thin eyebrows,((Looks weak)),An anxious look on one's face,slightly open mouth,A slightly frightened look in one's eyes,((Looking down slightly)),-1.0::to thrust one's hands into one's pockets::,-0.5::Outward curl of hair::,Retaining a touch of childishness,Goat-like small Blonde ears,Eyes that do not open fully"
-  },
-  "Deseo": {
-    name: "Deseo",
-    tag: "Male / Non-human",
-    image: "1deseo.png",
-    hoverShow: "profile",
-    description: "Age:21/Height:196\nBirthday:12/28\nHobbys:散歩,服屋巡り\nInformation:安定出力難易度高めです。ケモノモードよりもアニメモードのほうが私の場合安定して出力できました。\nリアルな動物のように描写される場合、ネガティブプロンプトに「realistic」等を入力してください。",
-    prompt: "boy, 1 furry man,handsome,black panther furry,sunglasses,baseball cap,watch,dog tags,grey Cargo jogger pants, very very muscular, cool,very oversized worn-out red Basketball jersey, jacket ::,tie a jacket around your waist,layered distressed streetwear, multiple leather belts, golden chains, fingerless black gloves, metallic accessories,dark Y2K punk aesthetic,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome older man,High levels of male hormones,Body hair,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,Mature allure,A face that looks, if only slightly, as if the person is in a bad mood,side eyes,calm,An annoyed face,Baring its fangs and acting in a threatening manner,A single scratch on the right eye,golden eyes,Rolling up one's sleeves,Smartphone,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A gold ring ornament on the tail,Brown work boots, not smile"
-  },
-  "Arceo": {
-    name: "Arceo",
-    tag: "MALE/NON-HUMAN",
-    image: "arceo.png",
-    hoverShow: "profile",
-    description: "Age:24/Height:200\nBirthday:08/07\nHobbys:読書/運動\nInformation:出力難易度激高だと思います。\n複雑なプロンプトなので適宜改変お願いします。\n私の場合出力モードはケモノです。",
-    prompt: "((boy, solo, anthropomorphic doberman cyborg:1.5)), highly muscular build, heavily armored plating, dark grey and matte black primary armor, vibrant yellow secondary color accents and glowing panels, intricate mechanical joint structures. (Anubis-style full face mask head:1.4), pointy ears with internal gold accents, black armor plating with detailed panel lines, (smooth solid face plate without eye slits:1.6), (no eyes:1.5), intricate mechanical components within the mask, (glowing yellow triangular emblem on forehead:1.5). Massively muscled upper body armor with heavily defined pectoral and abdominal plating, Heavily armored arms, mechanical joints, articulated gauntlets,Wrist armor cuffs with detailed mechanical elements. (Primary armor color is gunmetal grey and matte black:1.3), (secondary accent color is vibrant yellow:1.4), glowing yellow vents, detailed technical panels,Intricate and heavy detailed rendering,1.4::digitigrade,strong legs,::"
-  },
-  "Dylan": {
-    name: "Dylan",
-    tag: "MALE/NON-HUMAN",
-    image: "dylan.png",
-    hoverShow: "profile",
-    description: "Age:27/Height:211\nBirthday:07/20\nHobbys:水泳/筋トレ\nInformation:Hな絵を生成するときは「A killer whale-like pink penis emerges from a vertically split genital opening」を追加してください。",
-    prompt: "boy, 1 furry man,handsome,orca furry,green Workwear,Beige tank top,work clothes,They have their work clothes wrapped around their waist,dog tags,very very muscular, cool,very very bulky frame,dark ,A rugged, masculine face,Cool and masculine eyes,A rugged, manly, handsome man,High levels of male hormones,The dignity and ruggedness of a mature man, devoid of any lingering traces of boyishness,calm,Rolling up one's sleeves,Ear piercing,Lip ling　piercing,An armlet on the upper arm,A silver ring ornament on the tail,Brown work boots,2::eyeless,"
-  },
-  "Maya": {
-    name: "Maya",
-    tag: "PERSONA/HUMAN",
-    image: "maya.png",
-    hoverShow: "profile",
-    description: "Age:17/Height:180\nBirthday:02/21\nHobbys:発狂/インターネット\nInformation:代理です。性別不詳なのでお好きにどうぞ。",
-    prompt: "androgynous,\ngreen eyes, otaku,1.5::A geeky smile::, Lewd,mole under mouth, mole under eye,\nwhite hair, red inner hair, red highlights, red gradient hair, red hair intake, messy hair, short hair with long hair hanging between eyes, long hairlocks, facial hairlocks, \npatterned red bandana, headscarf,Mountaineering Equipment\n, brown tactical boots,\nred backpack, straps, carabiner, attached water bottle,long hair,long messy ponytail, hair tie, back hair,Snaggletooth,climbing shoes,low ponytail,low-tied hair,Slightly Voluminous ponytail,1.3::Slightly suggestive eyes::,"
-  },
-  "Waka": {
-    name: "Waka",
-    tag: "MALE/HUMAN",
-    image: "waka.png",
-    hoverShow: "profile",
-    description: "Age:37/Height:194\nBirthday:03/21\nHobbys:家族を観察すること/キャンプ\nInformation:ニタとの夫妻設定です。\n誘拐してHな絵を生成していただく際はご留意いただけると幸いです。",
-    prompt: "boy, very muscular,very bulky frame,1.1::strong arms::,Slightly beard stubble,A calm atmosphere, An expression that reveals no thoughts,Corners of the mouth that neither turn up nor down,verging on black hair,Fluffy hair,Messy hair,Center part,long Wolf cut,A Very long hair at the back,his hair is tied back with an elastic band,The hair at the back falls over both shoulders,oversized worn-out T-shirt with a mysterious print on it,Baggy sweatpants,flip flops,oversized T-shirt,bracelet,Listsband,Ear cuff,They have a checkered garment wrapped around their waist,Looks sluggish,A cool,Eyes like a boy’s,mint green eyes,half-closed eyes, sleepy eyes, heavy eyelids,"
-  },
-  "Nita": {
-    name: "Nita",
-    tag: "FEMALE/HUMAN",
-    image: "nita.png",
-    hoverShow: "profile",
-    description: "Age:35/Height:166\nBirthday:10/02\nHobbys:料理/バイク\nInformation:ワカとの夫妻設定です。\n誘拐してHな絵を生成していただく際はご留意いただけると幸いです。",
-    prompt: "girl,white hair, messy hair, medium hair, looped hair, hair loop, folded hair, hair clip, hair clamp, claw clip, Hair at the back, folded over once, hair spouting,  long sidelocks, facial hairlocks, antenna hair,green eyes,cool eyes,Upward-slanting eyes,A smile that suggested exasperation,Midriff-baring fashion,30s,black short Cropped tops,An unapproachable atmosphere\n,Upward-slanting ,low-ponytail ,1.4::black jacket::, looking worn and bedraggled,They have a checkered garment wrapped around their waist,sneakers,A ring on the ring finger,Mature woman,strong women,competitive personality,Married woman,Cool atmosphere,A smile that suggested exasperation,A bad-boy vibe,"
-  },
-　"Ghazal": {
-    name: "Ghazal",
-    tag: "MALE/NON-HUMAN",
-    image: "ghazal.png",
-    description: "Age:29/Height:257\nBirthday:06/09\nHobbys:H\nInformation:読み方は「ガザル」です。出力難度高めです。",
-    prompt: "White Frame,\nboy, scalie, anthro, monster guy, \nstylized, anime style, sharp features,0.45::tyrantrum\n::,grey skin, black scales, 2::white crown-like six crest and horns on the forehead::,1.8::six medium short horn growing vertically::,2::The bases of the horns connect like a crest, covering the forehead::,six horns arranged side by side,sharp horns on head,white spiky short fur collar, white beard-like spiky fur, jaw fangs, sharp teeth, \nmonstrous physique, colossal muscle, extremely muscular, abs, massive biceps, hyper muscular, broad shoulders, massive legs, claws, sharp black claws, tail, spiky tail,A straight line of white hair growing between the pectoral and abdominal muscles,-2::orange crown-like crest on the forehead::,training wear,#c6ff00 eyes,Black sclera,The five toes of the foot,An unpleasant personality,Five digits on both hands and feet,High sex drive,"
-  },
-};
+(window.OC_LOADED = window.OC_LOADED || []).push('effects');
+// effects.js — ノイズの区切り と 点の背景 を描きます
 
-// 一覧カードの描画
-const grid = document.getElementById('character-grid');
-grid.innerHTML = ""; // 初期化
+// ===== 動きのスイッチ（true：動く / false：止める） =====
+const DOTS_MOVE = true;       // 点の背景を流す
+const NOISE_FLICKER = false;  // ノイズをチラつかせる
+const FOLLOW = true;           // マウス・指・スマホの傾きに追従する
+const TILT = true;             // スマホの傾きにも追従する（FOLLOWがtrueのとき）
 
-Object.keys(characters).forEach(id => {
-  const char = characters[id];
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.onclick = () => showDetail(id, true);
+// 「動きを減らす」設定の人には、スイッチに関係なく止めた絵だけ出す
+const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  card.innerHTML = `
-    <div class="card-img-container">
-      <img class="card-img" src="${char.image}" alt="${char.name}" oncontextmenu="return false;" ondragstart="return false;">
-    </div>
-    <div class="card-info">
-      <h2 class="card-name">${char.name}</h2>
-      <span class="card-tag"># ${char.tag}</span>
-    </div>
-  `;
-  grid.appendChild(card);
-});
 
-// 詳細表示の切り替え処理
-function showDetail(id, pushHistory = true) {
-  const char = characters[id];
-  if (!char) return;
+// ===============================
+// 1. 左右に流れる点の背景
+// ===============================
+(function () {
+  const canvas = document.getElementById('dot-bg');
+  const ctx = canvas.getContext('2d');
 
-  const profileBox = document.getElementById('profile-box');
-  profileBox.innerHTML = `
-    <div class="profile-img-container">
-      <img class="profile-img" src="${char.image}" alt="${char.name}">
-    </div>
-    <div class="profile-info">
-      <h1 class="profile-name">${char.name}</h1>
-      <span class="profile-tag"># ${char.tag}</span>
-      <div class="section-title">Story / Profile</div>
-      <div class="profile-desc">${char.description}</div>
-      <div class="section-title">Prompt / Tags</div>
-      <pre class="prompt-box">${char.prompt}</pre>
-    </div>
-  `;
+  // ここの数字を変えると見た目が変わります
+  const GAP = 44;                 // 点と点の間隔（大きいほどまばら）
+  const SPEED = 10;               // 流れる速さ（大きいほど速い）
+  const DOT_COLOR = '#2b2b2b';    // 小さい点の色
+  const SQUARE_COLOR = '#777777'; // 目立つ四角の色
 
-  document.title = `${char.name} - OC ARCHIVE`;
-  
-  // HTML側のID名（index-screen / detail-screen）に合わせました！
-  document.getElementById('index-screen').classList.remove('active');
-  document.getElementById('detail-screen').classList.add('active');
-  window.scrollTo(0, 0);
+  // 各段に、目立つ四角を1〜2個ずつ（位置は最初に一度だけランダムに決める）
+  const squares = Array.from({ length: 60 }, () =>
+    Array.from({ length: 1 + Math.floor(Math.random() * 2) }, () => Math.random())
+  );
 
-  // スマホの「戻る」ボタンが効くように履歴を追加
-  if (pushHistory) {
-    history.pushState({ screen: 'detail', id: id }, '', `#${id}`);
+  let w, h, dpr, rows;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    rows = Math.min(Math.ceil(h / GAP) + 1, squares.length);
+    draw(performance.now());
   }
-}
 
-// 一覧表示の切り替え処理
-function showIndex(pushHistory = true) {
-  document.getElementById('detail-screen').classList.remove('active');
-  document.getElementById('index-screen').classList.add('active');
-  document.title = "OC ARCHIVE";
-  window.scrollTo(0, 0);
+  // 線がにじまないよう、画面のピクセルに合わせる
+  const snap = (v) => Math.round(v * dpr) / dpr;
 
-  if (pushHistory) {
-    history.pushState({ screen: 'index' }, '', window.location.pathname);
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    const cols = Math.ceil(w / GAP) + 1;
+    const cycle = cols * GAP; // 1周の長さ（画面の外で折り返すので、つなぎ目は見えない）
+    const moving = DOTS_MOVE && !REDUCE_MOTION;
+
+    for (let r = 0; r < rows; r++) {
+      const dir = r % 2 === 0 ? 1 : -1;       // 偶数段は右へ、奇数段は左へ
+      const move = moving ? (t / 1000) * SPEED * dir : 0;
+      const offset = ((move % cycle) + cycle) % cycle;
+      const y = r * GAP + GAP / 2;
+      const shift = (r % 2) * (GAP / 2);      // 段ごとに半分ずらして、ジグザグに
+
+      ctx.fillStyle = DOT_COLOR;
+      for (let c = 0; c < cols; c++) {
+        const x = (c * GAP + shift + offset) % cycle;
+        ctx.fillRect(snap(x - 1), snap(y - 1), 2, 2);
+      }
+
+      ctx.fillStyle = SQUARE_COLOR;
+      for (const f of squares[r]) {
+        const x = (f * cycle + offset) % cycle;
+        ctx.fillRect(snap(x - 3), snap(y - 3), 6, 6);
+      }
+    }
   }
-}
 
-// 「← BACK TO INDEX」ボタンが押されたとき
-document.getElementById('back-btn').onclick = () => {
-  showIndex(true);
-};
-
-// スマホの「戻る」「進む」ボタンが押されたときの処理
-window.onpopstate = (event) => {
-  if (event.state && event.state.screen === 'detail') {
-    showDetail(event.state.id, false);
-  } else {
-    showIndex(false);
+  const heroEl = document.getElementById('hero-main'), mvEl = document.getElementById('mv');
+  let lastDraw = 0;
+  function loop(t) {
+    // 入場画面（山の画面か、モーショングラフィックス）が画面いっぱいを覆っているあいだは、背後の点を描かない（軽くするため）
+    let covered = false;
+    const top = heroEl && heroEl.offsetParent !== null ? heroEl : mvEl && mvEl.offsetParent !== null ? mvEl : null;
+    if (top) { const r = top.getBoundingClientRect(); covered = r.top <= 0 && r.bottom >= window.innerHeight * 0.8; }
+    if (covered !== canvas.hidden) canvas.style.visibility = (canvas.hidden = covered) ? 'hidden' : '';   // おおわれているあいだは、画面に重ねない（軽くする）
+    if (!document.hidden && !covered && t - lastDraw > 32) { draw(t); lastDraw = t; }
+    requestAnimationFrame(loop);
   }
-};
+
+  window.addEventListener('resize', resize);
+  resize();
+  if (DOTS_MOVE && !REDUCE_MOTION) requestAnimationFrame(loop);
+})();
 
 
+// ===============================
+// 2. ノイズのグラデーション
+//    （透明 → 黒い粒がだんだん増えて、一番下は真っ黒）
+// ===============================
+(function () {
+  const canvas = document.getElementById('noise-divider');
+  const ctx = canvas.getContext('2d');
 
+  const GRAIN = 1;               // ざらざらの粗さ（1が一番細かい。大きいほど粗い）
+  const HEIGHT = 240;            // ノイズの高さ。変えると入場画面の長さも自動で合う
+  const DARK = [13, 13, 13];     // 黒い粒の色（サイトの背景色 #0d0d0d）
+
+  // 入場画面を「画面1つ分＋ノイズの高さ」にして、ノイズの部分は最初の画面の外に置く
+  // （effects.css が古いままでも崩れないように、ここでも指定しておく）
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.style.boxSizing = 'border-box';
+    hero.style.minHeight = (HEIGHT + 420) + 'px';
+    hero.style.height = 'calc(100vh + ' + HEIGHT + 'px)';
+    hero.style.height = 'calc(100svh + ' + HEIGHT + 'px)';
+    hero.style.paddingBottom = HEIGHT + 'px';
+  }
+  canvas.style.position = 'relative';
+  canvas.style.zIndex = '2';
+  canvas.style.height = HEIGHT + 'px';
+  canvas.style.marginTop = (-HEIGHT) + 'px';
+  canvas.style.pointerEvents = 'none';
+
+  let lastWidth = 0;
+  let w, h, img;
+  let visible = false;
+
+  function build() {
+    // スマホでスクロール中に画面の高さだけ変わったときは作り直さない（チラつき防止）
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+
+    const dpr = window.devicePixelRatio || 1;
+    w = Math.ceil((lastWidth * dpr) / GRAIN);
+    h = Math.ceil((HEIGHT * dpr) / GRAIN);
+    canvas.width = w;
+    canvas.height = h;
+    img = ctx.createImageData(w, h);
+    paint();
+  }
+
+  function paint() {
+    const d = img.data;
+    for (let y = 0; y < h; y++) {
+      const t = y / (h - 1);          // 上が0、下が1
+      const p = t * t * (3 - 2 * t);  // 上はまばら、下に向かって一気に黒へ
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        d[i] = DARK[0];
+        d[i + 1] = DARK[1];
+        d[i + 2] = DARK[2];
+        d[i + 3] = Math.random() < p ? 255 : 0; // 黒い粒 or 透明
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  // 画面に見えているときだけチラつかせる（電池を節約）
+  new IntersectionObserver((entries) => {
+    visible = entries[0].isIntersecting;
+  }).observe(canvas);
+
+  let last = 0;
+  function loop(t) {
+    if (visible && t - last > 120) {
+      paint();
+      last = t;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', build);
+  build();
+  if (NOISE_FLICKER && !REDUCE_MOTION) requestAnimationFrame(loop);
+})();
+
+
+// ===============================
+// 3. マウス・指・スマホの傾きに追従する動き（渦とコラージュで共通で使います）
+//    window.OC_POINTER.x / .y が、-1〜1 のなめらかな値になります
+// ===============================
+window.OC_POINTER = { x: 0, y: 0, moving: false };
+(function () {
+  if (!FOLLOW || REDUCE_MOTION) return;
+  const P = window.OC_POINTER, target = { x: 0, y: 0 };
+  let touching = false;
+  const clamp = (v) => Math.max(-1, Math.min(1, v));
+  const reset = () => { target.x = 0; target.y = 0; };
+
+  window.addEventListener('pointermove', (e) => {
+    touching = e.pointerType !== 'mouse';
+    target.x = clamp((e.clientX / window.innerWidth - 0.5) * 2);
+    target.y = clamp((e.clientY / window.innerHeight - 0.5) * 2);
+  });
+  ['pointerup', 'pointercancel'].forEach((ev) =>
+    window.addEventListener(ev, (e) => { if (e.pointerType !== 'mouse') { touching = false; reset(); } }));
+  document.documentElement.addEventListener('mouseleave', reset);
+
+  if (TILT) window.addEventListener('deviceorientation', (e) => {
+    if (touching || e.gamma == null || e.beta == null) return;
+    target.x = clamp(e.gamma / 25);
+    target.y = clamp((e.beta - 40) / 25);
+  });
+
+  (function tick() {
+    const dx = target.x - P.x, dy = target.y - P.y;
+    P.x += dx * 0.07; P.y += dy * 0.07;               // 0.07を小さくすると、ゆっくり追いかける
+    P.moving = Math.abs(dx) + Math.abs(dy) > 0.002;
+    requestAnimationFrame(tick);
+  })();
+})();
