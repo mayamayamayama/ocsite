@@ -47,79 +47,78 @@
     raf = jobs.length ? requestAnimationFrame(tick) : 0;
   }
 
-  // ---------- 電車（キャンバスに描く。先頭・まん中・最後の3両。最後は丸くて、テールランプつき） ----------
-  // まん中の車両（行き先の表示がある）が画面をおおったところで、ページが切りかわります
+  // ---------- 電車（キャンバスに描く。5両編成。まん中の3両目に、行き先の表示） ----------
+  // 3両目が画面をおおったところで、ページが切りかわります。着いたページでは、ゆっくり加速して走り去ります
+  const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
     const cv = document.createElement('canvas'); cv.className = 'nv-train'; cv.setAttribute('aria-hidden', 'true');
-    const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 4 * vw;
+    const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 3.2 * vw;
     cv.width = Math.round(W * r); cv.height = Math.round(H * r); document.body.appendChild(cv);
-    const c = cv.getContext('2d'), Y = '#ffd21f', NOSE = Math.min(34 * vm, H / 2);
-    const cars = [['front', 120 * vw], ['mid', 150 * vw], ['tail', 120 * vw]];
-    const shape = (x, w, k) => {
-      c.beginPath();
-      if (k === 'front') { c.moveTo(x + NOSE, 0); c.lineTo(x + w, 0); c.lineTo(x + w, H); c.lineTo(x + NOSE, H); c.ellipse(x + NOSE, H / 2, NOSE, H / 2, 0, Math.PI / 2, Math.PI * 1.5); }
-      else if (k === 'tail') { c.moveTo(x, 0); c.lineTo(x + w - NOSE, 0); c.ellipse(x + w - NOSE, H / 2, NOSE, H / 2, 0, -Math.PI / 2, Math.PI / 2); c.lineTo(x, H); }
-      else c.rect(x, 0, w, H);
-      c.closePath();
-    };
+    const c = cv.getContext('2d'), Y = '#ffd21f', CW = Array.from({ length: CARS }, (_, i) => (i === MID ? 150 : 128) * vw);
+    const lead = -25 * vw - CW.slice(0, MID).reduce((a, w) => a + w + G, 0), total = CW.reduce((a, w) => a + w, 0) + G * (CARS - 1);
     const font = (wt, px) => wt + ' ' + Math.round(px) + 'px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-    function car(x, w, k) {
-      c.save(); shape(x, w, k); c.fillStyle = Y; c.fill(); c.clip();
-      c.fillStyle = '#1d1d1d'; c.fillRect(x, 0, w, 0.06 * H);   // 屋根
-      c.fillStyle = '#111'; c.fillRect(x, 0.92 * H, w, 0.08 * H); c.fillRect(x, 0.8382 * H, w, 0.008 * H);   // 床下・細い線
-      c.fillStyle = '#ff6b2c'; c.fillRect(x, 0.6992 * H, w, 0.08 * H);   // オレンジの帯
-      for (let q = x + 7 * vm, n = 0; q < x + w; q += 47 * vm, n++) {
-        if (k === 'front' && q < x + NOSE * 0.7) continue;
-        if (k === 'tail' && q + 30 * vm > x + w - NOSE * 0.7) break;
-        c.fillStyle = '#26343e'; c.fillRect(q, 0.154 * H, 30 * vm, 0.3 * H);   // 窓
-        c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(q + 39.6 * vm, 0, 0.4 * vm, H);   // つなぎ目
+    const box = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+    function car(x, w, i) {
+      const mid = i === MID, R = 1.6 * vm;
+      c.save(); c.beginPath(); c.roundRect ? c.roundRect(x, 0, w, H, [i === 0 ? R : 0, i === CARS - 1 ? R : 0, i === CARS - 1 ? R : 0, i === 0 ? R : 0]) : c.rect(x, 0, w, H); c.fillStyle = Y; c.fill(); c.clip();
+      box(x, 0, w, 0.06 * H, '#1d1d1d'); box(x, 0.88 * H, w, 0.12 * H, '#111'); box(x, 0.8382 * H, w, 0.008 * H, '#111');   // 屋根・床下・細い線
+      box(x, 0.6992 * H, w, 0.08 * H, '#ff6b2c');   // オレンジの帯
+      if (mid) for (let q = x + 7 * vm; q < x + w; q += 47 * vm) { box(q, 0.154 * H, 30 * vm, 0.3 * H, '#26343e'); box(q + 39.6 * vm, 0, 0.4 * vm, H, 'rgba(0,0,0,.28)'); }   // 3両目は、読みこみ中の幕と同じ窓
+      else {
+        const dw = 20 * vm;
+        [0.16, 0.84].forEach((k) => {   // ドア（小さな窓つき）
+          const dx = x + w * k - dw / 2; c.strokeStyle = 'rgba(0,0,0,.45)'; c.lineWidth = Math.max(1.5, 0.5 * vm); c.strokeRect(dx, 0.1 * H, dw, 0.78 * H);
+          box(dx + dw * 0.18, 0.17 * H, dw * 0.64, 0.24 * H, '#26343e'); box(dx + dw / 2 - 0.25 * vm, 0.1 * H, 0.5 * vm, 0.78 * H, 'rgba(0,0,0,.3)');
+        });
+        for (let q = x + w * 0.16 + 10 * vm + 6 * vm; q + 30 * vm < x + w * 0.84 - 10 * vm - 4 * vm; q += 38 * vm) box(q, 0.154 * H, 30 * vm, 0.3 * H, '#26343e');   // 窓
       }
-      if (k !== 'mid') {   // 先頭のライト・最後のテールランプ
-        const lx = k === 'front' ? x + NOSE * 0.62 : x + w - NOSE * 0.62;
-        c.shadowColor = k === 'front' ? '#fff6d0' : '#ff2a1a'; c.shadowBlur = 30; c.fillStyle = k === 'front' ? '#fffbe8' : '#ff3b2a';
-        c.beginPath(); c.arc(lx, 0.6 * H, 2.6 * vm, 0, 7); c.arc(lx, 0.6 * H + 7 * vm, 2.6 * vm, 0, 7); c.fill(); c.shadowBlur = 0;
-      }
+      const gl = (lx, col, glow) => { c.shadowColor = glow; c.shadowBlur = 26; c.fillStyle = col; c.beginPath(); c.arc(lx, 0.6 * H, 2.4 * vm, 0, 7); c.arc(lx, 0.6 * H + 6.4 * vm, 2.4 * vm, 0, 7); c.fill(); c.shadowBlur = 0; };
+      if (i === 0) gl(x + 6 * vm, '#fffbe8', '#fff6d0');   // 先頭のライト
+      if (i === CARS - 1) gl(x + w - 6 * vm, '#ff3b2a', '#ff2a1a');   // 最後のテールランプ
+      [0.13, 0.87].forEach((k) => { const bx = x + w * k; box(bx - 13 * vm, 0.9 * H, 26 * vm, 0.035 * H, '#2a2a2a'); c.fillStyle = '#3a3a3a'; [-7, 7].forEach((o) => { c.beginPath(); c.arc(bx + o * vm, 0.955 * H, 4.6 * vm, 0, 7); c.fill(); }); });   // 台車と車輪
       c.restore();
       c.fillStyle = '#141414'; c.font = font(800, Math.max(12, Math.min(3.4 * vw, 20)));
-      c.fillText(k === 'mid' ? 'MT. MAYAMA LINE  ◆  2026' : k === 'front' ? 'MT. MAYAMA LINE  ▶' : '◀  MT. MAYAMA LINE', x + (k === 'front' ? NOSE * 1.1 : k === 'tail' ? 6 * vw : 31 * vw), 0.655 * H + 6);
-      if (k === 'mid') sign(x + 75 * vw, 0.54 * H);
+      c.fillText(mid ? 'MT. MAYAMA LINE  ◆  2026' : 'MT. MAYAMA LINE', x + (mid ? 31 * vw : w * 0.3), 0.655 * H + 6);
+      c.font = font(700, Math.max(10, Math.min(2.6 * vw, 14))); c.fillText('No.' + (i + 1), x + w * 0.16 - 10 * vm, 0.075 * H + 12);   // 号車
+      if (mid) sign(x + 75 * vw, 0.54 * H);
     }
     function sign(cx, cy) {   // 行き先の表示（オレンジ色に光る文字）
       const w = Math.min(84 * vw, 560), h = Math.max(104, Math.min(w * 0.3, 150)), big = Math.max(26, Math.min(8 * vw, 46));
-      c.fillStyle = '#111'; c.fillRect(cx - w / 2 - 7, cy - h / 2 - 7, w + 14, h + 14);
+      box(cx - w / 2 - 7, cy - h / 2 - 7, w + 14, h + 14, '#111');
       c.fillStyle = '#090909'; c.strokeStyle = '#2b2b2b'; c.lineWidth = 3; c.fillRect(cx - w / 2, cy - h / 2, w, h); c.strokeRect(cx - w / 2, cy - h / 2, w, h);
       c.textAlign = 'center'; c.fillStyle = 'rgba(255,178,31,.75)'; c.font = font(600, 11); c.fillText(top, cx, cy - h / 2 + 24);
       c.shadowColor = 'rgba(255,178,31,.8)'; c.shadowBlur = 12; c.fillStyle = '#ffb21f'; c.font = font(800, big); c.fillText(en, cx, cy + big * 0.32);
       c.shadowBlur = 0; c.fillStyle = '#fff3d6'; c.font = '600 14px "Hiragino Sans", "Noto Sans JP", sans-serif'; c.fillText(jp, cx, cy + h / 2 - 16); c.textAlign = 'left';
       c.fillStyle = 'rgba(0,0,0,.35)'; for (let yy = cy - h / 2; yy < cy + h / 2; yy += 3) c.fillRect(cx - w / 2, yy, w, 1);   // 光る点の、すじ
     }
-    function draw(tx, sp) {   // tx：右へのずれ、sp：速さ（0〜1。速いほど、かたむいて、すじが出る）
-      const k = -0.24 * sp;
-      c.setTransform(r, 0, k * r, r, -k * (H / 2) * r, 0); c.clearRect(-W, 0, W * 3, H);
-      let x = -25 * vw - G - cars[0][1] + tx;
-      cars.forEach(([k2, w], i) => {
-        if (x < W + H * 0.2 && x + w > -H * 0.2) car(x, w, k2);
-        if (i < cars.length - 1 && x + w < W && x + w + G > 0) { c.fillStyle = '#151515'; c.fillRect(x + w - 2, 0.08 * H, G + 4, 0.84 * H); c.fillStyle = '#2a2a2a'; for (let q = 0; q < 5; q++) c.fillRect(x + w + (q / 5) * G, 0.08 * H, 1.5, 0.84 * H); }   // 車両のつなぎ（ほろ）
+    function draw(tx, sp, now) {   // tx：右へのずれ、sp：速さ（0〜1。速いほど、ガタンゴトンとゆれて、すじが出る）
+      const dy = sp > 0.02 ? Math.sin(now / 38) * 1.4 * sp + (Math.sin(now / 97) > 0.92 ? 1.5 * sp : 0) : 0;   // レールのつなぎ目のゆれ
+      c.setTransform(r, 0, 0, r, 0, dy * r); c.clearRect(-10, -10, W + 20, H + 20);
+      let x = lead + tx;
+      CW.forEach((w, i) => {
+        if (x < W + 10 && x + w > -10) car(x, w, i);
+        if (i < CARS - 1 && x + w < W && x + w + G > 0) {   // 車両のつなぎ（ほろと連結器。上と下のすき間から、うしろが見える）
+          box(x + w - 2, 0.16 * H, G + 4, 0.66 * H, '#1a1a1a'); c.fillStyle = '#2e2e2e'; for (let q = 1; q < 5; q++) c.fillRect(x + w + (q / 5) * G, 0.16 * H, 1.5, 0.66 * H);
+          box(x + w - 3 * vm, 0.885 * H, G + 6 * vm, 0.025 * H, '#222');
+        }
         x += w + G;
       });
-      if (sp > 0.05) {   // 速さのすじと、最後の車両のうしろに残る風
-        const end = x - G, a0 = -25 * vw - G - cars[0][1] + tx;
-        c.fillStyle = 'rgba(255,255,255,' + (0.22 * sp).toFixed(3) + ')';
-        for (let q = 0; q < 16; q++) { const yy = H * (0.04 + q * 0.06), off = ((q * 37) % 11) * vw; c.fillRect(Math.max(a0, -W) + off, yy, Math.min(end, 2 * W) - Math.max(a0, -W) - off, 1.5); }
-        const g = c.createLinearGradient(end, 0, end + 45 * vw * sp, 0); g.addColorStop(0, 'rgba(255,210,31,' + (0.35 * sp).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,210,31,0)');
-        c.fillStyle = g; for (let q = 0; q < 9; q++) c.fillRect(end - NOSE * 0.3, H * (0.18 + q * 0.08), 45 * vw * sp, 2 + (q % 3));
+      if (sp > 0.08) {   // 速さのすじ（車体の上だけ）
+        c.fillStyle = 'rgba(255,255,255,' + (0.2 * sp).toFixed(3) + ')';
+        const a0 = Math.max(lead + tx, -10), a1 = Math.min(lead + tx + total, W + 10);
+        for (let q = 0; q < 14; q++) { const yy = H * (0.07 + q * 0.06), off = ((q * 37) % 11) * vw; if (a1 - a0 - off > 0) c.fillRect(a0 + off, yy, a1 - a0 - off, 1.5); }
       }
     }
-    cv.run = (from, to, ms, out) => new Promise((ok) => {   // out：だんだん速く（出ていく）／ でなければ、だんだんゆっくり（入ってくる）
+    cv.run = (from, to, ms, out) => new Promise((ok) => {   // out：ゆっくり加速して出ていく／ でなければ、減速して止まる
       const t0 = performance.now(), D = REDUCE ? 1 : ms;
       (function f(now) {
-        const t = Math.min(1, (now - t0) / D), p = out ? t * t * t : 1 - Math.pow(1 - t, 3), sp = out ? t * t : (1 - t) * (1 - t);
-        draw(from + (to - from) * p, REDUCE ? 0 : sp);
+        const t = Math.min(1, (now - t0) / D), p = out ? Math.pow(t, 2.2) : 1 - Math.pow(1 - t, 3), sp = out ? Math.min(1, t * 1.6) : (1 - t) * (1 - t);
+        draw(from + (to - from) * p, REDUCE ? 0 : sp, now);
         if (t < 1) requestAnimationFrame(f); else ok();
       })(t0);
     });
-    cv.span = { inX: W + 149 * vw + H * 0.15, outX: -(249 * vw + H * 0.15 + 45 * vw) };   // 入ってくる前の位置・出ていった後の位置
-    draw(0, 0);
+    cv.span = { inX: W - lead + 4 * vw, outX: -(lead + total) - 6 * vw };   // 入ってくる前の位置・出ていった後の位置
+    draw(0, 0, 0);
     return cv;
   }
   function go(href, en, jp) {   // 電車が入ってきて、画面をおおったら、次のページへ
@@ -128,7 +127,7 @@
       if (page(href) === 'index.html') sessionStorage.setItem('oc-op', '1');   // トップに戻るときは、OP を出さない
     } catch (e) { /* 覚えられなくても動く */ }
     const t = train(en, jp, 'NEXT  まもなく');
-    t.run(t.span.inX, 0, 820, false).then(() => { location.href = href; });
+    t.run(t.span.inX, 0, 900, false).then(() => { location.href = href; });
   }
 
   // ---------- 着いたとき：電車が出ていく ----------
@@ -137,7 +136,7 @@
   if (arr && Date.now() - arr.t < 15000) {
     const t = train(arr.en, arr.jp, 'ARRIVED  到着');
     root.classList.remove('nv-arrive');
-    setTimeout(() => t.run(0, t.span.outX, 760, true).then(() => t.remove()), REDUCE ? 0 : 450);
+    setTimeout(() => t.run(0, t.span.outX, 1500, true).then(() => t.remove()), REDUCE ? 0 : 380);   // 走り去る時間（1.5秒）
   } else root.classList.remove('nv-arrive');
   if (location.hash === '#list') {   // 「キャラクター一覧」で来たとき
     history.replaceState(null, '', location.pathname + location.search);
