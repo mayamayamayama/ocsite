@@ -9,7 +9,7 @@
 (function () {
   // ===== 変えてもいいところ =====
   const CHARAS = [];                                   // 立ち絵の名前を ['a.png', 'b.png'] と書くと、その中からランダム。空なら mv-chara1〜12 を自動でさがす
-  const MOTION = 'auto';                                // 動き：'auto' 重いと自動で少なめ／'lite' いつも少なめ／'full' 全部
+  const MOTION = 'lite';                                // 動き：'auto' 重いと自動で少なめ／'lite' いつも少なめ／'full' 全部
   const LINE = 0.7, LINE_COLOR = '#ffffff';            // 立ち絵の白いふちの太さ（0 でなし。1.4 で倍）と色
   const SHADOW = [1.8, 1.6], SHADOW_COLOR = '#2ec4b6'; // 立ち絵の影のずれ（右へ, 下へ。0, 0 でなし）と色
   const NAME = 'MAYAMA';                                // 活動名
