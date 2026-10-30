@@ -78,7 +78,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
     // 入場画面（山の画面か、モーショングラフィックス）が画面いっぱいを覆っているあいだは、背後の点を描かない（軽くするため）
     let covered = false;
     const top = heroEl && heroEl.offsetParent !== null ? heroEl : mvEl && mvEl.offsetParent !== null ? mvEl : null;
-    if (top) { const r = top.getBoundingClientRect(); covered = r.top <= 0 && r.bottom >= window.innerHeight; }
+    if (top) { const r = top.getBoundingClientRect(); covered = r.top <= 0 && r.bottom >= window.innerHeight * 0.8; }
     if (!document.hidden && !covered && t - lastDraw > 32) { draw(t); lastDraw = t; }
     requestAnimationFrame(loop);
   }
