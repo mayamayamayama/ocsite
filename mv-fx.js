@@ -64,16 +64,16 @@ window.OC_MV_FX = (function () {
   }
 
   // ---------- 紙吹雪 ----------
-  function confetti(cv, cols) {
+  function confetti(cv, cols, keep) {   // keep：リボンと同じキャンバスに描く（消さない・大きさを変えない）
     const ctx = cv.getContext('2d'); let W = 0, H = 0, dpr = 1; const P = [];
     const make = (x, y, burst) => { const a = Math.random() * Math.PI * 2, v = burst ? 3 + Math.random() * 6 : 0;
       return { x, y, vx: burst ? Math.cos(a) * v : (Math.random() - 0.5) * 0.3, vy: burst ? Math.sin(a) * v - 3 : 0.35 + Math.random() * 0.5, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 0.15,
         w: 4 + Math.random() * 6, h: 3 + Math.random() * 4, c: cols[(Math.random() * cols.length) | 0], s: Math.random() < 0.35, ph: Math.random() * 6.3, life: burst ? 1 : -1 }; };
-    function size() { [W, H, dpr] = fit(cv, MOB ? 1.5 : 2); const n = Math.round((W * H) / 20000); while (P.filter((p) => p.life < 0).length < n) P.push(make(Math.random() * W, Math.random() * H, false)); }
+    function size() { if (keep) { const r = cv.getBoundingClientRect(); W = r.width; H = r.height; dpr = W ? cv.width / W : 1; } else [W, H, dpr] = fit(cv, MOB ? 1.5 : 2); const n = Math.round((W * H) / 20000); while (P.filter((p) => p.life < 0).length < n) P.push(make(Math.random() * W, Math.random() * H, false)); }
     function burst(x, y, n = 26) { for (let i = 0; i < n; i++) P.push(make(x, y, true)); }
     function draw(t, dt) {
       if (!W) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); if (!keep) ctx.clearRect(0, 0, W, H);
       for (let i = P.length - 1; i >= 0; i--) {
         const p = P[i];
         if (p.life >= 0) { p.vy += 0.18 * dt; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.012 * dt; if (p.life <= 0 || p.y > H + 20) { P.splice(i, 1); continue; } }
