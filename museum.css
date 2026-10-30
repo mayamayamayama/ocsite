@@ -26,9 +26,14 @@ body.mu { margin: 0; min-height: 100vh; overflow-x: hidden; color: var(--mu-ink)
 .mu-bar.t { top: 0; transform-origin: top; } .mu-bar.b { bottom: 0; transform-origin: bottom; }
 body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-hero { position: relative; z-index: 2; cursor: pointer; }
-.mu-hero .mu-frame { max-width: min(84vw, 520px); }
-.mu-hero img { max-height: min(56vh, 600px); }
-.mu-hero .mu-empty { width: min(70vw, 360px); aspect-ratio: 3 / 4; display: grid; place-items: center; text-align: center; color: #7b7263; font: 500 13px/1.8 var(--mu-jp); background: repeating-linear-gradient(45deg, #e6dfd0 0 10px, #ebe5d7 10px 20px); }
+.mu-screen { position: relative; display: grid; place-items: center; min-width: min(78vw, 420px); min-height: min(42vh, 380px); }
+.mu-screen::before { content: ""; position: absolute; inset: -14%; z-index: -1; background: radial-gradient(closest-side, rgba(var(--mu-warm), .16), transparent); pointer-events: none; }   /* うしろの、ぼんやりした光 */
+.mu-screen.on { min-width: 0; min-height: 0; }
+.mu-screen img, .mu-screen video { display: block; max-width: min(90vw, 780px); max-height: 60vh; width: auto; height: auto; pointer-events: none; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
+.mu-ph { margin: 0; text-align: center; font: italic 500 clamp(40px, 12vw, 72px)/.95 var(--mu-serif); letter-spacing: .04em; color: rgba(236, 228, 211, .14); }
+.mu-own { position: fixed; top: calc(56px + env(safe-area-inset-top)); right: 14px; z-index: 40; padding: 9px 14px; border-radius: 999px; background: linear-gradient(180deg, #d9bd84, var(--mu-brass) 45%, var(--mu-brass2)); color: #1c1307; text-decoration: none; font: 700 11px/1 var(--mu-jp); letter-spacing: .1em; box-shadow: 0 6px 16px rgba(0, 0, 0, .4); }
 .mu-ltext { position: relative; z-index: 5; text-align: center; max-width: 560px; }
 .mu-kicker { margin: 0 0 10px; font: 600 10px/1 var(--mu-mono); letter-spacing: .34em; color: var(--mu-brass); }
 .mu-title { margin: 0; font: italic 500 clamp(44px, 13vw, 96px)/.9 var(--mu-serif); letter-spacing: .01em; text-shadow: 0 0 40px rgba(var(--mu-warm), .25); }
