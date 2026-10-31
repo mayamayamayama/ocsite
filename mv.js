@@ -28,8 +28,9 @@
   // 山の色ともようは、mv-parts.js のいちばん下（MT）で変えられます
   // ============================
   const mv = document.getElementById('mv'), P = window.OC_MV_PARTS, FX = window.OC_MV_FX;
-  if (!mv || !P || !FX) return;
-  const root = document.documentElement, body = document.body, REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement, body = document.body;
+  if (!mv || !P || !FX || body.classList.contains('is-after')) return;   // もう見たあと（list.js が決める）は、作らない
+  const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
   Object.entries(C).forEach(([k, v]) => mv.style.setProperty('--' + k, v)); if (MOTION === 'lite') mv.classList.add('lite');
   const stage = mv.querySelector('.mv-stage'), gcv = mv.querySelector('.mv-topo'), ccv = mv.querySelector('.mv-chips');
   const S = P.S, esc = (s) => String(s).replace(/[&<>"]/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -59,7 +60,7 @@
     ['dots', '<div class="mv-dots3"><i></i><i></i><i></i></div>', 'up', '', 0.2, [50, 91.5, 2.6, 0], [50, 90.5, 2.2, 0]],
     ['side', '<div class="mv-side">' + esc(SIDE) + '</div>', 'fade', '', 0.2, [97.5, 34, 2.2, 0], [98.6, 31, 1.7, 0]],
     ['roster', roster, 'up', '', 0.5, [0, 0, 0, 0], [10.5, 45, OCS ? 2.1 : 0, -2]],
-    ['band', '<div class="mv-band"><div>' + (esc(MARQUEE) + ' ').repeat(5) + '</div></div>', 'right', '', 0.15, [50, 97, 3.2, -3], [50, 95.5, 2.4, -2]],
+    ['band', '<div class="mv-band"><div>' + (esc(MARQUEE) + ' ').repeat(4) + '</div></div>', 'right', '', 0.15, [50, 97, 3.2, -3], [50, 95.5, 2.4, -2]],
     // シール
     ['compass', S.compass(C.orange), 'pop', 'bob', 1, [12, 21, 15, -8], [7, 25, 11, -8]],
     ['badge', S.badge(esc(BADGE), C.yellow, C.teal), 'pop', 'rot', 0.7, [88, 33, 14, 0], [50, 20, 12, 0]],
@@ -201,7 +202,7 @@
     if (t0 && !lite && MOTION === 'auto' && s > 2.6 && f < 100) { fr.push(f); if (fr.length > 90) { fr.sort((a, b) => a - b); if (fr[45] > 22) mv.classList.add('lite'); fr = []; } }   // ずっと見張って、なめらかでなければ動きをへらす
     n3 = (n3 + 1) % 3; odd = !odd; cdt += dt;
     if ((!n3 && !lite) || pw > 0.05 || !tDone) { terrain.draw(REDUCE || lite ? 0 : t, peaks, px, py, pw); tDone = 1; }   // 方眼は3コマに1回
-    if (t0 && (lite ? n3 === 1 : !odd || s < 2)) {   // リボンと紙吹雪は、同じキャンバスに2コマに1回（リボンは、登場のとき、のびていく）
+    if (t0 && (!lite || odd || s < 2)) {   // リボンと紙吹雪は、毎コマ（軽いモードでは2コマに1回）。リボンは、登場のとき、のびていく
       rib.draw(REDUCE ? 0 : t, ribs, REDUCE ? 1 : Math.max(0, (s - 0.2) / 1.6)); if (!REDUCE) conf.draw(t, Math.min(4, cdt)); cdt = 0;
     }
     if (t0 && s < 4) {
@@ -211,17 +212,4 @@
   }
   layout(); requestAnimationFrame(loop);
 
-  // ---------- プロフィールから戻るたびに、モーショングラフィックスを選び直す ----------
-  let wasIn = body.classList.contains('in-detail');
-  new MutationObserver(() => {
-    const now = body.classList.contains('in-detail');
-    if (wasIn && !now && window.OC_HERO && window.OC_HERO.use) window.OC_HERO.use();
-    wasIn = now;
-  }).observe(body, { attributes: true, attributeFilter: ['class'] });
-
-  // ---------- 一覧のカード：クリックしたら、表情違いの絵のまま、プロフィールへ ----------
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest && e.target.closest('.card.has-alt');
-    if (a && a.matches(':hover')) { a.classList.add('hold'); setTimeout(() => a.classList.remove('hold'), 1700); }
-  }, true);
 })();
