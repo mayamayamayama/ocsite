@@ -33,7 +33,6 @@ body.mu-in .mu-bar { transform: scaleY(0); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); -webkit-mask-composite: source-in;
   mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
 .mu-ph { margin: 0; text-align: center; font: italic 500 clamp(40px, 12vw, 72px)/.95 var(--mu-serif); letter-spacing: .04em; color: rgba(236, 228, 211, .14); }
-.mu-own { position: fixed; top: calc(56px + env(safe-area-inset-top)); right: 14px; z-index: 40; padding: 9px 14px; border-radius: 999px; background: linear-gradient(180deg, #d9bd84, var(--mu-brass) 45%, var(--mu-brass2)); color: #1c1307; text-decoration: none; font: 700 11px/1 var(--mu-jp); letter-spacing: .1em; box-shadow: 0 6px 16px rgba(0, 0, 0, .4); }
 .mu-ltext { position: relative; z-index: 5; text-align: center; max-width: 560px; }
 .mu-kicker { margin: 0 0 10px; font: 600 10px/1 var(--mu-mono); letter-spacing: .34em; color: var(--mu-brass); }
 .mu-title { margin: 0; font: italic 500 clamp(44px, 13vw, 96px)/.9 var(--mu-serif); letter-spacing: .01em; text-shadow: 0 0 40px rgba(var(--mu-warm), .25); }
@@ -55,8 +54,7 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-mat img { display: block; max-width: 100%; height: auto; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; pointer-events: none; }
 .mu-mat::after { content: ""; position: absolute; inset: clamp(12px, 4.4vw, 38px); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15), inset 0 1px 6px rgba(0, 0, 0, .25); pointer-events: none; }
 .mu-shield { position: absolute; inset: 0; z-index: 2; }
-.mu-mat img.wait { width: min(62vw, 32vh); aspect-ratio: 832 / 1216; background: linear-gradient(110deg, #ddd5c5 30%, #ebe4d6 50%, #ddd5c5 70%) 0 0 / 300% 100%; animation: muWait 1.4s linear infinite; }   /* 読みこみ中 */
-@keyframes muWait { to { background-position: -150% 0; } }
+
 
 /* ---------- 展示室（1作品ずつ。見えると、照明がバチッと灯る） ---------- */
 .mu-hall { position: relative; z-index: 4; }
@@ -106,7 +104,7 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 }
 
 /* ---------- 目録（作品の一覧から、とぶ） ---------- */
-.mu-catbtn { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 40; padding: 9px 14px; border: 1px solid #4a3f33; border-radius: 999px; background: rgba(17, 14, 11, .7);
+.mu-catbtn { position: fixed; top: calc(70px + env(safe-area-inset-top)); right: 12px; z-index: 40; padding: 9px 14px; border: 1px solid #4a3f33; border-radius: 999px; background: rgba(17, 14, 11, .7);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--mu-ink); font: 600 10px/1 var(--mu-mono); letter-spacing: .22em; cursor: pointer; }
 .mu-home { position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 14px; z-index: 40; color: var(--mu-sub); text-decoration: none; font: 600 10px/1.3 var(--mu-mono); letter-spacing: .22em; }
 .mu-home b { display: block; color: var(--mu-brass); }
@@ -142,5 +140,7 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-exit small { display: block; margin-top: 4px; font: 700 11px/1 var(--mu-jp); letter-spacing: .2em; }
 .mu-toast { position: fixed; left: 50%; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 60; transform: translate(-50%, 16px); opacity: 0; padding: 11px 18px; border-radius: 2px; background: var(--mu-paper); color: #1d1913; font: 700 12px/1.4 var(--mu-jp); letter-spacing: .08em; pointer-events: none; white-space: nowrap; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); transition: opacity .25s, transform .25s; }
 .mu-toast.on { opacity: 1; transform: translate(-50%, 0); }
+.mu-warn { position: fixed; left: 10px; right: 10px; top: calc(110px + env(safe-area-inset-top)); z-index: 70; padding: 12px 14px; border-radius: 6px; background: #ffd21f; color: #1d1913; font: 500 12px/1.7 var(--mu-jp); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); word-break: break-all; }
+.mu-warn a { color: inherit; font-weight: 700; }
 html.mu-lock, html.mu-lock body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .mu-lobby.auto .mu-spot, .mu-enter i { animation: none; } .mu-room.lit .mu-light { animation: none; } .mu-bar { display: none; } }
