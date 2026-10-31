@@ -2,7 +2,7 @@
 // ・画面の下の「MENU」を押すと、駅の発車標がおりてきて、行き先の文字がパタパタめくれて出てきます
 // ・行き先を押すと「発車」に変わって、電車が入ってきて画面をおおい、そのまま次のページへ。次のページで電車が出ていきます
 // ・どのページでも、<link nav.css> と、この nav.js を入れれば使えます（head の小さなスクリプトも、いっしょに入れてね）
-// ・ひみつの入り口：メニューの左上「MT. MAYAMA RAILWAY」を5回つづけて押すと、書きこみ帳（write.html）がひらきます
+// ・ほかのページへ行ったら「入場画面はもう見た」と覚えて、トップにもどったときはモーショングラフィックスにします
 (window.OC_LOADED = window.OC_LOADED || []).push('nav');
 
 (function () {
@@ -49,7 +49,7 @@
 
   // ---------- 電車（キャンバスに描く。5両編成。まん中の3両目に、行き先の表示） ----------
   // 3両目が画面をおおったところで、ページが切りかわります。着いたページでは、ゆっくり加速して走り去ります
-  const CARS = 6, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
+  const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
     const cv = document.createElement('canvas'); cv.className = 'nv-train'; cv.setAttribute('aria-hidden', 'true');
     const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 3.2 * vw;
@@ -123,7 +123,7 @@
   }
   function go(href, en, jp) {   // 電車が入ってきて、画面をおおったら、次のページへ
     try {
-      sessionStorage.setItem('nv-go', JSON.stringify({ en, jp, t: Date.now() }));
+      sessionStorage.setItem('nv-go', JSON.stringify({ en, jp, t: Date.now() })); sessionStorage.setItem('oc-mv-done', '1');
       if (page(href) === 'index.html') sessionStorage.setItem('oc-op', '1');   // トップに戻るときは、OP を出さない
     } catch (e) { /* 覚えられなくても動く */ }
     const t = train(en, jp, 'NEXT  まもなく');
@@ -179,8 +179,6 @@
   function say(s) { toast.textContent = s; toast.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('on'), 1800); }
 
   btn.addEventListener('click', open);
-  let taps = [];   // ひみつの入り口：左上の「MT. MAYAMA RAILWAY」を5回つづけて押すと、書きこみ帳（write.html）へ
-  menu.querySelector('.nv-rw').addEventListener('click', () => { const n = Date.now(); taps = taps.filter((x) => n - x < 2500).concat(n); if (taps.length >= 5) location.href = 'write.html'; });
   menu.querySelector('.nv-close').addEventListener('click', close);
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('open')) close(); });
   rows.addEventListener('click', (e) => {
