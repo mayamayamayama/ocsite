@@ -10,7 +10,7 @@ body.bx { margin: 0; min-height: 100vh; overflow-x: hidden; background: var(--bx
 /* 紙のざらざら（画面ぜんぶに、うすく） */
 body.bx::before { content: ""; position: fixed; inset: 0; z-index: 40; pointer-events: none; opacity: .2; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.2 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.bx-wrap { max-width: 980px; margin: 0 auto; padding: calc(22px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.bx-wrap { max-width: 980px; margin: 0 auto; overflow-x: clip; padding: calc(22px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
 button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
 button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 
@@ -23,10 +23,40 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-sub i { padding: 6px 9px 5px; background: var(--bx-ink); color: var(--bx-bg); font: 700 10px/1 var(--bx-mono); font-style: normal; letter-spacing: .18em; }
 
 /* ---------- 3D の舞台 ---------- */
-.bx-stage { position: relative; margin: 4px -16px 0; aspect-ratio: 10 / 11; max-height: 80svh; }
-.bx-stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: pointer; }
-.bx-hint { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); margin: 0; white-space: nowrap; font: 700 10px/1 var(--bx-mono); letter-spacing: .22em; pointer-events: none; }
+.bx-stage { position: relative; margin: 4px -16px 0; aspect-ratio: 10 / 11; max-height: 80svh; overflow: hidden; isolation: isolate; }
+.bx-stage canvas { position: relative; z-index: 1; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: pointer; }
+.bx-hint { position: absolute; z-index: 2; left: 50%; bottom: 4px; transform: translateX(-50%); margin: 0; white-space: nowrap; font: 700 10px/1 var(--bx-mono); letter-spacing: .22em; pointer-events: none; }
 .bx-no3d .bx-stage { display: none; }
+
+/* 舞台のうしろ：ゆっくり回る集中線・床の点々・すみの小さな文字 */
+.bx-stage::before { content: ""; position: absolute; left: 50%; top: 64%; z-index: -1; width: max(125%, 120vh); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(rgba(17, 17, 17, .075) 0 4deg, transparent 4deg 10deg); -webkit-mask: radial-gradient(closest-side, #000 15%, transparent 70%); mask: radial-gradient(closest-side, #000 15%, transparent 70%); animation: bxSpin 120s linear infinite; }
+.bx-playing .bx-stage::before { background: repeating-conic-gradient(rgba(17, 17, 17, .13) 0 4deg, transparent 4deg 10deg); animation-duration: 26s; }
+@keyframes bxSpin { to { rotate: 360deg; } }
+.bx-stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; z-index: -1; height: 36%; pointer-events: none; background: radial-gradient(circle, rgba(17, 17, 17, .2) 1.3px, transparent 1.8px) 0 0 / 9px 9px; -webkit-mask: radial-gradient(70% 100% at 50% 100%, #000 35%, transparent 100%); mask: radial-gradient(70% 100% at 50% 100%, #000 35%, transparent 100%); }
+.bx-spec { position: absolute; z-index: 0; font: 700 9px/1.45 var(--bx-mono); letter-spacing: .14em; pointer-events: none; }
+.bx-spec.tl { top: 14px; left: 16px; padding: 6px 0 0 7px; border-top: 2px solid; border-left: 2px solid; }
+.bx-spec.tr { top: 14px; right: 16px; padding: 6px 7px 0 0; border-top: 2px solid; border-right: 2px solid; text-align: right; }
+.bx-spec.br { bottom: 28px; right: 16px; padding: 0 7px 6px 0; border-bottom: 2px solid; border-right: 2px solid; text-align: right; }
+/* ゆれたときの文字（マンガの音） */
+.bx-sfx { position: absolute; top: 33%; z-index: 4; margin: 0; pointer-events: none; opacity: 0; font: 900 clamp(32px, 10vw, 58px)/1 "Hiragino Sans", "Noto Sans JP", sans-serif; letter-spacing: -.05em; color: var(--bx-ink);
+  text-shadow: 3px 0 var(--bx-paper), -3px 0 var(--bx-paper), 0 3px var(--bx-paper), 0 -3px var(--bx-paper), 2px 2px var(--bx-paper), -2px 2px var(--bx-paper), 2px -2px var(--bx-paper), -2px -2px var(--bx-paper), 6px 6px 0 var(--bx-ink); }
+.bx-sfx.pop { animation: bxSfx .95s cubic-bezier(.2, 1.5, .4, 1) forwards; }
+@keyframes bxSfx { 0% { opacity: 1; transform: rotate(var(--r, -10deg)) scale(.3); } 25% { opacity: 1; transform: rotate(var(--r, -10deg)) scale(1.15); } 70% { opacity: 1; transform: rotate(var(--r, -10deg)) translateY(-6px); } 100% { opacity: 0; transform: rotate(var(--r, -10deg)) translateY(-16px) scale(1.05); } }
+
+/* ---------- ライナーノーツ（ジャケットに貼ったシール）と、流れる帯 ---------- */
+.bx-notes { position: relative; max-width: 520px; margin: 22px 0 0; padding: 12px 14px; border: 3px solid var(--bx-ink); background: var(--bx-paper); box-shadow: 5px 5px 0 var(--bx-ink); transform: rotate(-1.4deg); }
+.bx-notes::after { content: ""; position: absolute; top: -11px; right: 24px; width: 66px; height: 20px; border: 1px solid rgba(17, 17, 17, .18); background: rgba(247, 244, 236, .72); transform: rotate(7deg); }
+.bx-notes p { margin: 0; font-size: 13px; line-height: 1.75; }
+.bx-notes .bx-notes-h { margin-bottom: 6px; font: 700 11px/1 var(--bx-mono); letter-spacing: .22em; }
+.bx-notes .bx-notes-en { margin-top: 8px; font: 400 10px/1.5 var(--bx-mono); letter-spacing: .06em; color: var(--bx-dim); }
+.bx-tick { position: relative; z-index: 3; margin: 30px -24px 0; padding: 10px 0 9px; overflow: hidden; background: var(--bx-ink); color: var(--bx-bg); transform: rotate(-2.2deg); white-space: nowrap;
+  font: 700 12px/1 var(--bx-mono); letter-spacing: .16em; text-transform: uppercase; box-shadow: 0 5px 0 rgba(17, 17, 17, .22); }
+.bx-tick > div { display: inline-flex; animation: bxTick 32s linear infinite; }
+.bx-playing .bx-tick > div { animation-duration: 18s; }
+@keyframes bxTick { to { transform: translateX(-50%); } }
+.bx-playing .bx-title { transform-origin: left bottom; animation: bxThump .625s cubic-bezier(.2, 1.6, .4, 1) infinite; }
+@keyframes bxThump { 0% { transform: scale(1.03); } 40%, 100% { transform: none; } }
 
 /* ---------- ボタン（ラジカセの押しボタン） ---------- */
 .bx-deck { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 18px; margin-top: 10px; }
@@ -67,6 +97,8 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 #bx-player.spl iframe { height: 352px; }
 #bx-player.msg { padding: 14px; background: #fff; font-size: 13px; text-align: center; }
 #bx-player.msg a { color: var(--bx-ink); font-weight: 700; }
+.bx-cat { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 10px 14px 12px; border-top: 2px dashed rgba(17, 17, 17, .3); font: 700 10px/1.4 var(--bx-mono); letter-spacing: .12em; }
+.bx-cat i { flex: none; width: 96px; height: 28px; background: repeating-linear-gradient(90deg, var(--bx-ink) 0 2px, transparent 2px 4px, var(--bx-ink) 4px 5px, transparent 5px 8px, var(--bx-ink) 8px 11px, transparent 11px 12px, var(--bx-ink) 12px 13px, transparent 13px 16px); }
 
 /* ---------- テープの背（一覧） ---------- */
 .bx-sel { margin-top: 38px; }
@@ -91,9 +123,10 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
   .bx-head { grid-column: 1; grid-row: 1; align-self: end; padding-right: 0; }
   .bx-stage { grid-column: 2; grid-row: 1 / span 2; aspect-ratio: auto; height: min(78svh, 700px); margin: 40px 0 0; }
   .bx-deck { grid-column: 1; grid-row: 2; align-self: start; justify-content: flex-start; margin-top: 28px; }
-  .bx-card { grid-column: 1; grid-row: 3; align-self: start; margin-top: 40px; }
-  .bx-sel { grid-column: 2; grid-row: 3; margin-top: 40px; }
+  .bx-tick { grid-column: 1 / -1; grid-row: 3; margin: 46px -32px 0; }
+  .bx-card { grid-column: 1; grid-row: 4; align-self: start; margin-top: 48px; }
+  .bx-sel { grid-column: 2; grid-row: 4; margin-top: 48px; }
   .bx-foot { grid-column: 1 / -1; }
   .bx-title { font-size: clamp(96px, 11vw, 168px); }
 }
-@media (prefers-reduced-motion: reduce) { .bx-playing .bx-card-top span { animation: none; } .bx-key, .bx-spine { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .bx-playing .bx-card-top span, .bx-tick > div, .bx-stage::before, .bx-playing .bx-title { animation: none; } .bx-key, .bx-spine { transition: none; } }
