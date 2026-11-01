@@ -17,8 +17,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=71">
-  <link rel="stylesheet" href="boom.css?v=71">
+  <link rel="stylesheet" href="nav.css?v=72">
+  <link rel="stylesheet" href="boom.css?v=72">
 </head>
 <body class="bx">
   <div class="bx-wrap">
@@ -29,7 +29,7 @@
       <!-- このページの説明（レコードのジャケットに貼ってあるシールみたいに） -->
       <div class="bx-notes">
         <p class="bx-notes-h">★ LINER NOTES</p>
-        <p>キャラクターたちの“イメージソング”と称して  まやま が好きな曲・おすすめしたい曲を共有している場所です。</p>
+        <p>キャラクターたちの“イメージソング”と称して、MAYAMA が好きな曲・おすすめしたい曲を、こっそりシェアしている場所です。気になるテープがあったら、再生してみてね。</p>
         <p class="bx-notes-en">IMAGE SONGS FOR THE CHARACTERS — OR, HONESTLY, JUST MAYAMA'S FAVORITE TRACKS.</p>
       </div>
     </header>
@@ -40,7 +40,7 @@
     <!-- ラジカセ（3D は boom3d.js）。左右にスワイプしてテープを選び、まん中のテープをタップすると再生 -->
     <div class="bx-stage" id="bx-stage">
       <span class="bx-spec tl">MODEL MY-26 · STEREO<br>MT. MAYAMA ELECTRIC CO.</span><span class="bx-spec tr">FM / AM<br>2 BAND · 4 SPEAKERS</span><span class="bx-spec br">TAP ME<br>TO SHAKE ✦</span>
-      <p class="bx-sfx" id="bx-sfx" aria-hidden="true"></p><canvas aria-label="ラジカセとカセットテープ。左右にスワイプしてテープを選び、まん中のテープをタップすると再生します"></canvas><p class="bx-hint">← SWIPE →　·　TAP THE TAPE</p></div>
+      <span class="bx-big" aria-hidden="true"></span><canvas aria-label="ラジカセとカセットテープ。左右にスワイプしてテープを選び、まん中のテープをタップすると再生します"></canvas><p class="bx-hint">← SWIPE →　·　TAP THE TAPE</p></div>
     <div class="bx-deck">
       <div class="bx-keys"><button type="button" class="bx-key" id="bx-prev" aria-label="前のテープ">◀&#xFE0E;◀&#xFE0E;</button><button type="button" class="bx-key big" id="bx-play">▶&#xFE0E; PLAY</button><button type="button" class="bx-key" id="bx-next" aria-label="次のテープ">▶&#xFE0E;▶&#xFE0E;</button></div>
       <div class="bx-side">SIDE<div class="bx-sw"><button type="button" id="bx-a" aria-label="A面">A</button><button type="button" id="bx-b" aria-label="B面">B</button></div></div>
@@ -64,14 +64,17 @@
     <p class="bx-foot">MAYAMA TAPES · TYPE II · 60 MIN<br>© OC ARCHIVE</p>
   </div>
 
+  <!-- A面⇄B面を切りかえるときの、大きなレコード（ふだんは見えません） -->
+  <div class="bx-flip" id="bx-flip" aria-hidden="true"><div class="bx-disc"><i class="a"><b>SIDE A</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i><i class="b"><b>SIDE B</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i></div></div>
+
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=71"></script>
+  <script src="nav.js?v=72"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=71"></script>
-  <script src="boom.js?v=71"></script>
-  <script src="boom-art.js?v=71"></script>
-  <script src="boom3d.js?v=71"></script>
+  <script src="sound.js?v=72"></script>
+  <script src="boom.js?v=72"></script>
+  <script src="boom-art.js?v=72"></script>
+  <script src="boom3d.js?v=72"></script>
 </body>
 </html>
