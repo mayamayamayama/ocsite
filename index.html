@@ -30,8 +30,9 @@
     html { overscroll-behavior-y: none; }
     /* OP（op.js が動かします） */
     #op { display: none; }
-    html.op-on #op { display: block; position: fixed; inset: 0; z-index: 2147483000; background: #000; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-    #op > video, #op > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; }
+    html.op-on #op { display: block; position: fixed; inset: 0; z-index: 2147483000; background: #000; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+    /* 動画と 3D には、さわれないようにする（長押し・右クリックで「動画を保存」が出ないように。タップは #op が受けとる） */
+    #op > video, #op > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; pointer-events: none; }
     #op > video { background: #000; }
     #op > canvas { visibility: hidden; }   /* 動画のうしろに用意してある 3D を、動画のあいだは見せない */
     #op.op-3d > canvas { visibility: visible; }
@@ -53,22 +54,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Anton&family=Oswald:wght@500;600&family=Dela+Gothic+One&display=swap" rel="stylesheet">
   <!-- デザイン（style.css）と、追加の演出（effects.css）を読み込み -->
-  <link rel="stylesheet" href="style.css?v=71">
-  <link rel="stylesheet" href="design.css?v=71">
-  <link rel="stylesheet" href="motion.css?v=71">
-  <link rel="stylesheet" href="effects.css?v=71">
-  <link rel="stylesheet" href="bridge.css?v=71">
-  <link rel="stylesheet" href="profile.css?v=71">
-  <link rel="stylesheet" href="mv.css?v=71">
-  <link rel="stylesheet" href="nav.css?v=71">
+  <link rel="stylesheet" href="style.css?v=74">
+  <link rel="stylesheet" href="design.css?v=74">
+  <link rel="stylesheet" href="motion.css?v=74">
+  <link rel="stylesheet" href="effects.css?v=74">
+  <link rel="stylesheet" href="bridge.css?v=74">
+  <link rel="stylesheet" href="profile.css?v=74">
+  <link rel="stylesheet" href="mv.css?v=74">
+  <link rel="stylesheet" href="nav.css?v=74">
 </head>
 <body>
   <!-- 入場画面（山の画面）は1回だけ。プロフィールやほかのページへ行ったあとは、モーショングラフィックスから（list.js が覚えます。?mv で、いつでも山の画面） -->
   <script>try { if (sessionStorage.getItem('oc-mv-done') && !/[?&]mv(=|&|$)/.test(location.search)) document.body.classList.add('is-after'); } catch (e) {}</script>
 
   <!-- OP：ロゴの動画（op.mp4）→ 壁のアニメーション（kabeban.glb）。op.js が動かします -->
-  <div id="op" aria-hidden="true"><canvas></canvas><video muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video><i class="op-grain"></i></div>
-  <script src="op.js?v=71"></script>
+  <div id="op" aria-hidden="true" oncontextmenu="return false"><canvas></canvas><video muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><i class="op-grain"></i></div>
+  <script src="op.js?v=74"></script>
 
   <!-- 一覧の背景：左右に流れる点（effects.js が描きます） -->
   <canvas id="dot-bg" aria-hidden="true"></canvas>
@@ -173,45 +174,45 @@
 
   <!-- スクリプト：キャラクターデータ（editor.js）→ 見た目と動き（site.js）→ 入場画面（hero.js）→ 最後の文字（reel.js）→ ノイズなどの演出（effects.js） -->
   <script src="editor.js"></script>
-  <script src="site.js?v=71"></script>
-  <script src="hero-parts.js?v=71"></script>
-  <script src="hero-parts2.js?v=71"></script>
-  <script src="hero-parts3.js?v=71"></script>
-  <script src="hero-parts4.js?v=71"></script>
-  <script src="hero-kit.js?v=71"></script>
-  <script src="hero-scenes.js?v=71"></script>
-  <script src="hero-scenes2.js?v=71"></script>
-  <script src="hero-abstract.js?v=71"></script>
-  <script src="hero-abstract2.js?v=71"></script>
-  <script src="hero-mountain.js?v=71"></script>
-  <script src="hero-mountain2.js?v=71"></script>
-  <script src="hero-game.js?v=71"></script>
-  <script src="hero-game2.js?v=71"></script>
-  <script src="hero-physics.js?v=71"></script>
-  <script src="hero-physics2.js?v=71"></script>
-  <script src="hero-physics3.js?v=71"></script>
-  <script src="hero-ancient.js?v=71"></script>
-  <script src="hero-ancient2.js?v=71"></script>
-  <script src="hero-ancient3.js?v=71"></script>
-  <script src="hero-ancient4.js?v=71"></script>
-  <script src="hero-elder.js?v=71"></script>
-  <script src="hero-elder2.js?v=71"></script>
-  <script src="hero-elder3.js?v=71"></script>
-  <script src="hero-elder4.js?v=71"></script>
-  <script src="hero-elder5.js?v=71"></script>
-  <script src="hero-elder6.js?v=71"></script>
-  <script src="hero-elder7.js?v=71"></script>
-  <script src="hero-hud.js?v=71"></script>
-  <script src="hero.js?v=71"></script>
-  <script src="reel.js?v=71"></script>
-  <script src="effects.js?v=71"></script>
-  <script src="bridge.js?v=71"></script>
-  <script src="trans.js?v=71"></script>
-  <script src="profile.js?v=71"></script>
-  <script src="mv-parts.js?v=71"></script>
-  <script src="mv-fx.js?v=71"></script>
-  <script src="mv.js?v=71"></script>
-  <script src="list.js?v=71"></script>
-  <script src="nav.js?v=71"></script>
+  <script src="site.js?v=74"></script>
+  <script src="hero-parts.js?v=74"></script>
+  <script src="hero-parts2.js?v=74"></script>
+  <script src="hero-parts3.js?v=74"></script>
+  <script src="hero-parts4.js?v=74"></script>
+  <script src="hero-kit.js?v=74"></script>
+  <script src="hero-scenes.js?v=74"></script>
+  <script src="hero-scenes2.js?v=74"></script>
+  <script src="hero-abstract.js?v=74"></script>
+  <script src="hero-abstract2.js?v=74"></script>
+  <script src="hero-mountain.js?v=74"></script>
+  <script src="hero-mountain2.js?v=74"></script>
+  <script src="hero-game.js?v=74"></script>
+  <script src="hero-game2.js?v=74"></script>
+  <script src="hero-physics.js?v=74"></script>
+  <script src="hero-physics2.js?v=74"></script>
+  <script src="hero-physics3.js?v=74"></script>
+  <script src="hero-ancient.js?v=74"></script>
+  <script src="hero-ancient2.js?v=74"></script>
+  <script src="hero-ancient3.js?v=74"></script>
+  <script src="hero-ancient4.js?v=74"></script>
+  <script src="hero-elder.js?v=74"></script>
+  <script src="hero-elder2.js?v=74"></script>
+  <script src="hero-elder3.js?v=74"></script>
+  <script src="hero-elder4.js?v=74"></script>
+  <script src="hero-elder5.js?v=74"></script>
+  <script src="hero-elder6.js?v=74"></script>
+  <script src="hero-elder7.js?v=74"></script>
+  <script src="hero-hud.js?v=74"></script>
+  <script src="hero.js?v=74"></script>
+  <script src="reel.js?v=74"></script>
+  <script src="effects.js?v=74"></script>
+  <script src="bridge.js?v=74"></script>
+  <script src="trans.js?v=74"></script>
+  <script src="profile.js?v=74"></script>
+  <script src="mv-parts.js?v=74"></script>
+  <script src="mv-fx.js?v=74"></script>
+  <script src="mv.js?v=74"></script>
+  <script src="list.js?v=74"></script>
+  <script src="nav.js?v=74"></script>
 </body>
 </html>
