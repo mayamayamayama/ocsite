@@ -102,5 +102,28 @@ window.OC_BOOM_ART = (function () {
   }
   const REELS = [[238, 248], [402, 248]];   // ラベルの絵の中の、車の位置
 
-  return { INK, PAPER, ACCENT, SHADOW, W, H, DP, S, CW, CH, REELS, cnv, front, top, side, cone, key, door, grip, reel, tape };
+  function record(x, k) {   // うしろに飾るレコード（黒い盤・細いみぞ・オレンジのラベル）
+    x.fillStyle = INK; x.beginPath(); x.arc(256, 256, 254, 0, 7); x.fill();
+    x.strokeStyle = 'rgba(247,244,236,.22)'; x.lineWidth = 1.5; for (let r = 120; r < 246; r += 5) { x.beginPath(); x.arc(256, 256, r, 0, 7); x.stroke(); }
+    x.strokeStyle = PAPER; x.lineWidth = 4; x.beginPath(); x.arc(256, 256, 247, 0, 7); x.stroke();
+    x.fillStyle = 'rgba(247,244,236,.16)'; [0.3, 0.3 + Math.PI].forEach((a) => { x.beginPath(); x.moveTo(256, 256); x.arc(256, 256, 244, a, a + 0.45); x.fill(); });
+    x.fillStyle = k ? PAPER : ACCENT; x.beginPath(); x.arc(256, 256, 96, 0, 7); x.fill(); x.lineWidth = 5; x.strokeStyle = INK; x.stroke();
+    x.fillStyle = INK; x.textAlign = 'center'; x.font = '400 30px ' + BIG; x.fillText(k ? 'SIDE B' : 'SIDE A', 256, 228); x.font = '700 15px ' + MONO; x.fillText(BRAND.replace('TAPES', 'RECORDS'), 256, 300); x.fillText('33⅓ RPM', 256, 322);
+    x.beginPath(); x.arc(256, 256, 9, 0, 7); x.fill();
+  }
+  function note(x, k) {   // スピーカーから飛び出す音符（白いふちどり）
+    x.clearRect(0, 0, 128, 128); x.lineCap = x.lineJoin = 'round';
+    const head = (cx, cy) => { x.beginPath(); x.ellipse(cx, cy, 17, 12, -0.45, 0, 7); };
+    const path = () => { if (k) { head(36, 98); head(88, 86); x.moveTo(51, 96); x.lineTo(51, 28); x.lineTo(103, 16); x.lineTo(103, 84); } else { head(50, 96); x.moveTo(65, 92); x.lineTo(65, 18); x.quadraticCurveTo(70, 46, 98, 56); } };
+    x.strokeStyle = PAPER; x.lineWidth = 16; path(); x.stroke(); x.strokeStyle = INK; x.fillStyle = INK; x.lineWidth = 7; path(); x.stroke();
+    if (k) { head(36, 98); x.fill(); head(88, 86); x.fill(); x.lineWidth = 12; x.beginPath(); x.moveTo(51, 32); x.lineTo(103, 20); x.stroke(); } else { head(50, 96); x.fill(); }
+  }
+  function lines(x) {   // ゆれるときの、横の線（マンガの「ガタガタ」）
+    x.clearRect(0, 0, 128, 384); x.lineCap = 'round';
+    [[30, 60, 330, 26], [70, 90, 290, 34], [104, 130, 250, 24]].forEach(([a, y0, y1, bend], q) => {
+      [[PAPER, 15], [INK, 7]].forEach(([c, w]) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); x.moveTo(a, y0); x.quadraticCurveTo(a + bend, (y0 + y1) / 2, a + (q === 1 ? 4 : -6), y1); x.stroke(); });
+    });
+  }
+
+  return { INK, PAPER, ACCENT, SHADOW, W, H, DP, S, CW, CH, REELS, cnv, front, top, side, cone, key, door, grip, reel, tape, record, note, lines };
 })();
