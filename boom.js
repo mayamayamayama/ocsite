@@ -1,7 +1,7 @@
 // boom.js — サウンドトラック（MAYAMA BOOMBOX）
 // ・曲を入れたキャラ（sound.js）が、1本ずつカセットテープになります。並びは editor.js のキャラの順
 // ・テープを選んで PLAY → ラジカセのふたが開いて、テープが入って、YouTube か Spotify の曲が流れます
-// ・A／B を押すと、テープが一度出てきて、裏返って B面に。画面を左右にスワイプしても、テープを選べます
+// ・A／B を押すと、大きなレコードが画面いっぱいに出てきて裏返り、オレンジ（A面）⇄青（B面）に変わります。そのあと、テープも裏返ります
 // ・3D が使えない端末でも、下のテープの背（せ）の一覧から、ふつうに聞けます
 (window.OC_LOADED = window.OC_LOADED || []).push('boom');
 
@@ -62,7 +62,7 @@
     ['A', 'B'].forEach((s) => { const b = $('#bx-' + s.toLowerCase()); b.classList.toggle('on', face === s); b.disabled = !has(r, s); b.setAttribute('aria-pressed', face === s); });
     $('#bx-prev').disabled = $('#bx-next').disabled = recs.length < 2;
     listEl.querySelectorAll('.bx-spine').forEach((b) => b.classList.toggle('on', +b.dataset.i === cur));
-    document.body.classList.toggle('bx-playing', playing); ticker();
+    document.body.classList.toggle('bx-playing', playing); document.documentElement.classList.toggle('bx-b', face === 'B'); ticker();
   }
   function player() {
     const box = $('#bx-player'), s = recs[cur][face], e = playing && s && s.url ? embed(s.url) : null;
@@ -81,7 +81,15 @@
     if (!was) setTimeout(() => $('#bx-now').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'nearest' }), 1400);
   }
   function stop() { playing = false; ui(); player(); }
-  function flip(s) { if (s === face || !has(recs[cur], s)) return; playing ? play(s) : ((face = s), ui()); }
+  let busy = false; const disc = $('#bx-flip');
+  function flip(s) {   // A面⇄B面：大きなレコードが裏返るあいだに色を変えて、そのあとテープを裏返す
+    if (s === face || !has(recs[cur], s) || busy) return;
+    const go = () => (playing ? play(s) : ((face = s), ui()));
+    if (REDUCE || !disc) return go();
+    busy = true; disc.className = 'bx-flip go' + (s === 'A' ? ' to-a' : '');
+    setTimeout(() => document.documentElement.classList.toggle('bx-b', s === 'B'), 540);
+    setTimeout(go, 1080); setTimeout(() => { disc.className = 'bx-flip'; busy = false; }, 1650);
+  }
   $('#bx-prev').onclick = () => select(cur - 1); $('#bx-next').onclick = () => select(cur + 1);
   $('#bx-play').onclick = () => (playing ? stop() : play());
   $('#bx-a').onclick = () => flip('A'); $('#bx-b').onclick = () => flip('B');
