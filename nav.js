@@ -13,7 +13,7 @@
     ['CHARACTERS', 'キャラクター一覧', 'index.html#list', 2],
     ['GUIDELINE', 'ガイドライン', '', 3],
     ['COMPOSITION', '構図置き場', 'composition.html', 4],
-    ['SOUNDTRACK', 'サウンドトラック', '', 5],
+    ['SOUNDTRACK', 'サウンドトラック', 'soundtrack.html', 5],
     ['Q&A', '質問解答', '', 6],
     ['COLUMN', 'コラム', '', 7],
   ];
@@ -52,7 +52,7 @@
   const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
     const cv = document.createElement('canvas'); cv.className = 'nv-train'; cv.setAttribute('aria-hidden', 'true');
-    const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 3.2 * vw;
+    const W = innerWidth, H = innerHeight, r = Math.min(devicePixelRatio || 1, 2), vw = W / 100, vm = Math.min(W, H) / 100, G = 1.6 * vw;
     cv.width = Math.round(W * r); cv.height = Math.round(H * r); document.body.appendChild(cv);
     const c = cv.getContext('2d'), Y = '#ffd21f', CW = Array.from({ length: CARS }, (_, i) => (i === MID ? 150 : 128) * vw);
     const lead = -25 * vw - CW.slice(0, MID).reduce((a, w) => a + w + G, 0), total = CW.reduce((a, w) => a + w, 0) + G * (CARS - 1);
@@ -97,9 +97,9 @@
       let x = lead + tx;
       CW.forEach((w, i) => {
         if (x < W + 10 && x + w > -10) car(x, w, i);
-        if (i < CARS - 1 && x + w < W && x + w + G > 0) {   // 車両のつなぎ（ほろと連結器。上と下のすき間から、うしろが見える）
-          box(x + w - 2, 0.16 * H, G + 4, 0.66 * H, '#1a1a1a'); c.fillStyle = '#2e2e2e'; for (let q = 1; q < 5; q++) c.fillRect(x + w + (q / 5) * G, 0.16 * H, 1.5, 0.66 * H);
-          box(x + w - 3 * vm, 0.885 * H, G + 6 * vm, 0.025 * H, '#222');
+        if (i < CARS - 1 && x + w < W + 10 && x + w + G > -10) {   // 車両のつなぎ（屋根から床までの、ほろと連結器）
+          box(x + w - 3, 0, G + 6, H, '#141414'); c.fillStyle = '#2c2c2c'; for (let q = 1; q < 4; q++) c.fillRect(x + w + (q / 4) * G - 0.75, 0.07 * H, 1.5, 0.8 * H);
+          box(x + w - 3 * vm, 0.885 * H, G + 6 * vm, 0.025 * H, '#2a2a2a');
         }
         x += w + G;
       });
