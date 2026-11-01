@@ -8,7 +8,7 @@
 
 (function () {
   // ===== 変えてもいいところ =====
-  const CHARAS = [];                                   // 立ち絵の名前を ['a.png', 'b.png'] と書くと、その中からランダム。空なら mv-chara1〜12 を自動でさがす
+  const CHARAS = [], CHARA_MAX = 12;                   // 立ち絵：['a.png'] と書くとその中から。空なら mv-chara1〜12（.webp か .png）
   const MOTION = 'auto';                                // 動き：'auto' 重いと自動で少なめ／'lite' いつも少なめ／'full' 全部
   const LINE = 0.7, LINE_COLOR = '#ffffff';            // 立ち絵の白いふちの太さ（0 でなし。1.4 で倍）と色
   const SHADOW = [1.8, 1.6], SHADOW_COLOR = '#2ec4b6'; // 立ち絵の影のずれ（右へ, 下へ。0, 0 でなし）と色
@@ -100,28 +100,27 @@
     if (!art || !H) return; const h = (H * L[ci][wide ? 6 : 5][2]) / 100, key = Math.round(h) + ':' + u.toFixed(2);
     if (key === artKey) return; artKey = key;
     try { charaEl.replaceChildren(FX.outline(art, h, LINE * u, SHADOW[0] * u, SHADOW[1] * u, LINE_COLOR, SHADOW_COLOR)); } catch (e) { charaEl.replaceChildren(art); }
+    if (!charaEl.classList.contains('ready') && t0 && performance.now() - t0 > 700 && !REDUCE) {   // 登場のあとに読みこめたときは、ジャンプで登場して、紙吹雪
+      charaEl.parentElement.parentElement.animate([{ transform: 'translateY(45%) scale(.7)' }, { transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.2,1.4,.4,1)' });
+      const r = charaEl.getBoundingClientRect(), q = stage.getBoundingClientRect(); conf.burst(r.left - q.left + r.width / 2, r.top - q.top + r.height * 0.3, 40);
+    }
     charaEl.classList.add('ready');
   }
-  function findCharas() {
-    if (CHARAS.length) return Promise.resolve(CHARAS);
-    let got = null; try { got = JSON.parse(sessionStorage.getItem('oc-mv-charas2')); } catch (e) { /* なにもしない */ }
-    if (Array.isArray(got) && got.length) return Promise.resolve(got);
-    const names = ['mv-chara'].concat(Array.from({ length: 12 }, (_, i) => 'mv-chara' + (i + 1))).flatMap((b) => [b + '.webp', b + '.png']);   // 同じ番号に両方あれば webp を使う
-    return Promise.all(names.map((n) => fetch(n, { method: 'HEAD', cache: 'no-cache' }).then((r) => (r.ok ? n : null), () => null))).then((ok) => {
-      const list = ok.filter((n) => n && !(n.endsWith('.png') && ok.includes(n.replace('.png', '.webp')))); try { if (list.length) sessionStorage.setItem('oc-mv-charas2', JSON.stringify(list)); } catch (e) { /* なにもしない */ }
-      return list; });
+  // 立ち絵：1〜CHARA_MAX 番からランダム（さがしに行かずに、すぐ読みこむ。index.html のはじめで、もう読みこみ始めている）
+  function pickChara() {
+    const pool = CHARAS.length ? CHARAS.map((n) => [n]) : Array.from({ length: CHARA_MAX }, (_, i) => ['mv-chara' + (i + 1) + '.webp', 'mv-chara' + (i + 1) + '.png']);
+    let p = '', last = ''; try { p = sessionStorage.getItem('oc-mv-pick') || ''; sessionStorage.removeItem('oc-mv-pick'); last = localStorage.getItem('oc-mv-last') || ''; } catch (e) { /* なにもしない */ }
+    const all = pool.map((_, i) => i), ok = all.filter((i) => !pool[i].includes(last));
+    let first = pool.findIndex((c) => p && c[0].indexOf(p + '.') === 0); if (first < 0) first = (ok.length ? ok : all)[Math.floor(Math.random() * (ok.length || all.length))];
+    const load = (i, j, left) => {
+      const img = new Image(), name = pool[i][j]; img.alt = ''; img.draggable = false;
+      img.onload = () => (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { art = img; artKey = ''; paintChara(); try { localStorage.setItem('oc-mv-last', name); } catch (e) { /* なにもしない */ } });   // 全部読みこんでから出す
+      img.onerror = () => { if (j + 1 < pool[i].length) return load(i, j + 1, left); left = left.filter((x) => x !== i); if (left.length) load(left[Math.floor(Math.random() * left.length)], 0, left); else ghost(); };
+      img.src = name;
+    };
+    load(first, 0, all);
   }
-  function pickChara(list) {
-    if (!list.length) return ghost();
-    let last = ''; try { last = localStorage.getItem('oc-mv-last') || ''; } catch (e) { /* なにもしない */ }
-    const pool = list.length > 1 ? list.filter((n) => n !== last) : list, name = pool[Math.floor(Math.random() * pool.length)];
-    try { localStorage.setItem('oc-mv-last', name); } catch (e) { /* なにもしない */ }
-    const img = new Image(); img.alt = ''; img.draggable = false;
-    img.onload = () => (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { art = img; artKey = ''; paintChara(); });   // 全部読みこんでから出す（半分だけ見えないように）
-    img.onerror = () => { const rest = list.filter((n) => n !== name); try { sessionStorage.removeItem('oc-mv-charas2'); } catch (e) { /* なにもしない */ } if (rest.length) pickChara(rest); else ghost(); };
-    img.src = name;
-  }
-  findCharas().then(pickChara, ghost);
+  pickChara();
 
   // ---------- 置き場所（スマホの縦長か、パソコンの横長かで切り替え） ----------
   let W = 0, H = 0, u = 4, wide = false, landKey = '', top = [0, 0], peaks = [], ribs = [];
