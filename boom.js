@@ -1,7 +1,7 @@
 // boom.js — サウンドトラック（MAYAMA BOOMBOX）
 // ・曲を入れたキャラ（sound.js）が、1本ずつカセットテープになります。並びは editor.js のキャラの順
 // ・テープを選んで PLAY → ラジカセのふたが開いて、テープが入って、YouTube か Spotify の曲が流れます
-// ・A／B を押すと、大きなレコードが画面いっぱいに出てきて裏返り、オレンジ（A面）⇄青（B面）に変わります。そのあと、テープも裏返ります
+// ・A／B を押すと、大きなレコードが画面のはしからころがって来て裏返り、オレンジ（A面）⇄青（B面）に変わります。そのあと、テープも裏返ります
 // ・3D が使えない端末でも、下のテープの背（せ）の一覧から、ふつうに聞けます
 (window.OC_LOADED = window.OC_LOADED || []).push('boom');
 
@@ -87,14 +87,16 @@
     const go = () => (playing ? play(s) : ((face = s), ui()));
     if (REDUCE || !disc) return go();
     busy = true; disc.className = 'bx-flip go' + (s === 'A' ? ' to-a' : '');
-    setTimeout(() => document.documentElement.classList.toggle('bx-b', s === 'B'), 540);
-    setTimeout(go, 1080); setTimeout(() => { disc.className = 'bx-flip'; busy = false; }, 1650);
+    setTimeout(() => document.documentElement.classList.toggle('bx-b', s === 'B'), 500);
+    setTimeout(go, 1000); setTimeout(() => { disc.className = 'bx-flip'; busy = false; }, 1630);
   }
   $('#bx-prev').onclick = () => select(cur - 1); $('#bx-next').onclick = () => select(cur + 1);
   $('#bx-play').onclick = () => (playing ? stop() : play());
   $('#bx-a').onclick = () => flip('A'); $('#bx-b').onclick = () => flip('B');
   $('#bx-tracks').addEventListener('click', (e) => { const b = e.target.closest('.bx-trk'); if (b && !b.disabled) b.dataset.s === face ? !playing && play() : flip(b.dataset.s); });
   listEl.addEventListener('click', (e) => { const b = e.target.closest('.bx-spine'); if (!b) return; select(+b.dataset.i); $('#bx-stage').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); });
+  document.querySelectorAll('.bx-rec, .bx-gw').forEach((el) => el.addEventListener('click', () => { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }));   // 見出しのレコードとギター
+  document.querySelectorAll('.bx-rec, .bx-gw').forEach((el) => el.addEventListener('animationend', (e) => { if (e.animationName === 'bxScratch' || e.animationName === 'bxStrum') el.classList.remove('hit'); }));
   addEventListener('keydown', (e) => { if (e.target.closest && e.target.closest('input, textarea')) return; if (e.key === 'ArrowLeft') select(cur - 1); if (e.key === 'ArrowRight') select(cur + 1); });
   face = first(recs[0]); ui();
 
