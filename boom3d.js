@@ -57,8 +57,6 @@
     const knob = new T.Mesh(new T.SphereGeometry(0.07, 12, 8), BLACK); knob.position.set(2.25, H + 0.09, -0.6); body.add(knob);
     const sh = new T.Shape([[-3.3, -0.8], [3.3, -0.8], [4.2, 0.0], [4.2, 1.5], [-2.4, 1.5], [-3.3, 0.8]].map(([a, b]) => new T.Vector2(a, b)));   // 床の影（右うしろへ）
     const shadow = new T.Mesh(new T.ShapeGeometry(sh), flat({ color: A.SHADOW, side: T.DoubleSide })); shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.002; boom.add(shadow);
-    const lnM = flat({ map: pic(128, 384, A.lines), transparent: true, side: T.DoubleSide, depthWrite: false }), lnG = new T.PlaneGeometry(0.75, 2.25);   // ゆれるときの横の線
-    const lns = [-1, 1].map((sx) => { const m = new T.Mesh(lnG, lnM); m.position.set(sx * (W / 2 + 0.5), 1.5, 0.3); m.scale.x = -sx; m.visible = false; boom.add(m); return m; });
 
     // うしろのレコード（飾り。再生中は速く回って、リズムでふくらむ）
     const recG = new T.CylinderGeometry(1, 1, 0.04, 72);
@@ -143,7 +141,6 @@
       body.rotation.z = th; body.position.set(px - px * Math.cos(th) + env * 0.05 * Math.sin(st * 70), -px * Math.sin(th) + jump, 0);
       body.scale.set(1 - kick * 0.008 + land * 0.08, 1 + kick * 0.02 - land * 0.15, 1); shadow.scale.setScalar(1 - Math.min(0.4, jump * 0.3));
       cones.forEach((c) => c.scale.set(1 + kick * 0.03, 1 + kick * 2.4 + land * 2, 1 + kick * 0.03));
-      lns.forEach((m, j) => { m.visible = env > 0.08 && Math.floor(st * 16 + j) % 3 !== 0; m.scale.y = 0.85 + Math.random() * 0.3; });
       boom.updateMatrixWorld(true); qD.copy(boom.quaternion);
       let open = false; inDeck = null;
       tapes.forEach((tp, i) => {
