@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>サウンドトラック - OC ARCHIVE</title>
   <meta name="description" content="MAYAMA BOOMBOX — キャラクターたちの曲を、カセットテープで。">
-  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします） -->
+  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします）。見出しの動きは、電車がどきはじめてから -->
   <script>
     (function () {
-      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); } } catch (e) {}
+      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive', 'bx-wait'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); setTimeout(function () { h.classList.remove('bx-wait'); }, 950); } } catch (e) {}
     })();
   </script>
   <!-- 3D の部品（three.js）の場所。boom3d.js が使います（index.html と同じ番号） -->
@@ -17,14 +17,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=72">
-  <link rel="stylesheet" href="boom.css?v=72">
+  <link rel="stylesheet" href="nav.css?v=73">
+  <link rel="stylesheet" href="boom.css?v=73">
+  <link rel="stylesheet" href="boom-fx.css?v=73">
 </head>
 <body class="bx">
   <div class="bx-wrap">
     <header class="bx-head">
-      <p class="bx-kicker">OC ARCHIVE — GALLERY 05</p>
-      <h1 class="bx-title">Sound<span>track</span></h1>
+    <!-- 見出しのまわりの飾り（レコードとギター。動きは boom-fx.css） -->
+    <div class="bx-art" aria-hidden="true">
+      <div class="bx-rec"><div class="bx-sc"><svg class="bx-vin" viewBox="-100 -100 200 200"><defs><path id="bx-lp" d="M-27 0a27 27 0 1 1 54 0a27 27 0 1 1-54 0"/></defs><circle r="99"/><g class="g"><circle r="93"/><circle r="86"/><circle r="80"/><circle r="73"/><circle r="66"/><circle r="59"/><circle r="51"/><circle r="45"/></g><circle class="lb" r="37"/><circle class="lr" r="33.5"/><text class="lt"><textPath href="#bx-lp">MAYAMA RECORDS ✦ STEREO ✦ 33⅓ RPM ✦ OC ARCHIVE ✦</textPath></text><text class="lm" y="-4">MAYAMA</text><text class="ls a" y="14">SIDE A</text><text class="ls b" y="14">SIDE B</text><circle class="h" r="2.4"/></svg></div></div>
+      <div class="bx-gw"><div class="bx-gs"><svg class="bx-gtr" viewBox="0 0 160 480"><defs><pattern id="bx-dt" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.3"/></pattern><linearGradient id="bx-sh" x1="0" x2="1"><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset=".95" stop-color="#fff"/></linearGradient><mask id="bx-mk"><rect width="160" height="480" fill="url(#bx-sh)"/></mask><symbol id="bx-nt" viewBox="0 0 26 34"><ellipse cx="8" cy="27" rx="7" ry="5" transform="rotate(-22 8 27)"/><path d="M12.5 26V3h3c1 6 9 7 8 16c-2-4-4-6-8-6v13z"/></symbol></defs>
+<g class="ol"><path d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z"/><path d="M67 82L63 42C61 22 69 6 83 5C97 4 106 12 102 25L96 44L93 82Z"/><rect x="67" y="70" width="26" height="262"/></g><path class="pa" d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z"/><path d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z" fill="url(#bx-dt)" mask="url(#bx-mk)" opacity=".5"/><path class="pa" d="M67 82L63 42C61 22 69 6 83 5C97 4 106 12 102 25L96 44L93 82Z"/><rect x="54" y="14" width="10" height="5" rx="2"/><rect x="54" y="24" width="10" height="5" rx="2"/><rect x="54" y="34" width="10" height="5" rx="2"/><rect x="54" y="44" width="10" height="5" rx="2"/><rect x="54" y="54" width="10" height="5" rx="2"/><rect x="54" y="64" width="10" height="5" rx="2"/><circle class="pa" cx="71" cy="16.5" r="2.3"/><circle class="pa" cx="71" cy="26.5" r="2.3"/><circle class="pa" cx="71" cy="36.5" r="2.3"/><circle class="pa" cx="71" cy="46.5" r="2.3"/><circle class="pa" cx="71" cy="56.5" r="2.3"/><circle class="pa" cx="71" cy="66.5" r="2.3"/>
+<rect class="pa" x="67" y="70" width="26" height="262"/><rect x="70.5" y="80" width="19" height="252"/><path class="fr" d="M71 99h18M71 116h18M71 133h18M71 148h18M71 163h18M71 177h18M71 190h18M71 202h18M71 214h18M71 225h18M71 235h18M71 245h18M71 254h18M71 263h18M71 271h18M71 279h18M71 286h18M71 293h18M71 300h18M71 306h18M71 312h18"/><g class="dt"><circle cx="80" cy="124" r="2"/><circle cx="80" cy="155" r="2"/><circle cx="80" cy="183" r="2"/><circle cx="80" cy="208" r="2"/><circle cx="80" cy="267" r="2"/><circle cx="80" cy="283" r="2"/><circle cx="75.5" cy="240" r="1.8"/><circle cx="84.5" cy="240" r="1.8"/></g><rect class="pa" x="69" y="77" width="22" height="4"/>
+<path d="M60 328C40 328 26 348 28 378C30 410 50 436 80 440C100 442 118 438 126 428C132 418 128 404 122 396C116 388 118 370 120 352C121 340 116 330 106 328Z"/><rect class="p" x="62" y="352" width="36" height="11" rx="3"/><circle cx="66.0" cy="357.5" r="1.4"/><circle cx="71.6" cy="357.5" r="1.4"/><circle cx="77.2" cy="357.5" r="1.4"/><circle cx="82.8" cy="357.5" r="1.4"/><circle cx="88.4" cy="357.5" r="1.4"/><circle cx="94.0" cy="357.5" r="1.4"/><rect class="p" x="62" y="380" width="36" height="11" rx="3"/><circle cx="66.0" cy="385.5" r="1.4"/><circle cx="71.6" cy="385.5" r="1.4"/><circle cx="77.2" cy="385.5" r="1.4"/><circle cx="82.8" cy="385.5" r="1.4"/><circle cx="88.4" cy="385.5" r="1.4"/><circle cx="94.0" cy="385.5" r="1.4"/><rect class="p" x="62" y="406" width="36" height="11" rx="3"/><circle cx="66.0" cy="411.5" r="1.4"/><circle cx="71.6" cy="411.5" r="1.4"/><circle cx="77.2" cy="411.5" r="1.4"/><circle cx="82.8" cy="411.5" r="1.4"/><circle cx="88.4" cy="411.5" r="1.4"/><circle cx="94.0" cy="411.5" r="1.4"/><rect class="p" x="64" y="424" width="32" height="10" rx="1.5"/><circle class="ac" cx="124" cy="432" r="6"/><circle class="ac" cx="138" cy="450" r="6"/><circle class="p" cx="144" cy="418" r="3"/><path class="st" d="M73.5 80L70 428M76.1 80L74 428M78.7 80L78 428M81.3 80L82 428M83.9 80L86 428M86.5 80L90 428"/></svg></div></div>
+      <i class="bx-nf n1"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n2"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n3"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i>
+    </div>
+      <p class="bx-kicker">OC ARCHIVE — GALLERY 05<em class="bx-eq" aria-hidden="true"><u></u><u></u><u></u><u></u><u></u></em></p>
+      <h1 class="bx-title" aria-label="Soundtrack"><b aria-hidden="true"><i style="--i:0">S</i><i style="--i:1">O</i><i style="--i:2">U</i><i style="--i:3">N</i><i style="--i:4">D</i></b><span aria-hidden="true"><i style="--i:5">T</i><i style="--i:6">R</i><i style="--i:7">A</i><i style="--i:8">C</i><i style="--i:9">K</i></span></h1>
       <p class="bx-sub">サウンドトラック<i>SIDE A / SIDE B</i></p>
       <!-- このページの説明（レコードのジャケットに貼ってあるシールみたいに） -->
       <div class="bx-notes">
@@ -70,11 +80,11 @@
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=72"></script>
+  <script src="nav.js?v=73"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=72"></script>
-  <script src="boom.js?v=72"></script>
-  <script src="boom-art.js?v=72"></script>
-  <script src="boom3d.js?v=72"></script>
+  <script src="sound.js?v=73"></script>
+  <script src="boom.js?v=73"></script>
+  <script src="boom-art.js?v=73"></script>
+  <script src="boom3d.js?v=73"></script>
 </body>
 </html>
