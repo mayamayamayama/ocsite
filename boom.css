@@ -1,0 +1,99 @@
+/* boom.css — サウンドトラック（MAYAMA BOOMBOX）。オレンジ一色の紙に、白黒のインクで描いたラジカセ。太い線と、ずらした黒い影 */
+:root {
+  --bx-bg: #ff8a00; --bx-ink: #111111; --bx-paper: #f7f4ec; --bx-dim: rgba(17, 17, 17, .6);
+  --bx-big: "Anton", "Oswald", "Roboto Condensed", sans-serif-condensed, "Arial Narrow", Impact, "Noto Sans JP", sans-serif; --bx-mono: "Space Mono", ui-monospace, "Noto Sans JP", monospace; --bx-body: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: var(--bx-bg); overscroll-behavior-y: none; }
+body.bx { margin: 0; min-height: 100vh; overflow-x: hidden; background: var(--bx-bg); color: var(--bx-ink); font: 15px/1.7 var(--bx-body); -webkit-tap-highlight-color: transparent; }
+/* 紙のざらざら（画面ぜんぶに、うすく） */
+body.bx::before { content: ""; position: fixed; inset: 0; z-index: 40; pointer-events: none; opacity: .2; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.2 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.bx-wrap { max-width: 980px; margin: 0 auto; padding: calc(22px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
+
+/* ---------- 見出し（ポスターのような大きな文字） ---------- */
+.bx-head { padding-right: 70px; }
+.bx-kicker { margin: 0; font: 700 11px/1 var(--bx-mono); letter-spacing: .24em; }
+.bx-title { margin: 16px 0 0; font: 400 clamp(76px, 29vw, 168px)/.88 var(--bx-big); letter-spacing: -.005em; text-transform: uppercase; }
+.bx-title span { display: block; color: transparent; -webkit-text-stroke: 2px var(--bx-ink); }
+.bx-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 16px 0 0; font: 700 13px/1 var(--bx-body); letter-spacing: .3em; }
+.bx-sub i { padding: 6px 9px 5px; background: var(--bx-ink); color: var(--bx-bg); font: 700 10px/1 var(--bx-mono); font-style: normal; letter-spacing: .18em; }
+
+/* ---------- 3D の舞台 ---------- */
+.bx-stage { position: relative; margin: 4px -16px 0; aspect-ratio: 10 / 11; max-height: 80svh; }
+.bx-stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: pointer; }
+.bx-hint { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); margin: 0; white-space: nowrap; font: 700 10px/1 var(--bx-mono); letter-spacing: .22em; pointer-events: none; }
+.bx-no3d .bx-stage { display: none; }
+
+/* ---------- ボタン（ラジカセの押しボタン） ---------- */
+.bx-deck { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 18px; margin-top: 10px; }
+.bx-keys { display: flex; }
+.bx-key { min-width: 58px; height: 54px; margin-left: -3px; padding: 0 14px; border: 3px solid var(--bx-ink); background: var(--bx-paper); font: 700 15px/1 var(--bx-mono); letter-spacing: .06em; cursor: pointer;
+  box-shadow: 0 5px 0 var(--bx-ink); transition: transform .08s, box-shadow .08s; }
+.bx-key:first-child { margin-left: 0; border-radius: 12px 0 0 12px; } .bx-key:last-child { border-radius: 0 12px 12px 0; }
+.bx-key.big { min-width: 132px; background: var(--bx-ink); color: var(--bx-paper); }
+.bx-key:active, .bx-key.on { transform: translateY(5px); box-shadow: 0 0 0 var(--bx-ink); }
+.bx-key:disabled { color: var(--bx-dim); cursor: default; transform: none; box-shadow: 0 5px 0 var(--bx-ink); }
+.bx-key.big:disabled { color: rgba(247, 244, 236, .5); }
+.bx-side { display: flex; align-items: center; gap: 10px; font: 700 11px/1 var(--bx-mono); letter-spacing: .2em; }
+.bx-sw { display: flex; padding: 3px; border: 3px solid var(--bx-ink); border-radius: 999px; background: var(--bx-paper); }
+.bx-sw button { width: 46px; height: 40px; border: 0; border-radius: 999px; background: none; font: 400 22px/1 var(--bx-big); cursor: pointer; transition: background .2s, color .2s; }
+.bx-sw button.on { background: var(--bx-ink); color: var(--bx-bg); }
+.bx-sw button:disabled { opacity: .28; cursor: default; }
+
+/* ---------- 今のテープ（カセットのケースに入っている紙＝J カード） ---------- */
+.bx-card { margin-top: 28px; border: 3px solid var(--bx-ink); background: var(--bx-paper); box-shadow: 8px 8px 0 var(--bx-ink); }
+.bx-card-top { display: flex; justify-content: space-between; gap: 10px; margin: 0; padding: 9px 12px 8px; background: var(--bx-ink); color: var(--bx-paper); font: 700 11px/1 var(--bx-mono); letter-spacing: .18em; }
+.bx-card-top b { color: var(--bx-bg); white-space: nowrap; }
+.bx-playing .bx-card-top span { color: var(--bx-bg); animation: bxBlink 1.2s steps(1) infinite; }
+@keyframes bxBlink { 50% { opacity: .35; } }
+.bx-name { margin: 0; padding: 16px 14px 10px; font: 400 clamp(36px, 12vw, 60px)/.92 var(--bx-big); text-transform: uppercase; overflow-wrap: anywhere; }
+.bx-trk { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; width: 100%; padding: 11px 14px; border: 0; border-top: 2px dashed rgba(17, 17, 17, .3); background: none; text-align: left; cursor: pointer; }
+.bx-trk b { display: grid; place-items: center; width: 32px; height: 32px; border: 3px solid var(--bx-ink); border-radius: 50%; font: 400 17px/1 var(--bx-big); }
+.bx-trk.on b { background: var(--bx-ink); color: var(--bx-bg); }
+.bx-trk span { font: 700 14px/1.4 var(--bx-mono); overflow-wrap: anywhere; }
+.bx-trk small { display: block; font: 400 12px/1.4 var(--bx-mono); color: var(--bx-dim); }
+.bx-trk:disabled { cursor: default; } .bx-trk:disabled span { color: var(--bx-dim); }
+.bx-note { margin: 0; padding: 12px 14px; border-top: 2px dashed rgba(17, 17, 17, .3); font-size: 13px; }
+.bx-note:empty { display: none; }
+#bx-player { margin: 0 14px 14px; border: 3px solid var(--bx-ink); background: var(--bx-ink); }
+#bx-player:empty { display: none; }
+#bx-player iframe { display: block; width: 100%; border: 0; }
+#bx-player.yt iframe { aspect-ratio: 16 / 9; height: auto; }
+#bx-player.sp iframe { height: 152px; }
+#bx-player.spl iframe { height: 352px; }
+#bx-player.msg { padding: 14px; background: #fff; font-size: 13px; text-align: center; }
+#bx-player.msg a { color: var(--bx-ink); font-weight: 700; }
+
+/* ---------- テープの背（一覧） ---------- */
+.bx-sel { margin-top: 38px; }
+.bx-label { margin: 0 0 12px; font: 700 12px/1 var(--bx-mono); letter-spacing: .22em; }
+.bx-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.bx-spine { display: grid; grid-template-columns: 54px minmax(0, 1fr); width: 100%; min-height: 66px; padding: 0; border: 3px solid var(--bx-ink); background: var(--bx-paper); text-align: left; cursor: pointer;
+  box-shadow: 5px 5px 0 var(--bx-ink); transition: transform .15s, box-shadow .15s, background .15s; }
+.bx-spine i { display: grid; place-items: center; background: var(--bx-ink); color: var(--bx-bg); font: 700 15px/1 var(--bx-mono); font-style: normal; }
+.bx-spine span { min-width: 0; padding: 9px 12px; }
+.bx-spine b { display: block; font: 400 23px/1.05 var(--bx-big); text-transform: uppercase; overflow-wrap: anywhere; }
+.bx-spine small { display: block; margin-top: 5px; overflow: hidden; font: 400 11px/1.35 var(--bx-mono); color: var(--bx-dim); white-space: nowrap; text-overflow: ellipsis; }
+.bx-spine.on { background: var(--bx-ink); color: var(--bx-paper); transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--bx-ink); }
+.bx-spine.on i { background: var(--bx-bg); color: var(--bx-ink); }
+.bx-spine.on small { color: rgba(247, 244, 236, .7); }
+.bx-spine.soon { opacity: .7; }
+.bx-foot { margin-top: 44px; text-align: center; font: 700 10px/1.9 var(--bx-mono); letter-spacing: .22em; }
+.bx-warn { position: fixed; left: 10px; right: 10px; top: calc(90px + env(safe-area-inset-top)); z-index: 70; padding: 12px 14px; border: 3px solid var(--bx-ink); background: #fff; font: 700 13px/1.6 var(--bx-body); }
+
+/* パソコン：左に見出しとボタン、右にラジカセ。その下に、今のテープとテープの一覧を横に並べる */
+@media (min-width: 900px) {
+  .bx-wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 28px; max-width: 1180px; padding-left: 32px; padding-right: 32px; }
+  .bx-head { grid-column: 1; grid-row: 1; align-self: end; padding-right: 0; }
+  .bx-stage { grid-column: 2; grid-row: 1 / span 2; aspect-ratio: auto; height: min(78svh, 700px); margin: 40px 0 0; }
+  .bx-deck { grid-column: 1; grid-row: 2; align-self: start; justify-content: flex-start; margin-top: 28px; }
+  .bx-card { grid-column: 1; grid-row: 3; align-self: start; margin-top: 40px; }
+  .bx-sel { grid-column: 2; grid-row: 3; margin-top: 40px; }
+  .bx-foot { grid-column: 1 / -1; }
+  .bx-title { font-size: clamp(96px, 11vw, 168px); }
+}
+@media (prefers-reduced-motion: reduce) { .bx-playing .bx-card-top span { animation: none; } .bx-key, .bx-spine { transition: none; } }
