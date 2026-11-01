@@ -95,7 +95,8 @@ window.OC_BOOM_ART = (function () {
     x.textAlign = 'right'; x.fillText('TAPE ' + no, CW - 70, 60);
     x.textAlign = 'left'; x.fillStyle = INK; x.font = '400 46px ' + BIG; x.fillText(String(r.name || (empty ? 'COMING SOON' : LOGO)).toUpperCase(), 70, 128, 370);
     x.font = '700 22px ' + MONO; x.fillStyle = t ? INK : '#8a877f'; x.fillText(t ? t.t : empty ? 'NO TAPES YET' : '— BLANK —', 70, 162, 370);
-    if (t && t.by) { x.font = '400 16px ' + MONO; x.fillStyle = '#55524b'; x.fillText(t.by, 70, 185, 370); }
+    const more = t && r.T ? r.T[s].length - 1 : 0, by = t ? [t.by, more > 0 ? '+' + more + ' MORE' : ''].filter(Boolean).join(' · ') : '';   // 2曲め、3曲め…があるときは「+2 MORE」
+    if (by) { x.font = '400 16px ' + MONO; x.fillStyle = '#55524b'; x.fillText(by, 70, 185, 370); }
     halftone(x, img, 520, 132, 52, AC);
     rr(x, 172, 214, 296, 68, 34); x.fillStyle = INK; x.fill();
     x.save(); rr(x, 172, 214, 296, 68, 34); x.clip(); x.fillStyle = '#4a3527'; [[238, 46], [402, 32]].forEach(([a, rad]) => { x.beginPath(); x.arc(a, 248, rad, 0, 7); x.fill(); }); x.restore();
