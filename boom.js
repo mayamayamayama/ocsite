@@ -42,7 +42,13 @@
   // ---------- 選ぶ・かける・裏返す ----------
   let cur = 0, playing = false, face = 'A';
   const D = {};   // 3D のほう（読みこめたら、ここに入る）
-  const has = (r, s) => !!(r[s] && r[s].url);
+  const has = (r, s) => !!(r[s] && r[s].url), tick = $('#bx-tick');
+  function ticker() {   // 流れる帯：今のテープの曲名（再生中は NOW PLAYING）
+    if (!tick) return; const r = recs[cur], nm = r.name || (EMPTY ? 'COMING SOON' : 'MAYAMA'), s = r[face];
+    const bits = playing ? ['▶ NOW PLAYING', nm, 'SIDE ' + face + ' : ' + (s ? s.t + (s.by ? ' — ' + s.by : '') : '')]
+      : ['TAPE ' + num(cur), nm].concat(['A', 'B'].filter((k) => r[k]).map((k) => k + ' : ' + r[k].t), [EMPTY ? 'カセットを準備中' : 'PRESS PLAY']);
+    const run = '<span>' + esc(bits.concat('MAYAMA TAPES').join('  ✦  ') + '  ✦  ').repeat(4) + '</span>'; tick.innerHTML = '<div>' + run + run + '</div>';
+  }
   function ui() {
     const r = recs[cur];
     $('#bx-no').textContent = 'TAPE ' + num(cur) + ' · SIDE ' + face;
@@ -51,12 +57,12 @@
     $('#bx-tracks').innerHTML = ['A', 'B'].map((s) => { const t = r[s];
       return '<button type="button" class="bx-trk' + (face === s ? ' on' : '') + '" data-s="' + s + '"' + (has(r, s) ? '' : ' disabled') + '><b>' + s + '</b><span>' +
         esc(t ? t.t : s === 'A' && EMPTY ? 'カセットを準備中です' : '— BLANK —') + (t && t.by ? '<small>' + esc(t.by) + '</small>' : '') + '</span></button>'; }).join('');
-    $('#bx-note').textContent = r.note;
+    $('#bx-note').textContent = r.note; $('#bx-cat').textContent = 'CAT. NO. MYM-' + String(cur + 1).padStart(3, '0') + ' · STEREO · ℗ OC ARCHIVE';
     const pb = $('#bx-play'); pb.textContent = playing ? '■︎ STOP' : '▶︎ PLAY'; pb.classList.toggle('on', playing); pb.disabled = !has(r, 'A') && !has(r, 'B');
     ['A', 'B'].forEach((s) => { const b = $('#bx-' + s.toLowerCase()); b.classList.toggle('on', face === s); b.disabled = !has(r, s); b.setAttribute('aria-pressed', face === s); });
     $('#bx-prev').disabled = $('#bx-next').disabled = recs.length < 2;
     listEl.querySelectorAll('.bx-spine').forEach((b) => b.classList.toggle('on', +b.dataset.i === cur));
-    document.body.classList.toggle('bx-playing', playing);
+    document.body.classList.toggle('bx-playing', playing); ticker();
   }
   function player() {
     const box = $('#bx-player'), s = recs[cur][face], e = playing && s && s.url ? embed(s.url) : null;
