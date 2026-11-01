@@ -17,8 +17,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=70">
-  <link rel="stylesheet" href="boom.css?v=70">
+  <link rel="stylesheet" href="nav.css?v=71">
+  <link rel="stylesheet" href="boom.css?v=71">
 </head>
 <body class="bx">
   <div class="bx-wrap">
@@ -26,10 +26,21 @@
       <p class="bx-kicker">OC ARCHIVE — GALLERY 05</p>
       <h1 class="bx-title">Sound<span>track</span></h1>
       <p class="bx-sub">サウンドトラック<i>SIDE A / SIDE B</i></p>
+      <!-- このページの説明（レコードのジャケットに貼ってあるシールみたいに） -->
+      <div class="bx-notes">
+        <p class="bx-notes-h">★ LINER NOTES</p>
+        <p>キャラクターたちの“イメージソング”と称して  まやま が好きな曲・おすすめしたい曲を共有している場所です。</p>
+        <p class="bx-notes-en">IMAGE SONGS FOR THE CHARACTERS — OR, HONESTLY, JUST MAYAMA'S FAVORITE TRACKS.</p>
+      </div>
     </header>
 
+    <!-- 流れる帯（今のテープの曲名が流れます。文字は boom.js が入れます） -->
+    <div class="bx-tick" id="bx-tick" aria-hidden="true"></div>
+
     <!-- ラジカセ（3D は boom3d.js）。左右にスワイプしてテープを選び、まん中のテープをタップすると再生 -->
-    <div class="bx-stage" id="bx-stage"><canvas aria-label="ラジカセとカセットテープ。左右にスワイプしてテープを選び、まん中のテープをタップすると再生します"></canvas><p class="bx-hint">← SWIPE →　·　TAP THE TAPE</p></div>
+    <div class="bx-stage" id="bx-stage">
+      <span class="bx-spec tl">MODEL MY-26 · STEREO<br>MT. MAYAMA ELECTRIC CO.</span><span class="bx-spec tr">FM / AM<br>2 BAND · 4 SPEAKERS</span><span class="bx-spec br">TAP ME<br>TO SHAKE ✦</span>
+      <p class="bx-sfx" id="bx-sfx" aria-hidden="true"></p><canvas aria-label="ラジカセとカセットテープ。左右にスワイプしてテープを選び、まん中のテープをタップすると再生します"></canvas><p class="bx-hint">← SWIPE →　·　TAP THE TAPE</p></div>
     <div class="bx-deck">
       <div class="bx-keys"><button type="button" class="bx-key" id="bx-prev" aria-label="前のテープ">◀&#xFE0E;◀&#xFE0E;</button><button type="button" class="bx-key big" id="bx-play">▶&#xFE0E; PLAY</button><button type="button" class="bx-key" id="bx-next" aria-label="次のテープ">▶&#xFE0E;▶&#xFE0E;</button></div>
       <div class="bx-side">SIDE<div class="bx-sw"><button type="button" id="bx-a" aria-label="A面">A</button><button type="button" id="bx-b" aria-label="B面">B</button></div></div>
@@ -42,6 +53,7 @@
       <div id="bx-tracks"></div>
       <p class="bx-note" id="bx-note"></p>
       <div id="bx-player"></div>
+      <p class="bx-cat"><span id="bx-cat"></span><i aria-hidden="true"></i></p>
     </section>
 
     <section class="bx-sel">
@@ -55,11 +67,11 @@
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=70"></script>
+  <script src="nav.js?v=71"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=70"></script>
-  <script src="boom.js?v=70"></script>
-  <script src="boom-art.js?v=70"></script>
-  <script src="boom3d.js?v=70"></script>
+  <script src="sound.js?v=71"></script>
+  <script src="boom.js?v=71"></script>
+  <script src="boom-art.js?v=71"></script>
+  <script src="boom3d.js?v=71"></script>
 </body>
 </html>
