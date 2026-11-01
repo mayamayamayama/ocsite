@@ -19,7 +19,8 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-head { padding-right: 70px; }
 .bx-kicker { margin: 0; font: 700 11px/1 var(--bx-mono); letter-spacing: .24em; }
 .bx-title { margin: 16px 0 0; font: 400 clamp(76px, 29vw, 168px)/.88 var(--bx-big); letter-spacing: -.005em; text-transform: uppercase; }
-.bx-title span { display: block; color: transparent; -webkit-text-stroke: 2px var(--bx-ink); }
+.bx-title > b, .bx-title > span { display: block; font-weight: 400; white-space: nowrap; }
+.bx-title > span { color: var(--bx-bg); -webkit-text-stroke: 2px var(--bx-ink); }   /* 中は背景の色（レコードに重なっても読めるように） */
 .bx-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 16px 0 0; font: 700 13px/1 var(--bx-body); letter-spacing: .3em; }
 .bx-sub i { padding: 6px 9px 5px; background: var(--bx-ink); color: var(--bx-bg); font: 700 10px/1 var(--bx-mono); font-style: normal; letter-spacing: .18em; }
 
@@ -53,28 +54,7 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-playing .bx-title { transform-origin: left bottom; animation: bxThump .625s cubic-bezier(.2, 1.6, .4, 1) infinite; }
 @keyframes bxThump { 0% { transform: scale(1.03); } 40%, 100% { transform: none; } }
 
-/* ---------- A面⇄B面：大きなレコードが画面をおおって、裏返る（boom.js が .go をつける） ---------- */
-.bx-flip { position: fixed; inset: 0; z-index: 80; display: none; overflow: hidden; pointer-events: none; perspective: 1600px; }
-.bx-flip.go { display: block; }
-.bx-disc { position: absolute; left: 50%; top: 50%; width: 118vmax; height: 118vmax; margin: -59vmax 0 0 -59vmax; transform-style: preserve-3d; }
-.bx-flip.go .bx-disc { animation: bxDisc 1.65s cubic-bezier(.66, 0, .34, 1) forwards; }
-.bx-flip.to-a .bx-disc { --f: 180deg; }
-@keyframes bxDisc {
-  0% { transform: scale(.05) rotateY(var(--f, 0deg)) rotate(-160deg); }
-  30% { transform: scale(1) rotateY(var(--f, 0deg)) rotate(0deg); }
-  38% { transform: scale(1) rotateY(var(--f, 0deg)) rotate(8deg); }
-  64% { transform: scale(1) rotateY(calc(var(--f, 0deg) + 180deg)) rotate(36deg); }
-  72% { transform: scale(1) rotateY(calc(var(--f, 0deg) + 180deg)) rotate(44deg); }
-  100% { transform: scale(.03) rotateY(calc(var(--f, 0deg) + 180deg)) rotate(230deg); }
-}
-.bx-disc i { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 1vmax; border-radius: 50%; -webkit-backface-visibility: hidden; backface-visibility: hidden; color: var(--bx-ink); font-style: normal;
-  background: radial-gradient(circle, var(--bx-ink) 0 .8%, var(--lab) .9% 17%, var(--bx-ink) 17.1% 17.8%, transparent 17.9%),
-    conic-gradient(from 25deg, transparent 0 6%, rgba(255, 255, 255, .12) 8% 13%, transparent 15% 50%, rgba(255, 255, 255, .12) 56% 61%, transparent 63%),
-    repeating-radial-gradient(circle, #111 0 2px, #2a2a2a 2px 3px);
-  box-shadow: inset 0 0 0 .5vmax #111, inset 0 0 0 .8vmax var(--bx-paper); }
-.bx-disc i.a { --lab: #ff8a00; } .bx-disc i.b { --lab: #3d7bff; transform: rotateY(180deg); }
-.bx-disc b { font: 400 10vmax/1 var(--bx-big); letter-spacing: .01em; }
-.bx-disc small { font: 700 1.3vmax/1 var(--bx-mono); letter-spacing: .2em; }
+/* A面⇄B面の切りかえ（大きなレコード）は boom-fx.css */
 
 /* ---------- ボタン（ラジカセの押しボタン） ---------- */
 .bx-deck { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 18px; margin-top: 10px; }
