@@ -11,26 +11,24 @@
       try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive', 'bx-wait'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); setTimeout(function () { h.classList.remove('bx-wait'); }, 950); } } catch (e) {}
     })();
   </script>
-  <!-- 3D の部品（three.js）の場所。boom3d.js が使います（index.html と同じ番号） -->
+  <!-- 3D の部品（three.js）の場所。boom3d.js と boom-disc.js が使います（index.html と同じ番号） -->
   <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=73">
-  <link rel="stylesheet" href="boom.css?v=73">
-  <link rel="stylesheet" href="boom-fx.css?v=73">
+  <link rel="stylesheet" href="nav.css?v=74">
+  <link rel="stylesheet" href="boom.css?v=74">
+  <link rel="stylesheet" href="boom-fx.css?v=74">
 </head>
 <body class="bx">
   <div class="bx-wrap">
     <header class="bx-head">
-    <!-- 見出しのまわりの飾り（レコードとギター。動きは boom-fx.css） -->
-    <div class="bx-art" aria-hidden="true">
+    <!-- 見出しのうしろの、大きな 3D レコード（boom-disc.js が描きます）。3D が使えないときは、下の平たいレコードの絵。hidden は、boom-fx.css が読みこめたときだけ見せるため -->
+    <div class="bx-art" aria-hidden="true" hidden>
+      <canvas class="bx-cv"></canvas>
       <div class="bx-rec"><div class="bx-sc"><svg class="bx-vin" viewBox="-100 -100 200 200"><defs><path id="bx-lp" d="M-27 0a27 27 0 1 1 54 0a27 27 0 1 1-54 0"/></defs><circle r="99"/><g class="g"><circle r="93"/><circle r="86"/><circle r="80"/><circle r="73"/><circle r="66"/><circle r="59"/><circle r="51"/><circle r="45"/></g><circle class="lb" r="37"/><circle class="lr" r="33.5"/><text class="lt"><textPath href="#bx-lp">MAYAMA RECORDS ✦ STEREO ✦ 33⅓ RPM ✦ OC ARCHIVE ✦</textPath></text><text class="lm" y="-4">MAYAMA</text><text class="ls a" y="14">SIDE A</text><text class="ls b" y="14">SIDE B</text><circle class="h" r="2.4"/></svg></div></div>
-      <div class="bx-gw"><div class="bx-gs"><svg class="bx-gtr" viewBox="0 0 160 480"><defs><pattern id="bx-dt" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.3"/></pattern><linearGradient id="bx-sh" x1="0" x2="1"><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset=".95" stop-color="#fff"/></linearGradient><mask id="bx-mk"><rect width="160" height="480" fill="url(#bx-sh)"/></mask><symbol id="bx-nt" viewBox="0 0 26 34"><ellipse cx="8" cy="27" rx="7" ry="5" transform="rotate(-22 8 27)"/><path d="M12.5 26V3h3c1 6 9 7 8 16c-2-4-4-6-8-6v13z"/></symbol></defs>
-<g class="ol"><path d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z"/><path d="M67 82L63 42C61 22 69 6 83 5C97 4 106 12 102 25L96 44L93 82Z"/><rect x="67" y="70" width="26" height="262"/></g><path class="pa" d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z"/><path d="M66 322C61 296 50 276 38 270C27 265 19 276 21 292C23 312 25 330 17 348C7 368 2 392 6 418C12 456 46 476 80 476C114 476 148 456 154 418C158 392 150 370 140 352C132 338 134 322 132 306C130 290 121 284 113 290C104 297 98 312 94 322Z" fill="url(#bx-dt)" mask="url(#bx-mk)" opacity=".5"/><path class="pa" d="M67 82L63 42C61 22 69 6 83 5C97 4 106 12 102 25L96 44L93 82Z"/><rect x="54" y="14" width="10" height="5" rx="2"/><rect x="54" y="24" width="10" height="5" rx="2"/><rect x="54" y="34" width="10" height="5" rx="2"/><rect x="54" y="44" width="10" height="5" rx="2"/><rect x="54" y="54" width="10" height="5" rx="2"/><rect x="54" y="64" width="10" height="5" rx="2"/><circle class="pa" cx="71" cy="16.5" r="2.3"/><circle class="pa" cx="71" cy="26.5" r="2.3"/><circle class="pa" cx="71" cy="36.5" r="2.3"/><circle class="pa" cx="71" cy="46.5" r="2.3"/><circle class="pa" cx="71" cy="56.5" r="2.3"/><circle class="pa" cx="71" cy="66.5" r="2.3"/>
-<rect class="pa" x="67" y="70" width="26" height="262"/><rect x="70.5" y="80" width="19" height="252"/><path class="fr" d="M71 99h18M71 116h18M71 133h18M71 148h18M71 163h18M71 177h18M71 190h18M71 202h18M71 214h18M71 225h18M71 235h18M71 245h18M71 254h18M71 263h18M71 271h18M71 279h18M71 286h18M71 293h18M71 300h18M71 306h18M71 312h18"/><g class="dt"><circle cx="80" cy="124" r="2"/><circle cx="80" cy="155" r="2"/><circle cx="80" cy="183" r="2"/><circle cx="80" cy="208" r="2"/><circle cx="80" cy="267" r="2"/><circle cx="80" cy="283" r="2"/><circle cx="75.5" cy="240" r="1.8"/><circle cx="84.5" cy="240" r="1.8"/></g><rect class="pa" x="69" y="77" width="22" height="4"/>
-<path d="M60 328C40 328 26 348 28 378C30 410 50 436 80 440C100 442 118 438 126 428C132 418 128 404 122 396C116 388 118 370 120 352C121 340 116 330 106 328Z"/><rect class="p" x="62" y="352" width="36" height="11" rx="3"/><circle cx="66.0" cy="357.5" r="1.4"/><circle cx="71.6" cy="357.5" r="1.4"/><circle cx="77.2" cy="357.5" r="1.4"/><circle cx="82.8" cy="357.5" r="1.4"/><circle cx="88.4" cy="357.5" r="1.4"/><circle cx="94.0" cy="357.5" r="1.4"/><rect class="p" x="62" y="380" width="36" height="11" rx="3"/><circle cx="66.0" cy="385.5" r="1.4"/><circle cx="71.6" cy="385.5" r="1.4"/><circle cx="77.2" cy="385.5" r="1.4"/><circle cx="82.8" cy="385.5" r="1.4"/><circle cx="88.4" cy="385.5" r="1.4"/><circle cx="94.0" cy="385.5" r="1.4"/><rect class="p" x="62" y="406" width="36" height="11" rx="3"/><circle cx="66.0" cy="411.5" r="1.4"/><circle cx="71.6" cy="411.5" r="1.4"/><circle cx="77.2" cy="411.5" r="1.4"/><circle cx="82.8" cy="411.5" r="1.4"/><circle cx="88.4" cy="411.5" r="1.4"/><circle cx="94.0" cy="411.5" r="1.4"/><rect class="p" x="64" y="424" width="32" height="10" rx="1.5"/><circle class="ac" cx="124" cy="432" r="6"/><circle class="ac" cx="138" cy="450" r="6"/><circle class="p" cx="144" cy="418" r="3"/><path class="st" d="M73.5 80L70 428M76.1 80L74 428M78.7 80L78 428M81.3 80L82 428M83.9 80L86 428M86.5 80L90 428"/></svg></div></div>
+      <svg class="bx-defs" width="0" height="0" aria-hidden="true"><symbol id="bx-nt" viewBox="0 0 26 34"><ellipse cx="8" cy="27" rx="7" ry="5" transform="rotate(-22 8 27)"/><path d="M12.5 26V3h3c1 6 9 7 8 16c-2-4-4-6-8-6v13z"/></symbol></svg>
       <i class="bx-nf n1"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n2"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n3"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i>
     </div>
       <p class="bx-kicker">OC ARCHIVE — GALLERY 05<em class="bx-eq" aria-hidden="true"><u></u><u></u><u></u><u></u><u></u></em></p>
@@ -74,17 +72,57 @@
     <p class="bx-foot">MAYAMA TAPES · TYPE II · 60 MIN<br>© OC ARCHIVE</p>
   </div>
 
-  <!-- A面⇄B面を切りかえるときの、大きなレコード（ふだんは見えません） -->
-  <div class="bx-flip" id="bx-flip" aria-hidden="true"><div class="bx-disc"><i class="a"><b>SIDE A</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i><i class="b"><b>SIDE B</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i></div></div>
+  <!-- A面⇄B面を切りかえるときの、大きな厚いレコード（ふだんは見えません） -->
+  <div class="bx-flip" id="bx-flip" aria-hidden="true" hidden><div class="bx-disc"><u></u><i class="a"><b>SIDE A</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i><i class="b"><b>SIDE B</b><small>MAYAMA RECORDS · 33⅓ RPM</small></i></div></div>
 
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=73"></script>
+  <script src="nav.js?v=74"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=73"></script>
-  <script src="boom.js?v=73"></script>
-  <script src="boom-art.js?v=73"></script>
-  <script src="boom3d.js?v=73"></script>
+  <script src="sound.js?v=74"></script>
+  <script src="boom.js?v=74"></script>
+  <script src="boom-art.js?v=74"></script>
+  <script src="boom3d.js?v=74"></script>
+  <script src="boom-disc.js?v=74"></script>
+
+  <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
+  <script>
+    (function () {
+      var RELEASE = 'R74';   // このページのファイル一式の番号
+      var SIZE = { 'boom.css': 12875, 'boom-fx.css': 9637, 'boom.js': 10069, 'boom-art.js': 12862, 'boom3d.js': 17318, 'boom-disc.js': 11472, 'nav.css': 7619, 'nav.js': 14341 };   // 正しいファイルの文字数（中身が古い・切れている、を見分ける）
+      var JS = ['nav', 'boom', 'boom-art', 'boom3d', 'boom-disc'];
+      function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
+      function run() {
+        var full = /[?&]check/.test(location.search), msg = [], box = null, got = window.OC_LOADED || [], names = Object.keys(SIZE), art = document.querySelector('.bx-art');
+        function show(t) {
+          if (!box) { box = document.createElement('div'); box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:6px;white-space:pre-wrap;max-height:60vh;overflow:auto';
+            box.textContent = 'サウンドトラックのチェック（' + RELEASE + '）'; box.onclick = function () { box.remove(); }; document.body.appendChild(box); }
+          box.textContent += '\n' + t;
+        }
+        var miss = JS.filter(function (n) { return got.indexOf(n) < 0; });
+        if (miss.length) msg.push('読みこめていないファイル：' + miss.map(function (n) { return n + '.js'; }).join('、'));
+        if (art && getComputedStyle(art).display === 'none') msg.push('boom-fx.css が読みこめていません');
+        if (typeof sound === 'undefined') msg.push('sound.js が読みこめていません');
+        if (typeof characters === 'undefined') msg.push('editor.js が読みこめていません');
+        if (msg.length) show(msg.join('\n'));
+        if (full) show((msg.length ? '' : '問題なし！\n') + '\n' + JS.map(function (n) { return (got.indexOf(n) < 0 ? '✗ ' : '✓ ') + n + '.js'; }).join('\n') + '\n3D のレコード：' + (art && art.classList.contains('bx-3d') ? '✓' : art && art.classList.contains('bx-flat') ? '平たい絵（3D が使えない端末）' : '?'));
+        if (!window.fetch || location.protocol === 'file:') return;
+        var urls = names.map(function (n) { var e = document.querySelector('script[src^="' + n + '"], link[href^="' + n + '"]'); return e ? e.src || e.href : n; });
+        Promise.all(urls.map(function (u) { return look(u, 'default'); })).then(function (a) {
+          var bad = names.filter(function (n, i) { return a[i] !== SIZE[n]; });
+          if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
+          Promise.all(bad.map(function (n) { return look(n, 'no-store'); })).then(function (b) {
+            show('\nファイルの中身のチェック：\n' + bad.map(function (n, i) { var q = b[i], f = '・' + n + '：';
+              if (q == null) return f + '確かめられませんでした';
+              if (q < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '」か確かめて、アップロードしてね（スマホだと「' + n.replace(/\.(\w+)$/, ' (1).$1') + '」のように名前が変わることがあるよ）';
+              if (q !== SIZE[n]) return f + '中身が古いか、途中で切れている。もう一度アップロードしてね';
+              return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね'; }).join('\n'));
+          });
+        });
+      }
+      addEventListener('load', function () { setTimeout(run, 1500); });
+    })();
+  </script>
 </body>
 </html>
