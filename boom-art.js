@@ -120,13 +120,7 @@ window.OC_BOOM_ART = (function () {
     x.strokeStyle = PAPER; x.lineWidth = 16; path(); x.stroke(); x.strokeStyle = INK; x.fillStyle = INK; x.lineWidth = 7; path(); x.stroke();
     if (k) { head(36, 98); x.fill(); head(88, 86); x.fill(); x.lineWidth = 12; x.beginPath(); x.moveTo(51, 32); x.lineTo(103, 20); x.stroke(); } else { head(50, 96); x.fill(); }
   }
-  function lines(x) {   // ゆれるときの、横の線（マンガの「ガタガタ」）
-    x.clearRect(0, 0, 128, 384); x.lineCap = 'round';
-    [[30, 60, 330, 26], [70, 90, 290, 34], [104, 130, 250, 24]].forEach(([a, y0, y1, bend], q) => {
-      [[PAPER, 15], [INK, 7]].forEach(([c, w]) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); x.moveTo(a, y0); x.quadraticCurveTo(a + bend, (y0 + y1) / 2, a + (q === 1 ? 4 : -6), y1); x.stroke(); });
-    });
-  }
 
   let acc = ACCENT; const theme = (b) => { acc = b ? ACCENT_B : ACCENT; };   // 今の面の色（ラジカセの針と再生ボタン）
-  return { INK, PAPER, ACCENT, SHADOW, ACCENT_B, SHADOW_B, W, H, DP, S, CW, CH, REELS, cnv, theme, front, top, side, cone, key, door, grip, reel, tape, record, note, lines };
+  return { INK, PAPER, ACCENT, SHADOW, ACCENT_B, SHADOW_B, W, H, DP, S, CW, CH, REELS, cnv, theme, front, top, side, cone, key, door, grip, reel, tape, record, note };
 })();
