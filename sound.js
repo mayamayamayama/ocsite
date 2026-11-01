@@ -19,4 +19,13 @@ const sound = [
     b_artist: "米津玄師",
     b_url: "https://youtu.be/mHP6-D-yBEw?si=Ki_GKCPhb3hXz4p2",
   },
+  {
+    chara: "Mele",
+    a_title: "シェードの埃は延長",
+    a_artist: "ずっと真夜中で良いのに。",
+    a_url: "https://youtu.be/zjEMFuj23B4?si=lXE05RV-Y2wod5Nh",
+    b_title: "そのまんまそのまんま、そのままずっとそのまま",
+    b_artist: "きくお",
+    b_url: "https://youtu.be/CwP1pT6aDcM?si=-oI6kgA1RF_ZturM",
+  },
 ];
