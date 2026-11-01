@@ -4,7 +4,9 @@
 
 window.OC_BOOM_ART = (function () {
   // ===== 変えてもいいところ =====
-  const INK = '#111111', PAPER = '#f7f4ec', ACCENT = '#ff8a00', SHADOW = '#d86a00';   // 線・紙・アクセント（オレンジ）・床の影（背景より少し濃いオレンジ）
+  const INK = '#111111', PAPER = '#f7f4ec';   // 線・紙
+  const ACCENT = '#ff8a00', SHADOW = '#d86a00';     // A面の色（オレンジ）と、床の影（少し濃いオレンジ）。boom.css の --bx-bg と合わせる
+  const ACCENT_B = '#3d7bff', SHADOW_B = '#2c5fd4'; // B面の色（青）と、床の影
   const LOGO = 'MAYAMA', BRAND = 'MAYAMA TAPES';   // ラジカセのロゴ・カセットのラベルの上の文字
   // ============================
   const BIG = 'Anton, Impact, "Noto Sans JP", sans-serif', MONO = '"Space Mono", ui-monospace, "Noto Sans JP", monospace';
@@ -21,7 +23,7 @@ window.OC_BOOM_ART = (function () {
       x.strokeStyle = PAPER; x.lineWidth = 3; for (let q = 0; q <= 40; q++) { const px = X(a) + 26 + (q / 40) * (X(b) - X(a) - 52); x.beginPath(); x.moveTo(px, Y(2.86)); x.lineTo(px, Y(q % 8 ? 2.79 : 2.72)); x.stroke(); }
       x.fillStyle = PAPER; x.font = '700 22px ' + MONO; x.textAlign = 'center'; nums.forEach((n, q) => x.fillText(n, X(a) + 26 + (q / 5) * (X(b) - X(a) - 52), Y(2.52)));
       x.textAlign = k ? 'right' : 'left'; x.font = '700 20px ' + MONO; x.fillText(band, k ? X(b) - 16 : X(a) + 16, Y(2.62) - 2);
-      x.strokeStyle = ACCENT; x.lineWidth = 6; const nx = X(a) + (k ? 0.62 : 0.35) * (X(b) - X(a)); x.beginPath(); x.moveTo(nx, Y(2.88)); x.lineTo(nx, Y(2.47)); x.stroke();
+      x.strokeStyle = acc; x.lineWidth = 6; const nx = X(a) + (k ? 0.62 : 0.35) * (X(b) - X(a)); x.beginPath(); x.moveTo(nx, Y(2.88)); x.lineTo(nx, Y(2.47)); x.stroke();
     });
     rr(x, X(-0.82), Y(2.9), X(0.82) - X(-0.82), Y(2.42) - Y(2.9), 10); x.fillStyle = INK; x.fill();   // まん中の小さな画面（光る棒は 3D）
     [-2.05, 2.05].forEach((cx) => {
@@ -53,7 +55,7 @@ window.OC_BOOM_ART = (function () {
     x.strokeStyle = INK; x.lineWidth = 10; x.beginPath(); x.arc(256, 256, 60, 0, 7); x.stroke(); x.strokeStyle = PAPER; x.lineWidth = 9; x.beginPath(); x.arc(256, 256, 186, 3.6, 4.4); x.stroke();
   }
   function key(x, k) {   // ボタンの記号（巻きもどし・再生・停止・早送り・取り出し）
-    x.fillStyle = '#ffffff'; x.fillRect(0, 0, 96, 80); x.fillStyle = k === 1 ? ACCENT : INK; x.strokeStyle = INK; x.lineWidth = 3;
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, 96, 80); x.fillStyle = k === 1 ? acc : INK; x.strokeStyle = INK; x.lineWidth = 3;
     const tri = (a, d) => { x.beginPath(); x.moveTo(a, 40); x.lineTo(a + d, 26); x.lineTo(a + d, 54); x.closePath(); x.fill(); x.stroke(); };
     if (k === 0) { tri(22, 24); tri(46, 24); } if (k === 1) { x.beginPath(); x.moveTo(36, 24); x.lineTo(62, 40); x.lineTo(36, 56); x.closePath(); x.fill(); x.stroke(); }
     if (k === 2) x.fillRect(34, 26, 28, 28); if (k === 3) { tri(50, -24); tri(74, -24); } if (k === 4) { x.beginPath(); x.moveTo(48, 22); x.lineTo(66, 44); x.lineTo(30, 44); x.closePath(); x.fill(); x.fillRect(30, 50, 36, 7); }
@@ -72,8 +74,8 @@ window.OC_BOOM_ART = (function () {
   }
 
   // カセットのラベルの丸：キャラの絵を、オレンジの上に黒い点々で（新聞の写真みたいに）
-  function halftone(x, img, cx, cy, rad) {
-    x.save(); x.beginPath(); x.arc(cx, cy, rad, 0, 7); x.fillStyle = ACCENT; x.fill(); x.clip(); x.fillStyle = INK;
+  function halftone(x, img, cx, cy, rad, col) {
+    x.save(); x.beginPath(); x.arc(cx, cy, rad, 0, 7); x.fillStyle = col; x.fill(); x.clip(); x.fillStyle = INK;
     let ok = false;
     if (img) try {
       const N = 24, [, q] = cnv(N, N), iw = img.naturalWidth, ih = img.naturalHeight, s = Math.min(iw, ih) * 0.62; q.drawImage(img, (iw - s) / 2, ih * 0.05, s, s, 0, 0, N, N);
@@ -85,16 +87,16 @@ window.OC_BOOM_ART = (function () {
     x.restore(); x.lineWidth = 5; x.strokeStyle = INK; x.beginPath(); x.arc(cx, cy, rad, 0, 7); x.stroke();
   }
   function tape(x, r, no, s, img, empty) {   // カセットの片面（s = 'A' か 'B'）
-    const t = r[s]; x.clearRect(0, 0, CW, CH); x.lineJoin = 'round';
+    const t = r[s], AC = s === 'B' ? ACCENT_B : ACCENT; x.clearRect(0, 0, CW, CH); x.lineJoin = 'round';   // A面はオレンジ、B面は青
     rr(x, 6, 6, CW - 12, CH - 12, 30); x.fillStyle = PAPER; x.fill(); x.lineWidth = 9; x.strokeStyle = INK; x.stroke();
     [[30, 30], [CW - 30, 30], [30, CH - 30], [CW - 30, CH - 30], [CW / 2, CH - 34]].forEach(([a, b]) => { x.beginPath(); x.arc(a, b, 10, 0, 7); x.lineWidth = 4; x.stroke(); x.beginPath(); x.moveTo(a - 6, b); x.lineTo(a + 6, b); x.stroke(); });
-    rr(x, 52, 28, CW - 104, 264, 14); x.fillStyle = '#ffffff'; x.fill(); x.save(); x.clip(); x.fillStyle = INK; x.fillRect(52, 28, CW - 104, 50); x.fillStyle = ACCENT; x.fillRect(52, 192, CW - 104, 9); x.restore(); x.lineWidth = 5; x.stroke();
-    x.fillStyle = ACCENT; x.font = '400 40px ' + BIG; x.textAlign = 'left'; x.fillText(s, 70, 68); x.fillStyle = PAPER; x.font = '700 18px ' + MONO; x.fillText(BRAND, 108, 60);
+    rr(x, 52, 28, CW - 104, 264, 14); x.fillStyle = '#ffffff'; x.fill(); x.save(); x.clip(); x.fillStyle = INK; x.fillRect(52, 28, CW - 104, 50); x.fillStyle = AC; x.fillRect(52, 192, CW - 104, 9); x.restore(); x.lineWidth = 5; x.stroke();
+    x.fillStyle = AC; x.font = '400 40px ' + BIG; x.textAlign = 'left'; x.fillText(s, 70, 68); x.fillStyle = PAPER; x.font = '700 18px ' + MONO; x.fillText(BRAND, 108, 60);
     x.textAlign = 'right'; x.fillText('TAPE ' + no, CW - 70, 60);
     x.textAlign = 'left'; x.fillStyle = INK; x.font = '400 46px ' + BIG; x.fillText(String(r.name || (empty ? 'COMING SOON' : LOGO)).toUpperCase(), 70, 128, 370);
     x.font = '700 22px ' + MONO; x.fillStyle = t ? INK : '#8a877f'; x.fillText(t ? t.t : empty ? 'NO TAPES YET' : '— BLANK —', 70, 162, 370);
     if (t && t.by) { x.font = '400 16px ' + MONO; x.fillStyle = '#55524b'; x.fillText(t.by, 70, 185, 370); }
-    halftone(x, img, 520, 132, 52);
+    halftone(x, img, 520, 132, 52, AC);
     rr(x, 172, 214, 296, 68, 34); x.fillStyle = INK; x.fill();
     x.save(); rr(x, 172, 214, 296, 68, 34); x.clip(); x.fillStyle = '#4a3527'; [[238, 46], [402, 32]].forEach(([a, rad]) => { x.beginPath(); x.arc(a, 248, rad, 0, 7); x.fill(); }); x.restore();
     x.beginPath(); x.moveTo(150, CH - 8); x.lineTo(178, 304); x.lineTo(CW - 178, 304); x.lineTo(CW - 150, CH - 8); x.lineWidth = 5; x.strokeStyle = INK; x.stroke();
@@ -107,7 +109,7 @@ window.OC_BOOM_ART = (function () {
     x.strokeStyle = 'rgba(247,244,236,.22)'; x.lineWidth = 1.5; for (let r = 120; r < 246; r += 5) { x.beginPath(); x.arc(256, 256, r, 0, 7); x.stroke(); }
     x.strokeStyle = PAPER; x.lineWidth = 4; x.beginPath(); x.arc(256, 256, 247, 0, 7); x.stroke();
     x.fillStyle = 'rgba(247,244,236,.16)'; [0.3, 0.3 + Math.PI].forEach((a) => { x.beginPath(); x.moveTo(256, 256); x.arc(256, 256, 244, a, a + 0.45); x.fill(); });
-    x.fillStyle = k ? PAPER : ACCENT; x.beginPath(); x.arc(256, 256, 96, 0, 7); x.fill(); x.lineWidth = 5; x.strokeStyle = INK; x.stroke();
+    x.fillStyle = k ? ACCENT_B : ACCENT; x.beginPath(); x.arc(256, 256, 96, 0, 7); x.fill(); x.lineWidth = 5; x.strokeStyle = INK; x.stroke();
     x.fillStyle = INK; x.textAlign = 'center'; x.font = '400 30px ' + BIG; x.fillText(k ? 'SIDE B' : 'SIDE A', 256, 228); x.font = '700 15px ' + MONO; x.fillText(BRAND.replace('TAPES', 'RECORDS'), 256, 300); x.fillText('33⅓ RPM', 256, 322);
     x.beginPath(); x.arc(256, 256, 9, 0, 7); x.fill();
   }
@@ -125,5 +127,6 @@ window.OC_BOOM_ART = (function () {
     });
   }
 
-  return { INK, PAPER, ACCENT, SHADOW, W, H, DP, S, CW, CH, REELS, cnv, front, top, side, cone, key, door, grip, reel, tape, record, note, lines };
+  let acc = ACCENT; const theme = (b) => { acc = b ? ACCENT_B : ACCENT; };   // 今の面の色（ラジカセの針と再生ボタン）
+  return { INK, PAPER, ACCENT, SHADOW, ACCENT_B, SHADOW_B, W, H, DP, S, CW, CH, REELS, cnv, theme, front, top, side, cone, key, door, grip, reel, tape, record, note, lines };
 })();
