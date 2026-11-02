@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>質問解答 - OC ARCHIVE</title>
+  <meta name="description" content="MAYAMA 未確認信号 調査記録 — 匿名で届いた質問と、その答え。">
+  <meta name="theme-color" content="#0a0e0f">
+  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします）。字幕の解読は、電車がどきはじめてから -->
+  <script>
+    (function () {
+      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive', 'ar-wait'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); setTimeout(function () { h.classList.remove('ar-wait'); }, 950); } } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Shippori+Mincho+B1:wght@500;800&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css?v=77">
+  <link rel="stylesheet" href="qa.css?v=78">
+</head>
+<body class="ar">
+  <!-- いちばん上：古いビデオカメラで撮った、洞窟の壁画（archive-cave.js が描きます） -->
+  <header class="ar-hero">
+    <canvas class="ar-cv" aria-hidden="true"></canvas>
+    <div class="ar-osd" aria-hidden="true">
+      <span class="o-tl"><i class="o-bat"></i>120min<br>A: 45mm</span>
+      <span class="o-rec">REC</span>
+      <span class="o-tr"><em>[A] DUR </em><b class="o-tc">00:00:00:00</b><br>1000/60</span>
+      <span class="o-trk">TRACKING ▶▶</span>
+      <span class="o-bl">TLCS<br>◘ Off<br>MF</span>
+      <span class="o-br o-files">FILES 000</span>
+      <i class="o-c c1"></i><i class="o-c c2"></i><i class="o-c c3"></i><i class="o-c c4"></i>
+    </div>
+    <div class="ar-title">
+      <p class="ar-file">CASE FILE 06 — MT. MAYAMA</p>
+      <h1>質問解答<small>Signals from Unknown Origin</small></h1>
+      <p class="ar-subt">匿名で届いた質問を、ひとつずつ解読して、ここに保管しています。</p>
+    </div>
+  </header>
+
+  <!-- 新聞の切りぬき（号外）：質問の送りかた -->
+  <section class="ar-news" aria-label="質問の送りかた">
+    <div class="nw">
+      <div class="nw-mast"><b>MAYAMA 新報</b><span class="nw-date"></span><i>號外</i></div>
+      <h2 class="nw-head">正体不明の〝信号〟<br>続々と届く</h2>
+      <p class="nw-en">Signals Received from Unknown Origin</p>
+      <figure class="nw-photo"><canvas width="560" height="380" aria-hidden="true"></canvas><figcaption>写真＝信号の発信源とみられる壁画（MT. MAYAMA 山中）</figcaption></figure>
+      <div class="nw-body">
+        <p>MT. MAYAMA の山中で、送り主のわからない信号が、続けて見つかっている。</p>
+        <p>信号はウェーブボックスを通って匿名で届き、中身はどれも「質問」だった。</p>
+        <p>MAYAMA はひとつずつ解読して答え、下の記録室に保管している。調査は、今も続いている。</p>
+      </div>
+      <div class="nw-tel">
+        <p class="nw-tel-h">電報 ── あなたも信号を送る</p>
+        <div class="ar-cta"></div>
+        <p class="nw-tel-n">名前は出ません。答えたものから、ここに並びます。</p>
+      </div>
+      <div class="nw-rosetta"><p>解読の手がかり</p><div class="nw-key"></div></div>
+    </div>
+  </section>
+
+  <!-- 解読済みの記録（qa.js の中身から、archive.js が作ります） -->
+  <main class="ar-arch" id="arch">
+    <div class="ar-arch-h">
+      <h2>解読済みの記録<small>Decoded Records</small></h2>
+      <p class="ar-tally">保管数 <b class="ar-count">0</b> 件</p>
+      <label class="ar-search"><span>キーワードで発掘</span><input type="search" placeholder="例：誕生日" autocomplete="off"></label>
+      <p class="ar-hit" role="status"></p>
+    </div>
+    <div class="ar-strip"></div>
+  </main>
+
+  <footer class="ar-end">
+    <p class="ar-cont">調査は続く</p>
+    <p class="ar-cont-en">The excavation continues.</p>
+    <div class="ar-cta"></div>
+  </footer>
+
+  <script src="nav.js?v=77"></script>
+  <script src="qa.js?v=78"></script>
+  <script src="archive-cave.js?v=78"></script>
+  <script src="archive.js?v=78"></script>
+
+  <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
+  <script>
+    (function () {
+      var RELEASE = 'R78';   // このページのファイル一式の番号
+      var SIZE = { 'qa.css': 12686, 'archive.js': 8056, 'archive-cave.js': 9482, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れていないかを見ます）
+      var JS = ['nav', 'archive-cave', 'archive'];
+      function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
+      function run() {
+        var full = /[?&]check/.test(location.search), msg = [], box = null, got = window.OC_LOADED || [], names = Object.keys(SIZE);
+        function show(t) {
+          if (!box) { box = document.createElement('div'); box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:8px;white-space:pre-wrap;box-shadow:0 6px 20px rgba(0,0,0,.4)';
+            box.textContent = '質問コーナーのチェック（' + RELEASE + '）'; box.onclick = function () { box.remove(); }; document.body.appendChild(box); }
+          box.textContent += '\n' + t;
+        }
+        var miss = JS.filter(function (n) { return got.indexOf(n) < 0; });
+        if (miss.length) msg.push('読みこめていないファイル：' + miss.map(function (n) { return n + '.js'; }).join('、'));
+        if (getComputedStyle(document.body).getPropertyValue('--ar-css').trim() !== '1') msg.push('qa.css が読みこめていません');
+        if (typeof qa === 'undefined') msg.push('qa.js が読みこめていません');
+        if (msg.length) show(msg.join('\n'));
+        if (full) show((msg.length ? '' : '問題なし！\n') + '\n' + JS.map(function (n) { return (got.indexOf(n) < 0 ? '✗ ' : '✓ ') + n + '.js'; }).join('\n') + '\n' + (typeof qa === 'undefined' ? '✗ ' : '✓ ') + 'qa.js');
+        if (!window.fetch || location.protocol === 'file:') return;
+        var urls = names.map(function (n) { var e = document.querySelector('script[src^="' + n + '"], link[href^="' + n + '"]'); return e ? e.src || e.href : n; });
+        Promise.all(urls.map(function (u) { return look(u, 'default'); })).then(function (a) {
+          var bad = names.filter(function (n, i) { return a[i] !== SIZE[n]; });
+          if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
+          Promise.all(bad.map(function (n) { return look(n, 'no-store'); })).then(function (b) {
+            show('\nファイルの中身のチェック：\n' + bad.map(function (n, i) { var q = b[i], f = '・' + n + '：';
+              if (q == null) return f + '確かめられませんでした';
+              if (q < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '」か確かめて、アップロードしてね（スマホだと「' + n.replace(/\.(\w+)$/, ' (1).$1') + '」のように名前が変わることがあるよ）';
+              if (q !== SIZE[n]) return f + '中身が古いか、途中で切れている。もう一度アップロードしてね';
+              return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね'; }).join('\n'));
+          });
+        });
+      }
+      addEventListener('load', function () { setTimeout(run, 1500); });
+    })();
+  </script>
+</body>
+</html>
