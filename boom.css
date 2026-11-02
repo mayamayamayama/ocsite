@@ -1,10 +1,11 @@
 /* boom.css — サウンドトラック（MAYAMA BOOMBOX）。オレンジ一色の紙に、白黒のインクで描いたラジカセ。太い線と、ずらした黒い影 */
 :root {
   --bx-bg: #ff8a00; --bx-deep: #d86a00; --bx-ink: #111111; --bx-paper: #f7f4ec; --bx-dim: rgba(17, 17, 17, .6);
+  --bx-hi: #ff8a00; --bx-on: #111111;   /* hi：黒の上にのせる色の文字／on：背景の上の小さな文字 */
   --bx-big: "Anton", "Oswald", "Roboto Condensed", sans-serif-condensed, "Arial Narrow", Impact, "Noto Sans JP", sans-serif; --bx-mono: "Space Mono", ui-monospace, "Noto Sans JP", monospace; --bx-body: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   color-scheme: light;
 }
-html.bx-b { --bx-bg: #3d7bff; --bx-deep: #2c5fd4; }   /* B面：青（boom-art.js の ACCENT_B と合わせる） */
+html.bx-b { --bx-bg: #2350d0; --bx-deep: #183a9c; --bx-hi: #7ea4ff; --bx-on: #f7f4ec; }   /* B面：こい青（boom-art.js の ACCENT_B と合わせる）。小さな文字は白に */
 * { box-sizing: border-box; }
 html { background: var(--bx-bg); overscroll-behavior-y: none; transition: background-color .25s; }
 body.bx { margin: 0; min-height: 100vh; overflow-x: hidden; background: var(--bx-bg); transition: background-color .25s; color: var(--bx-ink); font: 15px/1.7 var(--bx-body); -webkit-tap-highlight-color: transparent; }
@@ -17,17 +18,17 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 
 /* ---------- 見出し（ポスターのような大きな文字） ---------- */
 .bx-head { padding-right: 70px; }
-.bx-kicker { margin: 0; font: 700 11px/1 var(--bx-mono); letter-spacing: .24em; }
+.bx-kicker { margin: 0; color: var(--bx-on); font: 700 11px/1 var(--bx-mono); letter-spacing: .24em; }
 .bx-title { margin: 16px 0 0; font: 400 clamp(76px, 29vw, 168px)/.88 var(--bx-big); letter-spacing: -.005em; text-transform: uppercase; }
 .bx-title > b, .bx-title > span { display: block; font-weight: 400; white-space: nowrap; }
 .bx-title > span { color: var(--bx-bg); -webkit-text-stroke: 2px var(--bx-ink); }   /* 中は背景の色（レコードに重なっても読めるように） */
-.bx-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 16px 0 0; font: 700 13px/1 var(--bx-body); letter-spacing: .3em; }
-.bx-sub i { padding: 6px 9px 5px; background: var(--bx-ink); color: var(--bx-bg); font: 700 10px/1 var(--bx-mono); font-style: normal; letter-spacing: .18em; }
+.bx-sub { display: flex; color: var(--bx-on); flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 16px 0 0; font: 700 13px/1 var(--bx-body); letter-spacing: .3em; }
+.bx-sub i { padding: 6px 9px 5px; background: var(--bx-ink); color: var(--bx-hi); font: 700 10px/1 var(--bx-mono); font-style: normal; letter-spacing: .18em; }
 
 /* ---------- 3D の舞台 ---------- */
 .bx-stage { position: relative; margin: 4px -16px 0; aspect-ratio: 10 / 11; max-height: 80svh; overflow: hidden; isolation: isolate; }
 .bx-stage canvas { position: relative; z-index: 1; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: pointer; }
-.bx-hint { position: absolute; z-index: 2; left: 50%; bottom: 4px; transform: translateX(-50%); margin: 0; white-space: nowrap; font: 700 10px/1 var(--bx-mono); letter-spacing: .22em; pointer-events: none; }
+.bx-hint { position: absolute; z-index: 2; left: 50%; bottom: 4px; transform: translateX(-50%); margin: 0; color: var(--bx-on); white-space: nowrap; font: 700 10px/1 var(--bx-mono); letter-spacing: .22em; pointer-events: none; }
 .bx-no3d .bx-stage { display: none; }
 
 /* 舞台のうしろ：大きな A／B の文字・床の点々・すみの小さな文字 */
@@ -35,7 +36,7 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-big { position: absolute; left: 50%; top: 50%; z-index: -1; translate: -50% -50%; font: 400 min(120cqw, 96cqh)/.8 var(--bx-big); color: var(--bx-deep); pointer-events: none; user-select: none; }
 .bx-big::before { content: "A"; } html.bx-b .bx-big::before { content: "B"; }
 .bx-stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; z-index: -1; height: 36%; pointer-events: none; background: radial-gradient(circle, rgba(17, 17, 17, .2) 1.3px, transparent 1.8px) 0 0 / 9px 9px; -webkit-mask: radial-gradient(70% 100% at 50% 100%, #000 35%, transparent 100%); mask: radial-gradient(70% 100% at 50% 100%, #000 35%, transparent 100%); }
-.bx-spec { position: absolute; z-index: 0; font: 700 9px/1.45 var(--bx-mono); letter-spacing: .14em; pointer-events: none; }
+.bx-spec { position: absolute; z-index: 0; color: var(--bx-on); font: 700 9px/1.45 var(--bx-mono); letter-spacing: .14em; pointer-events: none; }
 .bx-spec.tl { top: 14px; left: 16px; padding: 6px 0 0 7px; border-top: 2px solid; border-left: 2px solid; }
 .bx-spec.tr { top: 14px; right: 16px; padding: 6px 7px 0 0; border-top: 2px solid; border-right: 2px solid; text-align: right; }
 .bx-spec.br { bottom: 28px; right: 16px; padding: 0 7px 6px 0; border-bottom: 2px solid; border-right: 2px solid; text-align: right; }
@@ -46,7 +47,7 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-notes p { margin: 0; font-size: 13px; line-height: 1.75; }
 .bx-notes .bx-notes-h { margin-bottom: 6px; font: 700 11px/1 var(--bx-mono); letter-spacing: .22em; }
 .bx-notes .bx-notes-en { margin-top: 8px; font: 400 10px/1.5 var(--bx-mono); letter-spacing: .06em; color: var(--bx-dim); }
-.bx-tick { position: relative; z-index: 3; margin: 30px -24px 0; padding: 10px 0 9px; overflow: hidden; background: var(--bx-ink); color: var(--bx-bg); transform: rotate(-2.2deg); white-space: nowrap;
+.bx-tick { position: relative; z-index: 3; margin: 30px -24px 0; padding: 10px 0 9px; overflow: hidden; background: var(--bx-ink); color: var(--bx-hi); transform: rotate(-2.2deg); white-space: nowrap;
   font: 700 12px/1 var(--bx-mono); letter-spacing: .16em; text-transform: uppercase; box-shadow: 0 5px 0 rgba(17, 17, 17, .22); }
 .bx-tick > div { display: inline-flex; animation: bxTick 32s linear infinite; }
 .bx-playing .bx-tick > div { animation-duration: 18s; }
@@ -66,22 +67,22 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 .bx-key:active, .bx-key.on { transform: translateY(5px); box-shadow: 0 0 0 var(--bx-ink); }
 .bx-key:disabled { color: var(--bx-dim); cursor: default; transform: none; box-shadow: 0 5px 0 var(--bx-ink); }
 .bx-key.big:disabled { color: rgba(247, 244, 236, .5); }
-.bx-side { display: flex; align-items: center; gap: 10px; font: 700 11px/1 var(--bx-mono); letter-spacing: .2em; }
+.bx-side { display: flex; align-items: center; gap: 10px; color: var(--bx-on); font: 700 11px/1 var(--bx-mono); letter-spacing: .2em; }
 .bx-sw { display: flex; padding: 3px; border: 3px solid var(--bx-ink); border-radius: 999px; background: var(--bx-paper); }
-.bx-sw button { width: 46px; height: 40px; border: 0; border-radius: 999px; background: none; font: 400 22px/1 var(--bx-big); cursor: pointer; transition: background .2s, color .2s; }
-.bx-sw button.on { background: var(--bx-ink); color: var(--bx-bg); }
+.bx-sw button { width: 46px; height: 40px; border: 0; border-radius: 999px; background: none; color: var(--bx-ink); font: 400 22px/1 var(--bx-big); cursor: pointer; transition: background .2s, color .2s; }
+.bx-sw button.on { background: var(--bx-ink); color: var(--bx-hi); }
 .bx-sw button:disabled { opacity: .28; cursor: default; }
 
 /* ---------- 今のテープ（カセットのケースに入っている紙＝J カード） ---------- */
 .bx-card { margin-top: 28px; border: 3px solid var(--bx-ink); background: var(--bx-paper); box-shadow: 8px 8px 0 var(--bx-ink); }
 .bx-card-top { display: flex; justify-content: space-between; gap: 10px; margin: 0; padding: 9px 12px 8px; background: var(--bx-ink); color: var(--bx-paper); font: 700 11px/1 var(--bx-mono); letter-spacing: .18em; }
-.bx-card-top b { color: var(--bx-bg); white-space: nowrap; }
-.bx-playing .bx-card-top span { color: var(--bx-bg); animation: bxBlink 1.2s steps(1) infinite; }
+.bx-card-top b { color: var(--bx-hi); white-space: nowrap; }
+.bx-playing .bx-card-top span { color: var(--bx-hi); animation: bxBlink 1.2s steps(1) infinite; }
 @keyframes bxBlink { 50% { opacity: .35; } }
 .bx-name { margin: 0; padding: 16px 14px 10px; font: 400 clamp(36px, 12vw, 60px)/.92 var(--bx-big); text-transform: uppercase; overflow-wrap: anywhere; }
 .bx-trk { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; width: 100%; padding: 11px 14px; border: 0; border-top: 2px dashed rgba(17, 17, 17, .3); background: none; text-align: left; cursor: pointer; }
 .bx-trk b { display: grid; place-items: center; width: 32px; height: 32px; border: 3px solid var(--bx-ink); border-radius: 50%; font: 400 17px/1 var(--bx-big); }
-.bx-trk.on b { background: var(--bx-ink); color: var(--bx-bg); }
+.bx-trk.on b { background: var(--bx-ink); color: var(--bx-hi); }
 .bx-trk span { font: 700 14px/1.4 var(--bx-mono); overflow-wrap: anywhere; }
 .bx-trk small { display: block; font: 400 12px/1.4 var(--bx-mono); color: var(--bx-dim); }
 .bx-trk:disabled { cursor: default; } .bx-trk:disabled span { color: var(--bx-dim); }
@@ -100,19 +101,19 @@ button:focus-visible { outline: 3px solid var(--bx-ink); outline-offset: 3px; }
 
 /* ---------- テープの背（一覧） ---------- */
 .bx-sel { margin-top: 38px; }
-.bx-label { margin: 0 0 12px; font: 700 12px/1 var(--bx-mono); letter-spacing: .22em; }
+.bx-label { margin: 0 0 12px; color: var(--bx-on); font: 700 12px/1 var(--bx-mono); letter-spacing: .22em; }
 .bx-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
 .bx-spine { display: grid; grid-template-columns: 54px minmax(0, 1fr); width: 100%; min-height: 66px; padding: 0; border: 3px solid var(--bx-ink); background: var(--bx-paper); text-align: left; cursor: pointer;
   box-shadow: 5px 5px 0 var(--bx-ink); transition: transform .15s, box-shadow .15s, background .15s; }
-.bx-spine i { display: grid; place-items: center; background: var(--bx-ink); color: var(--bx-bg); font: 700 15px/1 var(--bx-mono); font-style: normal; }
+.bx-spine i { display: grid; place-items: center; background: var(--bx-ink); color: var(--bx-hi); font: 700 15px/1 var(--bx-mono); font-style: normal; }
 .bx-spine span { min-width: 0; padding: 9px 12px; }
 .bx-spine b { display: block; font: 400 23px/1.05 var(--bx-big); text-transform: uppercase; overflow-wrap: anywhere; }
 .bx-spine small { display: block; margin-top: 5px; overflow: hidden; font: 400 11px/1.35 var(--bx-mono); color: var(--bx-dim); white-space: nowrap; text-overflow: ellipsis; }
 .bx-spine.on { background: var(--bx-ink); color: var(--bx-paper); transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--bx-ink); }
-.bx-spine.on i { background: var(--bx-bg); color: var(--bx-ink); }
+.bx-spine.on i { background: var(--bx-hi); color: var(--bx-ink); }
 .bx-spine.on small { color: rgba(247, 244, 236, .7); }
 .bx-spine.soon { opacity: .7; }
-.bx-foot { margin-top: 44px; text-align: center; font: 700 10px/1.9 var(--bx-mono); letter-spacing: .22em; }
+.bx-foot { margin-top: 44px; color: var(--bx-on); text-align: center; font: 700 10px/1.9 var(--bx-mono); letter-spacing: .22em; }
 .bx-warn { position: fixed; left: 10px; right: 10px; top: calc(90px + env(safe-area-inset-top)); z-index: 70; padding: 12px 14px; border: 3px solid var(--bx-ink); background: #fff; font: 700 13px/1.6 var(--bx-body); }
 
 /* パソコン：左に見出しとボタン、右にラジカセ。その下に、今のテープとテープの一覧を横に並べる */
