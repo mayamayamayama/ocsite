@@ -100,4 +100,13 @@ const sound = [
     b_artist: "sasakure.UK",
     b_url: "https://youtu.be/NZecO3stfmI?si=sYY5VfoU4qGsl0dw",
   },
+  {
+    chara: "Asimov",
+    a_title: "ラブ&デストロイ",
+    a_artist: "MI8k",
+    a_url: "https://youtu.be/TePMB9zv9Ss?si=J8j-2fLS-b0Vmq5J",
+    b_title: "雪国",
+    b_artist: "ヨルシカ",
+    b_url: "https://youtu.be/5bpHW3ToFlQ?si=RCcf9FHb_hY5o4kS",
+  },
 ];
