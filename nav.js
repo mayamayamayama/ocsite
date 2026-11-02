@@ -1,8 +1,8 @@
 // nav.js — メニュー（MT. MAYAMA 登山鉄道の発車標）と、ページを移るときの電車
 // ・右上の「MENU」を押すと、駅の発車標がおりてきて、行き先の文字がパタパタめくれて出てきます
-// ・行き先を押すと「発車」に変わって、電車が入ってきて画面をおおい、そのまま次のページへ。次のページで電車が出ていきます
+// ・行き先を押すと「発車」に変わって、電車が画面をおおい、次のページへ。着いたら電車が出ていきます
 // ・どのページでも、<link nav.css> と、この nav.js を入れれば使えます（head の小さなスクリプトも、入れてね）
-// ・ほかのページへ行ったら「入場画面はもう見た」と覚えて、トップにもどったときはモーショングラフィックスにします
+// ・ほかのページへ行ったら「入場画面はもう見た」と覚えて、トップではモーショングラフィックスにします
 (window.OC_LOADED = window.OC_LOADED || []).push('nav');
 
 (function () {
@@ -48,7 +48,7 @@
   }
 
   // ---------- 電車（キャンバス。5両編成。3両目に行き先） ----------
-  // 3両目が画面をおおったところで、ページが切りかわります。着いたページでは、ゆっくり加速して走り去ります
+  // 3両目が画面をおおったら、ページが切りかわる。着いたページでは、加速して走り去る
   const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
     const cv = document.createElement('canvas'); cv.className = 'nv-train'; cv.setAttribute('aria-hidden', 'true');
@@ -92,12 +92,12 @@
       c.fillStyle = 'rgba(0,0,0,.35)'; for (let yy = cy - h / 2; yy < cy + h / 2; yy += 3) c.fillRect(cx - w / 2, yy, w, 1);   // 光る点の、すじ
     }
     function draw(tx, sp, now) {   // tx：右へのずれ、sp：速さ（0〜1。速いほど、ガタンゴトンとゆれて、すじが出る）
-      const dy = sp > 0.02 ? Math.sin(now / 38) * 1.4 * sp + (Math.sin(now / 97) > 0.92 ? 1.5 * sp : 0) : 0;   // レールのつなぎ目のゆれ
+      const dy = sp > 0.02 ? Math.sin(now / 38) * 1.4 * sp + (Math.sin(now / 97) > 0.92 ? 1.5 * sp : 0) : 0;   // つなぎ目のゆれ
       c.setTransform(r, 0, 0, r, 0, dy * r); c.clearRect(-10, -10, W + 20, H + 20);
       let x = lead + tx;
       CW.forEach((w, i) => {
         if (x < W + 10 && x + w > -10) car(x, w, i);
-        if (i < CARS - 1 && x + w < W + 10 && x + w + G > -10) {   // 車両のつなぎ（屋根から床までの、ほろと連結器）
+        if (i < CARS - 1 && x + w < W + 10 && x + w + G > -10) {   // 車両のつなぎ（ほろと連結器）
           box(x + w - 3, 0, G + 6, H, '#141414'); c.fillStyle = '#2c2c2c'; for (let q = 1; q < 4; q++) c.fillRect(x + w + (q / 4) * G - 0.75, 0.07 * H, 1.5, 0.8 * H);
           box(x + w - 3 * vm, 0.885 * H, G + 6 * vm, 0.025 * H, '#2a2a2a');
         }
@@ -112,7 +112,7 @@
     cv.run = (from, to, ms, out) => new Promise((ok) => {   // out：ゆっくり加速して出ていく／ でなければ、減速して止まる
       const t0 = performance.now(), D = REDUCE ? 1 : ms;
       (function f(now) {
-        const t = Math.min(1, (now - t0) / D), p = out ? Math.pow(t, 2.2) : 1 - Math.pow(1 - t, 3), sp = out ? Math.min(1, t * 1.6) : (1 - t) * (1 - t);
+        const t = Math.max(0, Math.min(1, (now - t0) / D)), p = out ? Math.pow(t, 2.2) : 1 - Math.pow(1 - t, 3), sp = out ? Math.min(1, t * 1.6) : (1 - t) * (1 - t);
         draw(from + (to - from) * p, REDUCE ? 0 : sp, now);
         if (t < 1) requestAnimationFrame(f); else ok();
       })(t0);
@@ -134,9 +134,8 @@
   let arr = null;
   try { arr = JSON.parse(sessionStorage.getItem('nv-go')); sessionStorage.removeItem('nv-go'); } catch (e) { /* なにもしない */ }
   if (arr && Date.now() - arr.t < 15000) {
-    const t = train(arr.en, arr.jp, 'ARRIVED  到着');
-    root.classList.remove('nv-arrive');
-    setTimeout(() => t.run(0, t.span.outX, 1500, true).then(() => t.remove()), REDUCE ? 0 : 380);   // 走り去る時間（1.5秒）
+    const t = train(arr.en, arr.jp, 'ARRIVED  到着'); t.style.zIndex = 2147483647;   // 止まるあいだ幕も残す
+    setTimeout(() => { root.classList.remove('nv-arrive'); t.run(0, t.span.outX, 1500, true).then(() => t.remove()); }, REDUCE ? 0 : 380);
   } else root.classList.remove('nv-arrive');
   if (location.hash === '#list') {   // 「キャラクター一覧」で来たとき
     history.replaceState(null, '', location.pathname + location.search);
