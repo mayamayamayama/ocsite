@@ -43,7 +43,7 @@ const characters = {
     tag: "PERSONA/HUMAN",
     image: "maya.png",
     hoverShow: "profile",
-    description: "Age:17/Height:180\nBirthday:02/21\nHobbys:発狂/登山\nInformation:読み方は「マヤ」です。代理です。性別不詳設定です。",
+    description: "Age:17/Height:180\nBirthday:02/21\nHobbys:登山\nInformation:読み方は「マヤ」です。代理です。性別不詳設定です。",
     prompt: "androgynous,\ngreen eyes, otaku,1.5::A geeky smile::, Lewd,mole under mouth, mole under eye,\nwhite hair, red inner hair, red highlights, red gradient hair, red hair intake, messy hair, short hair with long hair hanging between eyes, long hairlocks, facial hairlocks, \npatterned red bandana, headscarf,Mountaineering Equipment\n, brown tactical boots,\nred backpack, straps, carabiner, attached water bottle,long hair,long messy ponytail, hair tie, back hair,Snaggletooth,climbing shoes,low ponytail,low-tied hair,Slightly Voluminous ponytail,1.3::Slightly suggestive eyes::,"
   },
   "Waka": {
