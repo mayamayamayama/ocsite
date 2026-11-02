@@ -17,9 +17,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=75">
-  <link rel="stylesheet" href="boom.css?v=75">
-  <link rel="stylesheet" href="boom-fx.css?v=75">
+  <link rel="stylesheet" href="nav.css?v=77">
+  <link rel="stylesheet" href="boom.css?v=77">
+  <link rel="stylesheet" href="boom-fx.css?v=77">
 </head>
 <body class="bx">
   <div class="bx-wrap">
@@ -35,7 +35,7 @@
       <!-- このページの説明（レコードのジャケットに貼ってあるシールみたいに） -->
       <div class="bx-notes">
         <p class="bx-notes-h">★ LINER NOTES</p>
-        <p>OCの“イメソン”と称してまやまが好きな曲・おすすめしたい曲をシェアしている場所です。</p>
+        <p>OCズの“イメージソング”と称して、まやま が好きな曲・おすすめしたい曲を共有している場所です。</p>
         <p class="bx-notes-en">IMAGE SONGS FOR THE CHARACTERS — OR, HONESTLY, JUST MAYAMA'S FAVORITE TRACKS.</p>
       </div>
     </header>
@@ -76,19 +76,19 @@
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=75"></script>
+  <script src="nav.js?v=77"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=75"></script>
-  <script src="boom.js?v=75"></script>
-  <script src="boom-art.js?v=75"></script>
-  <script src="boom3d.js?v=75"></script>
-  <script src="boom-disc.js?v=75"></script>
+  <script src="sound.js?v=77"></script>
+  <script src="boom.js?v=77"></script>
+  <script src="boom-art.js?v=77"></script>
+  <script src="boom3d.js?v=77"></script>
+  <script src="boom-disc.js?v=77"></script>
 
   <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
   <script>
     (function () {
-      var RELEASE = 'R75';   // このページのファイル一式の番号
-      var SIZE = { 'boom.css': 13166, 'boom-fx.css': 8685, 'boom.js': 10069, 'boom-art.js': 12862, 'boom3d.js': 17318, 'boom-disc.js': 11467, 'nav.css': 7619, 'nav.js': 14341 };   // 正しいファイルの文字数（中身が古い・切れている、を見分ける）
+      var RELEASE = 'R77';   // このページのファイル一式の番号
+      var SIZE = { 'boom.css': 13166, 'boom-fx.css': 8685, 'boom.js': 10069, 'boom-art.js': 12862, 'boom3d.js': 17318, 'boom-disc.js': 11467, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れている、を見分ける）
       var JS = ['nav', 'boom', 'boom-art', 'boom3d', 'boom-disc'];
       function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
       function run() {
