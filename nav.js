@@ -11,7 +11,7 @@
   const LINES = [
     ['OC ARCHIVE', 'トップ', 'index.html', 1],
     ['CHARACTERS', 'キャラクター一覧', 'index.html#list', 2],
-    ['GUIDELINE', 'ガイドライン', '', 3],
+    ['GUIDELINE', 'ガイドライン', 'guideline.html', 3],
     ['COMPOSITION', '構図置き場', 'composition.html', 4],
     ['SOUNDTRACK', 'サウンドトラック', 'soundtrack.html', 5],
     ['Q&A', '質問解答', '', 6],
@@ -198,5 +198,5 @@
     setTimeout(() => go(href, en, jp), REDUCE ? 0 : 420);
   });
 
-  window.OC_NAV = { open, close, go: (href) => { const l = LINES.find((x) => page(x[2]) === page(href)) || ['OC ARCHIVE', 'トップ']; go(href, l[0], l[1]); } };
+  window.OC_NAV = { lines: LINES, open, close, go: (href) => { const l = LINES.find((x) => page(x[2]) === page(href)) || ['OC ARCHIVE', 'トップ']; go(href, l[0], l[1]); } };
 })();
