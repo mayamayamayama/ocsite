@@ -71,10 +71,18 @@ const characters = {
   },
   "Gigi": {
     name: "Gigi",
-    tag: "Male/NON-HUMAN",
+    tag: "MALE/NON-HUMAN",
     image: "gigi.png",
     description: "Age:13/Height:147\nBirthday:04/20\nHobbys:無し\nInformation:読み方は「ギギ」です。",
     prompt: "boy,13 years old,Shota,Messy, unkempt white hair that falls even over the bangs,A messily voluminous hairstyle,Thick eyebrows,black round eyes, large pupils,Disheveled hair,\ntimid eyes,4::pupil shaped like gears::,yellow eyes,A toy-like wind-up key on its back,An impression of being unreliable,1.4::Droopy eyes,Eyes that do not open fully,timid,::,Half-open eyes,cute,\n2::Hunched back::,A troubled,\n\nvery oversized blue Postal worker uniform,very oversized Peaked cap,very oversized grey French work pants,white very big shoulder bag,Worn-out shoes,sleeves past wrists,"
+  },
+  "Asimov": {
+    name: "Asimov",
+    tag: "MALE/NON-HUMAN",
+    image: "asimov.png",
+    hoverShow: "profile",
+    description: "Age:24/Height:196\nBirthday:05/08\nHobbys:焚き火\nInformation:読み方は「アシモフ」です。",
+    prompt: "mature man,White-dog fully,very bulky frame,Part of the right ear is missing,darkred sclera,2::large eyes\n, Straight upper eyelid,::,Eyes that look like they're in a bad mood,0.7::Furrowing one's brow::,The upper eyelids of both eyes are horizontal.slanted eyes\nA large scar running across the right eye,\nBroad shoulders,\n\n7::Pilot cap,Muzzle::,kosovorotka,big fur-collar long coat,leather shoes,Wool trousers,dog tag,pilot goggles\n\n-2::fat::,1.1::small white iris,black pupil,::"
   },
 };
 
