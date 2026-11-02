@@ -17,9 +17,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="nav.css?v=74">
-  <link rel="stylesheet" href="boom.css?v=74">
-  <link rel="stylesheet" href="boom-fx.css?v=74">
+  <link rel="stylesheet" href="nav.css?v=75">
+  <link rel="stylesheet" href="boom.css?v=75">
+  <link rel="stylesheet" href="boom-fx.css?v=75">
 </head>
 <body class="bx">
   <div class="bx-wrap">
@@ -28,8 +28,6 @@
     <div class="bx-art" aria-hidden="true" hidden>
       <canvas class="bx-cv"></canvas>
       <div class="bx-rec"><div class="bx-sc"><svg class="bx-vin" viewBox="-100 -100 200 200"><defs><path id="bx-lp" d="M-27 0a27 27 0 1 1 54 0a27 27 0 1 1-54 0"/></defs><circle r="99"/><g class="g"><circle r="93"/><circle r="86"/><circle r="80"/><circle r="73"/><circle r="66"/><circle r="59"/><circle r="51"/><circle r="45"/></g><circle class="lb" r="37"/><circle class="lr" r="33.5"/><text class="lt"><textPath href="#bx-lp">MAYAMA RECORDS ✦ STEREO ✦ 33⅓ RPM ✦ OC ARCHIVE ✦</textPath></text><text class="lm" y="-4">MAYAMA</text><text class="ls a" y="14">SIDE A</text><text class="ls b" y="14">SIDE B</text><circle class="h" r="2.4"/></svg></div></div>
-      <svg class="bx-defs" width="0" height="0" aria-hidden="true"><symbol id="bx-nt" viewBox="0 0 26 34"><ellipse cx="8" cy="27" rx="7" ry="5" transform="rotate(-22 8 27)"/><path d="M12.5 26V3h3c1 6 9 7 8 16c-2-4-4-6-8-6v13z"/></symbol></svg>
-      <i class="bx-nf n1"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n2"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i><i class="bx-nf n3"><svg viewBox="0 0 26 34"><use href="#bx-nt"/></svg></i>
     </div>
       <p class="bx-kicker">OC ARCHIVE — GALLERY 05<em class="bx-eq" aria-hidden="true"><u></u><u></u><u></u><u></u><u></u></em></p>
       <h1 class="bx-title" aria-label="Soundtrack"><b aria-hidden="true"><i style="--i:0">S</i><i style="--i:1">O</i><i style="--i:2">U</i><i style="--i:3">N</i><i style="--i:4">D</i></b><span aria-hidden="true"><i style="--i:5">T</i><i style="--i:6">R</i><i style="--i:7">A</i><i style="--i:8">C</i><i style="--i:9">K</i></span></h1>
@@ -78,19 +76,19 @@
   <!-- editor.js（キャラクター）が使う場所。このページでは見えません -->
   <div id="character-grid" hidden></div><button type="button" id="back-btn" hidden></button>
 
-  <script src="nav.js?v=74"></script>
+  <script src="nav.js?v=75"></script>
   <script src="editor.js"></script>
-  <script src="sound.js?v=74"></script>
-  <script src="boom.js?v=74"></script>
-  <script src="boom-art.js?v=74"></script>
-  <script src="boom3d.js?v=74"></script>
-  <script src="boom-disc.js?v=74"></script>
+  <script src="sound.js?v=75"></script>
+  <script src="boom.js?v=75"></script>
+  <script src="boom-art.js?v=75"></script>
+  <script src="boom3d.js?v=75"></script>
+  <script src="boom-disc.js?v=75"></script>
 
   <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
   <script>
     (function () {
-      var RELEASE = 'R74';   // このページのファイル一式の番号
-      var SIZE = { 'boom.css': 12875, 'boom-fx.css': 9637, 'boom.js': 10069, 'boom-art.js': 12862, 'boom3d.js': 17318, 'boom-disc.js': 11472, 'nav.css': 7619, 'nav.js': 14341 };   // 正しいファイルの文字数（中身が古い・切れている、を見分ける）
+      var RELEASE = 'R75';   // このページのファイル一式の番号
+      var SIZE = { 'boom.css': 13166, 'boom-fx.css': 8685, 'boom.js': 10069, 'boom-art.js': 12862, 'boom3d.js': 17318, 'boom-disc.js': 11467, 'nav.css': 7619, 'nav.js': 14341 };   // 正しいファイルの文字数（中身が古い・切れている、を見分ける）
       var JS = ['nav', 'boom', 'boom-art', 'boom3d', 'boom-disc'];
       function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
       function run() {
