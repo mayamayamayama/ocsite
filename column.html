@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>コラム - OC ARCHIVE</title>
+  <meta name="description" content="MT. MAYAMA 山行記録 — MAYAMA のコラム。">
+  <meta name="theme-color" content="#c3d5df">
+  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします） -->
+  <script>
+    (function () {
+      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); } } catch (e) {}
+    })();
+  </script>
+  <!-- 3D の部品（three.js）の場所。trail-3d.js が使います（index.html と同じ番号） -->
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css?v=77">
+  <link rel="stylesheet" href="trail.css?v=79">
+</head>
+<body class="tr">
+  <!-- いちばん上：MT. MAYAMA の山なみ（trail-3d.js が描きます）。コラム1本ごとに、山がひとつ -->
+  <header class="tr-hero">
+    <canvas class="tr-cv" aria-label="MT. MAYAMA の山なみ。旗を押すと、そのコラムがひらきます"></canvas>
+    <div class="tr-labels"></div>
+    <div class="tr-hero-t">
+      <p class="tr-k">MT. MAYAMA</p>
+      <h1>山行記録</h1>
+      <p class="tr-sub">MAYAMA のコラム。<br>山を歩くみたいに、読んでください。</p>
+    </div>
+    <p class="tr-hint">ドラッグで山が回ります<br>旗を押すと、その山へ</p>
+  </header>
+
+  <!-- コラムの一覧（column.js の中身から、trail.js が作ります） -->
+  <main class="tr-list" id="list">
+    <div class="tr-list-h"><h2>記録の一覧</h2><p>記録 <b class="tr-count">0</b> 件</p></div>
+    <div class="tr-cards"></div>
+  </main>
+
+  <!-- コラムを読むところ -->
+  <div class="tr-view" hidden>
+    <div class="tr-wrap">
+      <article class="tr-page"></article>
+      <aside class="tr-track" aria-label="標高計"></aside>
+    </div>
+  </div>
+
+  <script src="nav.js?v=77"></script>
+  <script src="column.js?v=79"></script>
+  <script src="trail-3d.js?v=79"></script>
+  <script src="trail.js?v=79"></script>
+
+  <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
+  <script>
+    (function () {
+      var RELEASE = 'R79';   // このページのファイル一式の番号
+      var SIZE = { 'trail.css': 14508, 'trail.js': 13931, 'trail-3d.js': 11126, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れていないかを見ます）
+      var JS = ['nav', 'trail-3d', 'trail'];
+      function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
+      function run() {
+        var full = /[?&]check/.test(location.search), msg = [], box = null, got = window.OC_LOADED || [], names = Object.keys(SIZE), hero = document.querySelector('.tr-hero');
+        function show(t) {
+          if (!box) { box = document.createElement('div'); box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:8px;white-space:pre-wrap;box-shadow:0 6px 20px rgba(0,0,0,.4)';
+            box.textContent = 'コラムのチェック（' + RELEASE + '）'; box.onclick = function () { box.remove(); }; document.body.appendChild(box); }
+          box.textContent += '\n' + t;
+        }
+        var miss = JS.filter(function (n) { return got.indexOf(n) < 0; });
+        if (miss.length) msg.push('読みこめていないファイル：' + miss.map(function (n) { return n + '.js'; }).join('、'));
+        if (getComputedStyle(document.body).getPropertyValue('--tr-css').trim() !== '1') msg.push('trail.css が読みこめていません');
+        if (typeof columns === 'undefined') msg.push('column.js が読みこめていません');
+        if (msg.length) show(msg.join('\n'));
+        if (full) show((msg.length ? '' : '問題なし！\n') + '\n' + JS.map(function (n) { return (got.indexOf(n) < 0 ? '✗ ' : '✓ ') + n + '.js'; }).join('\n') + '\n' + (typeof columns === 'undefined' ? '✗ ' : '✓ ') + 'column.js\n3D の山：' + (hero && hero.classList.contains('tr-3d') ? '✓' : hero && hero.classList.contains('tr-flat') ? '✗（この端末では、平らな絵になります）' : '…'));
+        if (!window.fetch || location.protocol === 'file:') return;
+        var urls = names.map(function (n) { var e = document.querySelector('script[src^="' + n + '"], link[href^="' + n + '"]'); return e ? e.src || e.href : n; });
+        Promise.all(urls.map(function (u) { return look(u, 'default'); })).then(function (a) {
+          var bad = names.filter(function (n, i) { return a[i] !== SIZE[n]; });
+          if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
+          Promise.all(bad.map(function (n) { return look(n, 'no-store'); })).then(function (b) {
+            show('\nファイルの中身のチェック：\n' + bad.map(function (n, i) { var q = b[i], f = '・' + n + '：';
+              if (q == null) return f + '確かめられませんでした';
+              if (q < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '」か確かめて、アップロードしてね（スマホだと「' + n.replace(/\.(\w+)$/, ' (1).$1') + '」のように名前が変わることがあるよ）';
+              if (q !== SIZE[n]) return f + '中身が古いか、途中で切れている。もう一度アップロードしてね';
+              return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね'; }).join('\n'));
+          });
+        });
+      }
+      addEventListener('load', function () { setTimeout(run, 2000); });
+    })();
+  </script>
+</body>
+</html>
