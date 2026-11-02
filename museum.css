@@ -14,24 +14,26 @@ body.mu { margin: 0; min-height: 100vh; overflow-x: hidden; color: var(--mu-ink)
 .mu-vig { position: fixed; inset: 0; z-index: 29; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, .55)); }
 .mu-dust { position: fixed; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; }
 
-/* ---------- ロビー（コラージュ作品を、懐中電灯のような光で照らす） ---------- */
+/* ---------- ロビー（コラージュの動画。額縁なしで、ふちがやみに溶ける。タップした場所に、うっすらスポットライト） ---------- */
 .mu-lobby { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 76px 20px 110px; overflow: hidden; isolation: isolate;
   background: linear-gradient(transparent 78%, rgba(0, 0, 0, .55) 78.2%, #0a0806), repeating-linear-gradient(90deg, transparent 0 22vw, rgba(255, 255, 255, .025) 22vw calc(22vw + 1px)); }
-.mu-spot { position: absolute; left: 50%; top: 40%; width: 230vmax; height: 230vmax; margin: -115vmax 0 0 -115vmax; z-index: 4; pointer-events: none; transition: opacity 1.2s;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, .1) 9vmax, rgba(8, 6, 4, .9) 26vmax); }
-.mu-lobby.auto .mu-spot { animation: muSweep 11s ease-in-out infinite alternate; }
-.mu-lobby.allon .mu-spot { opacity: 0; }
-@keyframes muSweep { 0% { transform: translate(-16vw, -10vh); } 35% { transform: translate(18vw, -4vh); } 70% { transform: translate(-6vw, 8vh); } 100% { transform: translate(12vw, 14vh); } }
 .mu-bar { position: fixed; left: 0; right: 0; z-index: 25; height: 50vh; background: #000; pointer-events: none; transition: transform 1.6s cubic-bezier(.7, 0, .2, 1); }
 .mu-bar.t { top: 0; transform-origin: top; } .mu-bar.b { bottom: 0; transform-origin: bottom; }
 body.mu-in .mu-bar { transform: scaleY(0); }
-.mu-hero { position: relative; z-index: 2; cursor: pointer; }
+.mu-hero { position: relative; z-index: 2; }
+.mu-screen.on { cursor: pointer; }
 .mu-screen { position: relative; display: grid; place-items: center; min-width: min(78vw, 420px); min-height: min(42vh, 380px); }
 .mu-screen::before { content: ""; position: absolute; inset: -14%; z-index: -1; background: radial-gradient(closest-side, rgba(var(--mu-warm), .16), transparent); pointer-events: none; }   /* うしろの、ぼんやりした光 */
-.mu-screen.on { min-width: 0; min-height: 0; }
-.mu-screen img, .mu-screen video { display: block; max-width: min(90vw, 780px); max-height: 60vh; width: auto; height: auto; pointer-events: none; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
+.mu-screen.on { --ar: 16 / 9; min-width: 0; min-height: 0; width: 100vw; aspect-ratio: 1; overflow: hidden; container-type: inline-size; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 88%, transparent); mask-image: linear-gradient(transparent, #000 9%, #000 88%, transparent); }
+.mu-screen img, .mu-screen video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; }
+/* スポットライト（タップした場所に、うっすら。もう一度、光のところをタップすると消える） */
+@property --lx { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+@property --ly { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+.mu-lamp { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; --lx: 50%; --ly: 50%; transition: opacity .7s, --lx .8s cubic-bezier(.2, .8, .2, 1), --ly .8s cubic-bezier(.2, .8, .2, 1);
+  --k: 1.5; background: radial-gradient(circle at var(--lx) var(--ly), rgba(var(--mu-warm), .26), rgba(var(--mu-warm), .08) calc(var(--k) * 8cqw), rgba(8, 6, 4, 0) calc(var(--k) * 14cqw), rgba(8, 6, 4, .42) calc(var(--k) * 30cqw)); }
+.mu-screen.lamp .mu-lamp { opacity: 1; }
+.mu-full .mu-screen.on { aspect-ratio: var(--ar); } .mu-full .mu-screen video, .mu-full .mu-screen img { object-fit: contain; }   /* museum.js の PHONE_FULL */
 .mu-ph { margin: 0; text-align: center; font: italic 500 clamp(40px, 12vw, 72px)/.95 var(--mu-serif); letter-spacing: .04em; color: rgba(236, 228, 211, .14); }
 .mu-ltext { position: relative; z-index: 5; text-align: center; max-width: 560px; }
 .mu-kicker { margin: 0 0 10px; font: 600 10px/1 var(--mu-mono); letter-spacing: .34em; color: var(--mu-brass); }
@@ -45,7 +47,7 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-enter { display: inline-flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 26px; color: var(--mu-ink); text-decoration: none; font: 600 10px/1 var(--mu-mono); letter-spacing: .4em; }
 .mu-enter i { width: 1px; height: 42px; background: linear-gradient(var(--mu-brass), transparent); animation: muDrop 1.8s ease-in-out infinite; transform-origin: top; }
 @keyframes muDrop { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
-.mu-tap { margin-top: 12px; text-align: center; white-space: nowrap; font: 600 9px/1 var(--mu-mono); letter-spacing: .3em; color: var(--mu-sub); }
+.mu-tap { margin-top: 14px; text-align: center; white-space: nowrap; font: 600 9px/1 var(--mu-mono); letter-spacing: .3em; color: var(--mu-sub); }
 
 /* ---------- 額縁 ---------- */
 .mu-frame { position: relative; padding: clamp(9px, 2.2vw, 16px); background: linear-gradient(140deg, #3a2b1b, #140e08 42%, #4a3721 52%, #1a120a 64%, #2d2114);
@@ -98,8 +100,16 @@ body.mu-in .mu-bar { transform: scaleY(0); }
   .mu-light { background: radial-gradient(ellipse 40% 46% at 40% 48%, rgba(var(--mu-warm), .34), rgba(var(--mu-warm), .08) 55%, transparent 74%), conic-gradient(from 160deg at 40% -4%, transparent 0deg, rgba(var(--mu-warm), .13) 7deg, rgba(var(--mu-warm), .28) 20deg, rgba(var(--mu-warm), .13) 33deg, transparent 40deg); }
   .mu-rno { position: absolute; left: 6vw; top: 80px; margin: 0; }
   .mu-room:nth-child(even) .mu-light { background-position: 0 0; transform: scaleX(-1); }
-  .mu-lobby { flex-direction: row; gap: 7vw; }
-  .mu-ltext { text-align: left; }
+  .mu-lobby { flex-direction: row; gap: 4vw; padding: 90px 5vw 110px; }
+  .mu-hero { flex: 1 1 0; min-width: 0; }
+  .mu-screen.on { width: min(100%, calc((100vh - 200px) * var(--ar))); margin: 0 auto; aspect-ratio: var(--ar);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent), linear-gradient(transparent, #000 4%, #000 96%, transparent); -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent), linear-gradient(transparent, #000 4%, #000 96%, transparent); mask-composite: intersect; }
+  .mu-screen img, .mu-screen video { object-fit: contain; }
+  .mu-lamp { --k: 1; }
+  .mu-ltext { flex: 0 0 clamp(300px, 25vw, 440px); min-width: 0; text-align: left; }
+  .mu-title { font-size: clamp(52px, 4.8vw, 88px); }
+  .mu-lead { margin-left: 0; }
   .mu-info { justify-content: flex-start; }
 }
 
@@ -143,4 +153,4 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-warn { position: fixed; left: 10px; right: 10px; top: calc(130px + env(safe-area-inset-top)); z-index: 70; padding: 12px 14px; border-radius: 6px; background: #ffd21f; color: #1d1913; font: 500 12px/1.7 var(--mu-jp); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); word-break: break-all; }
 .mu-warn a { color: inherit; font-weight: 700; }
 html.mu-lock, html.mu-lock body { overflow: hidden; }
-@media (prefers-reduced-motion: reduce) { .mu-lobby.auto .mu-spot, .mu-enter i { animation: none; } .mu-room.lit .mu-light { animation: none; } .mu-bar { display: none; } }
+@media (prefers-reduced-motion: reduce) { .mu-enter i { animation: none; } .mu-lamp { transition: opacity .3s; } .mu-room.lit .mu-light { animation: none; } .mu-bar { display: none; } }
