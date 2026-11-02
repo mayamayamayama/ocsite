@@ -14,19 +14,21 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Shippori+Mincho+B1:wght@500;800&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="nav.css?v=77">
-  <link rel="stylesheet" href="qa.css?v=78">
+  <link rel="stylesheet" href="qa.css?v=80">
 </head>
 <body class="ar">
   <!-- いちばん上：古いビデオカメラで撮った、洞窟の壁画（archive-cave.js が描きます） -->
   <header class="ar-hero">
     <canvas class="ar-cv" aria-hidden="true"></canvas>
     <div class="ar-osd" aria-hidden="true">
-      <span class="o-tl"><i class="o-bat"></i>120min<br>A: 45mm</span>
+      <span class="o-tl"><i class="o-bat"></i>120min<br>A: 45mm<br>ISO 3200</span>
       <span class="o-rec">REC</span>
-      <span class="o-tr"><em>[A] DUR </em><b class="o-tc">00:00:00:00</b><br>1000/60</span>
+      <span class="o-tr"><em>[A] DUR </em><b class="o-tc">00:00:00:00</b><br>1000/60<br>WB 3200K</span>
       <span class="o-trk">TRACKING ▶▶</span>
+      <span class="o-aud"><b>CH1</b><i><u></u></i><b>CH2</b><i><u></u></i></span>
+      <span class="o-loc">LOC MT.MAYAMA CAVE B3<br>TEMP 11.4°C　RH 92%</span>
       <span class="o-bl">TLCS<br>◘ Off<br>MF</span>
       <span class="o-br o-files">FILES 000</span>
       <i class="o-c c1"></i><i class="o-c c2"></i><i class="o-c c3"></i><i class="o-c c4"></i>
@@ -36,15 +38,29 @@
       <h1>質問解答<small>Signals from Unknown Origin</small></h1>
       <p class="ar-subt">匿名で届いた質問を、ひとつずつ解読して、ここに保管しています。</p>
     </div>
+    <div class="ar-log" aria-hidden="true"><div class="ar-log-in"></div></div>
   </header>
+
+  <!-- 受信機：信号の波（archive.js が描きます）。いちばん新しい信号は、記号のまま。押すと解読 -->
+  <section class="ar-rx" aria-label="受信機">
+    <div class="rx">
+      <p class="rx-top"><b>MAYAMA 受信機 RX-06</b><span class="rx-st">受信待機中</span></p>
+      <canvas class="rx-cv" aria-hidden="true"></canvas>
+      <dl class="rx-data"><div><dt>周波数</dt><dd>142.80<small>MHz</small></dd></div><div><dt>信号強度</dt><dd class="rx-sig">▮▮▮▯▯</dd></div><div><dt>受信数</dt><dd class="rx-n">0</dd></div><div><dt>最終受信</dt><dd class="rx-last">----.--.--</dd></div></dl>
+      <div class="rx-raw"><p>いちばん新しい信号（未解読）</p><button type="button" class="rx-q"></button></div>
+    </div>
+  </section>
 
   <!-- 新聞の切りぬき（号外）：質問の送りかた -->
   <section class="ar-news" aria-label="質問の送りかた">
     <div class="nw">
-      <div class="nw-mast"><b>MAYAMA 新報</b><span class="nw-date"></span><i>號外</i></div>
-      <h2 class="nw-head">正体不明の〝信号〟<br>続々と届く</h2>
+      <div class="nw-mast"><b>MAYAMA 新報</b><span><span class="nw-date"></span><br>第六號　定價&nbsp;無料</span><i>號外</i></div>
+      <h2 class="nw-head">正体不明の「信号」<br>続々と届く</h2>
       <p class="nw-en">Signals Received from Unknown Origin</p>
-      <figure class="nw-photo"><canvas width="560" height="380" aria-hidden="true"></canvas><figcaption>写真＝信号の発信源とみられる壁画（MT. MAYAMA 山中）</figcaption></figure>
+      <div class="nw-side">
+        <figure class="nw-photo"><canvas width="560" height="380" aria-hidden="true"></canvas><figcaption>写真＝信号の発信源とみられる壁画（MT. MAYAMA 山中）</figcaption></figure>
+        <div class="nw-wx"><p class="nw-wx-h">山頂の天気</p><dl><div><dt>今日</dt><dd>晴れ のち 信号</dd><dd>降信確率 80%</dd></div><div><dt>明日</dt><dd>くもり ときどき 質問</dd><dd>降信確率 60%</dd></div></dl><p class="nw-wx-n">信号が降った夜は、壁画が少しだけ光るらしい。</p></div>
+      </div>
       <div class="nw-body">
         <p>MT. MAYAMA の山中で、送り主のわからない信号が、続けて見つかっている。</p>
         <p>信号はウェーブボックスを通って匿名で届き、中身はどれも「質問」だった。</p>
@@ -56,6 +72,7 @@
         <p class="nw-tel-n">名前は出ません。答えたものから、ここに並びます。</p>
       </div>
       <div class="nw-rosetta"><p>解読の手がかり</p><div class="nw-key"></div></div>
+      <div class="nw-ad"><b>求む、質問。</b><span>どんな信号でも受信します。<br>好きな食べ物から、世界の秘密まで。</span><i>MT. MAYAMA 調査隊</i></div>
     </div>
   </section>
 
@@ -63,7 +80,7 @@
   <main class="ar-arch" id="arch">
     <div class="ar-arch-h">
       <h2>解読済みの記録<small>Decoded Records</small></h2>
-      <p class="ar-tally">保管数 <b class="ar-count">0</b> 件</p>
+      <dl class="ar-stats"><div><dt>保管数</dt><dd class="ar-count">0</dd></div><div><dt>総文字数</dt><dd class="ar-chars">0</dd></div><div><dt>解読率</dt><dd>100%</dd></div><div><dt>最新受信</dt><dd class="ar-latest">----</dd></div></dl>
       <label class="ar-search"><span>キーワードで発掘</span><input type="search" placeholder="例：誕生日" autocomplete="off"></label>
       <p class="ar-hit" role="status"></p>
     </div>
@@ -71,21 +88,22 @@
   </main>
 
   <footer class="ar-end">
-    <p class="ar-cont">調査は続く</p>
+    <p class="ar-cont">調査は続く…</p>
     <p class="ar-cont-en">The excavation continues.</p>
     <div class="ar-cta"></div>
+    <p class="ar-eof">END OF FILE 06 ── 次の信号を待っています</p>
   </footer>
 
   <script src="nav.js?v=77"></script>
-  <script src="qa.js?v=78"></script>
-  <script src="archive-cave.js?v=78"></script>
-  <script src="archive.js?v=78"></script>
+  <script src="qa.js?v=80"></script>
+  <script src="archive-cave.js?v=80"></script>
+  <script src="archive.js?v=80"></script>
 
   <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
   <script>
     (function () {
-      var RELEASE = 'R78';   // このページのファイル一式の番号
-      var SIZE = { 'qa.css': 12686, 'archive.js': 8056, 'archive-cave.js': 9482, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れていないかを見ます）
+      var RELEASE = 'R80';   // このページのファイル一式の番号
+      var SIZE = { 'qa.css': 17727, 'archive.js': 11744, 'archive-cave.js': 11071, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れていないかを見ます）
       var JS = ['nav', 'archive-cave', 'archive'];
       function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
       function run() {
