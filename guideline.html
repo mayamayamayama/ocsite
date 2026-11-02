@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ガイドライン - OC ARCHIVE</title>
+  <meta name="description" content="MT. MAYAMA 入山のしおり — OC ARCHIVE のキャラクターと構図のガイドライン。">
+  <meta name="theme-color" content="#23443d">
+  <!-- 電車で来たときは、最初から電車で画面をおおっておく（nav.js が動かします）。表紙の絵は、電車がどきはじめてから描きます -->
+  <script>
+    (function () {
+      try { var g = JSON.parse(sessionStorage.getItem('nv-go')); if (g && Date.now() - g.t < 15000) { var h = document.documentElement; h.classList.add('nv-arrive', 'pm-wait'); setTimeout(function () { h.classList.remove('nv-arrive'); }, 5000); setTimeout(function () { h.classList.remove('pm-wait'); }, 950); } } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css?v=77">
+  <link rel="stylesheet" href="pamphlet.css?v=77">
+</head>
+<body class="gd">
+  <!-- MT. MAYAMA 入山のしおり（じゃばら折りのパンフレット）。表紙だけここに書いてあって、中身は guide.js の文章から pamphlet.js が作ります -->
+  <main class="pm" id="pm">
+    <section class="pp pp-cover" aria-label="表紙">
+      <div class="pc-top"><span>MT. MAYAMA 観光協会 発行</span><span class="pc-no">入山番号 <b id="pm-no"></b></span></div>
+      <svg class="pc-art" id="pm-cover" viewBox="0 0 400 300" role="img" aria-label="MT. MAYAMA と登山鉄道の絵"></svg>
+      <h1 class="pc-title"><small>MT. MAYAMA 観光案内</small><span>入山の</span><span>しおり</span></h1>
+      <p class="pc-sub">ガイドライン<i>Guideline of Mt. Mayama</i></p>
+      <dl class="pc-info">
+        <div><dt>開山時間</dt><dd>24時間</dd></div>
+        <div><dt>入山料</dt><dd>無料</dd></div>
+        <div><dt>本日の天気</dt><dd id="pm-sky">快晴</dd></div>
+        <div><dt>見ごろ</dt><dd>通年</dd></div>
+      </dl>
+      <p class="pc-open">ひらいて読んでね<i aria-hidden="true"></i></p>
+    </section>
+  </main>
+
+  <script src="nav.js?v=77"></script>
+  <script src="guide.js?v=77"></script>
+  <script src="pamphlet-art.js?v=77"></script>
+  <script src="pamphlet.js?v=77"></script>
+
+  <!-- ファイルのチェック：足りないファイル・古いファイルがあると、画面の下に教えてくれます（アドレスの最後に ?check をつけると、いつでも一覧が出ます） -->
+  <script>
+    (function () {
+      var RELEASE = 'R77';   // このページのファイル一式の番号
+      var SIZE = { 'pamphlet.css': 18926, 'pamphlet.js': 16205, 'pamphlet-art.js': 12209, 'nav.css': 7619, 'nav.js': 14369 };   // 正しいファイルの文字数（中身が古い・切れていないかを見ます）
+      var JS = ['nav', 'pamphlet-art', 'pamphlet'];
+      function look(u, mode) { return fetch(u, { cache: mode }).then(function (r) { return r.ok ? r.text().then(function (t) { return t.length; }) : -r.status; }).catch(function () { return null; }); }
+      function run() {
+        var full = /[?&]check/.test(location.search), msg = [], box = null, got = window.OC_LOADED || [], names = Object.keys(SIZE);
+        function show(t) {
+          if (!box) { box = document.createElement('div'); box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#d8ff00;color:#141b3a;font:600 12px/1.6 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:8px;white-space:pre-wrap;box-shadow:0 6px 20px rgba(0,0,0,.4)';
+            box.textContent = 'ガイドラインのチェック（' + RELEASE + '）'; box.onclick = function () { box.remove(); }; document.body.appendChild(box); }
+          box.textContent += '\n' + t;
+        }
+        var miss = JS.filter(function (n) { return got.indexOf(n) < 0; });
+        if (miss.length) msg.push('読みこめていないファイル：' + miss.map(function (n) { return n + '.js'; }).join('、'));
+        if (getComputedStyle(document.body).getPropertyValue('--pm-css').trim() !== '1') msg.push('pamphlet.css が読みこめていません');
+        if (typeof guide === 'undefined') msg.push('guide.js が読みこめていません');
+        if (msg.length) show(msg.join('\n'));
+        if (full) show((msg.length ? '' : '問題なし！\n') + '\n' + JS.map(function (n) { return (got.indexOf(n) < 0 ? '✗ ' : '✓ ') + n + '.js'; }).join('\n') + '\n' + (typeof guide === 'undefined' ? '✗ ' : '✓ ') + 'guide.js');
+        if (!window.fetch || location.protocol === 'file:') return;
+        var urls = names.map(function (n) { var e = document.querySelector('script[src^="' + n + '"], link[href^="' + n + '"]'); return e ? e.src || e.href : n; });
+        Promise.all(urls.map(function (u) { return look(u, 'default'); })).then(function (a) {
+          var bad = names.filter(function (n, i) { return a[i] !== SIZE[n]; });
+          if (!bad.length) { if (full) show('\nファイルの中身：ぜんぶ正しい！'); return; }
+          Promise.all(bad.map(function (n) { return look(n, 'no-store'); })).then(function (b) {
+            show('\nファイルの中身のチェック：\n' + bad.map(function (n, i) { var q = b[i], f = '・' + n + '：';
+              if (q == null) return f + '確かめられませんでした';
+              if (q < 0) return f + 'GitHub に見つからない。名前がちょうど「' + n + '」か確かめて、アップロードしてね（スマホだと「' + n.replace(/\.(\w+)$/, ' (1).$1') + '」のように名前が変わることがあるよ）';
+              if (q !== SIZE[n]) return f + '中身が古いか、途中で切れている。もう一度アップロードしてね';
+              return f + 'GitHub は正しいのに、スマホに古いものが残っている。10分ほど待つか、シークレットタブで開いてね'; }).join('\n'));
+          });
+        });
+      }
+      addEventListener('load', function () { setTimeout(run, 1500); });
+    })();
+  </script>
+</body>
+</html>
