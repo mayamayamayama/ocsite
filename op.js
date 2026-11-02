@@ -11,7 +11,7 @@
   const VIDEO = 'op.mp4';            // ロゴの動画（index.html と同じ場所に置く）
   const MODEL = 'kabeban.glb';       // 壁のアニメーション（同じく）
   const FIT = 'logo';                // 'logo'＝ロゴの大きさで合わせる／'cover'＝画面いっぱい／'contain'＝動画のはしまで全部
-  const LOGO_SIZE = 1.0;             // 'logo' のときのロゴの大きさ（0.8 で小さく、1.2 で大きく）
+  const LOGO_SIZE = 0.5;             // 'logo' のときのロゴの大きさ（1 で前の大きさ。0.6 でもっと小さく）
   const LOGO_W = 0.56;               // 動画の横はばのうち、ロゴがしめる割合（動画を作り直したときだけ変える）
   const VIDEO_SAFE = 0.3;            // 'cover' でも、動画のまん中のこの割合は、かならず見せる
   const SITE_BEHIND_WALL = true;     // 壁のうしろにサイトを置く（false にすると、動画の最後の色）
