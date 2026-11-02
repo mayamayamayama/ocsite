@@ -66,7 +66,7 @@ const characters = {
     name: "Ghazal",
     tag: "MALE/NON-HUMAN",
     image: "ghazal.png",
-    description: "Age:29/Height:257\nBirthday:06/09\nHobbys:楽しいこと\Information:読み方は「ガザル」です。",
+    description: "Age:29/Height:257\nBirthday:06/09\nHobbys:楽しいこと\nInformation:読み方は「ガザル」です。",
     prompt: "White Frame,\nboy, scalie, anthro, monster guy, \nstylized, anime style, sharp features,0.45::tyrantrum\n::,grey skin, black scales, 2::white crown-like six crest and horns on the forehead::,1.8::six medium short horn growing vertically::,2::The bases of the horns connect like a crest, covering the forehead::,six horns arranged side by side,sharp horns on head,white spiky short fur collar, white beard-like spiky fur, jaw fangs, sharp teeth, \nmonstrous physique, colossal muscle, extremely muscular, abs, massive biceps, hyper muscular, broad shoulders, massive legs, claws, sharp black claws, tail, spiky tail,A straight line of white hair growing between the pectoral and abdominal muscles,-2::orange crown-like crest on the forehead::,training wear,#c6ff00 eyes,Black sclera,The five toes of the foot,An unpleasant personality,Five digits on both hands and feet,High sex drive,"
   },
 };
