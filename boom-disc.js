@@ -85,7 +85,7 @@
     // ---------- 置き場所（画面の大きさから決める） ----------
     let cw = 1, ch = 1, Rw = 1, X0 = 0, Y0 = 0, XO = 0;
     // x：横の位置（0 が左はし、1 が右はし）、y：見出しの上からの位置（px）、r：半径（px）、tl：倒れぐあい、rl・yw：ななめの向き
-    const pose = () => (PC.matches ? { x: 0.45, y: 140, r: Math.min(cw * 0.37, 200), tl: 0.86, rl: -0.3, yw: 0.16, fov: 52 } : { x: 0.58, y: 150, r: Math.min(cw * 0.56, 300), tl: 0.86, rl: -0.3, yw: 0.16, fov: 52 });
+    const pose = () => (PC.matches ? { x: 0.5, y: 170, r: Math.min(cw * 0.47, 270), tl: 0.9, rl: -0.3, yw: 0.16, fov: 52 } : { x: 0.6, y: 175, r: Math.min(cw * 0.7, 420), tl: 0.9, rl: -0.3, yw: 0.16, fov: 52 });
     let P = pose();
     function place() {
       cw = cv.clientWidth || 1; ch = cv.clientHeight || 1; P = pose(); R.setSize(cw, ch, false); cam.aspect = cw / ch; cam.fov = P.fov; cam.position.z = 4.2 / Math.tan((P.fov * Math.PI) / 360); cam.updateProjectionMatrix();
