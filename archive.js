@@ -3,6 +3,7 @@
 // ・届いた質問は「読めない文字」で出てきて、フィルムが現像されると、日本語に解読されます（同じ文字は、いつも同じ記号になる暗号です）
 // ・答えは、そのあとにタイプライターみたいに出てきます
 // ・キーワードで、記録をさがせます
+// ・受信機の波は、ときどき信号を受信してはねます（押しても、はねます）。いちばん新しい信号は、押すと解読
 (window.OC_LOADED = window.OC_LOADED || []).push('archive');
 
 (function () {
@@ -83,17 +84,21 @@
   const KAN = '〇一二三四五六七八九', kn = (n) => String(n).split('').map((d) => KAN[+d]).join('');
   const kanNum = (n) => (n < 10 ? KAN[n] : n < 20 ? '十' + (n % 10 ? KAN[n % 10] : '') : KAN[Math.floor(n / 10)] + '十' + (n % 10 ? KAN[n % 10] : ''));
   const dt = new Date(), nd = $('.nw-date');
-  if (nd) nd.textContent = kn(dt.getFullYear()) + '年' + kanNum(dt.getMonth() + 1) + '月' + kanNum(dt.getDate()) + '日';
-  const ph = $('.nw-photo canvas'); if (CAVE && ph) CAVE.halftone(ph, [140, 120, 300]);
+  if (nd) nd.textContent = kn(dt.getFullYear()) + '年\n' + kanNum(dt.getMonth() + 1) + '月' + kanNum(dt.getDate()) + '日';
+  const ph = $('.nw-photo canvas'); if (CAVE && ph) CAVE.halftone(ph);
   const ro = $('.nw-key'); if (ro) ro.innerHTML = [...'マヤマ質問'].map((c) => '<span><i class="cx g' + gi(c) + '">' + c + '</i><b>' + c + '</b></span>').join('');
   const cta = links.map((l) => '<a class="ar-send" href="' + esc(String(l[1]).trim()) + '" target="_blank" rel="noopener">' + esc(l[0]) + '</a>').join('');
   document.querySelectorAll('.ar-cta').forEach((c) => { c.innerHTML = cta || '<p class="ar-none">（送り先のアドレスが、qa.js にまだ書かれていません）</p>'; });
 
   // ---------- 解読済みの記録（フィルム） ----------
   const strip = $('.ar-strip'), cnt = $('.ar-count');
+  const strength = (r) => 2 + ((Math.imul([...String(r.q || '') + r.date].reduce((h, c) => h + c.codePointAt(0), 7), 2654435761) >>> 0) % 4), bars = (r) => '▮'.repeat(strength(r)) + '▯'.repeat(5 - strength(r));
+  const latest = list[0] ? String(list[0].date || '----') : '----';
+  $('.ar-chars').textContent = list.reduce((n, r) => n + [...String(r.q || '') + String(r.a || '')].length, 0).toLocaleString();
+  $('.ar-latest').textContent = latest;
   const frame = (r, i) => { const no = list.length - i;
     return '<article class="fr' + (REDUCE ? '' : ' neg') + '" data-i="' + i + '"><header class="fr-h"><b>FRAME ' + pad(no, 3) + '</b><span>受信 ' + esc(r.date || '----.--.--') + '</span></header>' +
-      '<p class="fr-l">受信した信号</p><p class="fr-q">' + plain(r.q) + '</p><p class="fr-l">解読　MAYAMA</p><p class="fr-a">' + plain(r.a) + '</p><i class="fr-edge" aria-hidden="true">MAYAMA 0606 ▸ ' + pad(no, 3) + 'A</i></article>'; };
+      '<p class="fr-m"><span>信号強度 <b>' + bars(r) + '</b></span><span>文字数 <b>' + [...String(r.q || '')].length + '</b></span><span>解読率 <b>100%</b></span></p><p class="fr-l">受信した信号</p><p class="fr-q">' + plain(r.q) + '</p><p class="fr-l">解読　MAYAMA</p><p class="fr-a">' + plain(r.a) + '</p><i class="fr-edge" aria-hidden="true">MAYAMA 0606 ▸ ' + pad(no, 3) + 'A</i></article>'; };
   strip.innerHTML = list.length ? list.map(frame).join('') : '<article class="fr fr-empty"><header class="fr-h"><b>FRAME 000</b><span>受信待ち</span></header><p class="fr-q">まだ解読された記録はありません。<br>最初の信号を、待っています。</p><div class="ar-cta"></div></article>';
   if (!list.length) $('.fr-empty .ar-cta').innerHTML = cta;
   cnt.textContent = list.length;
@@ -106,6 +111,40 @@
     setTimeout(() => decode(q, r.q, 'cx').then(() => decode(a, r.a, 'tx')), REDUCE ? 0 : 650);
   }), { rootMargin: '0px 0px -25% 0px' });   // 画面の下から 1/4 のところまで来たら
   strip.querySelectorAll('.fr[data-i]').forEach((f) => { pre.observe(f); io.observe(f); });
+
+  // ---------- 受信ログ（いちばん上の、流れる文字） ----------
+  const lg = $('.ar-log-in');
+  if (lg) lg.textContent = '受信ログ ▸ ' + (list.length ? list.slice(0, 8).map((r, i) => 'SIG.' + pad(list.length - i, 3) + '　' + (r.date || '----') + ' 受信　' + [...String(r.q || '')].length + '字　解読完了').join('　▸　') : '受信待機中…　最初の信号を待っています') + '　▸　MT. MAYAMA 調査隊';
+
+  // ---------- 受信機：信号の波 ----------
+  const rx = $('.rx-cv'), st = $('.rx-st');
+  $('.rx-n').textContent = list.length; $('.rx-last').textContent = latest;
+  const rq = $('.rx-q'), rqText = list[0] ? [...String(list[0].q || '').replace(/\s+/g, ' ')].slice(0, 40).join('') + ([...String(list[0].q || '')].length > 40 ? '…' : '') : '';
+  if (rq) {
+    if (rqText) wrap(rq, rqText, 'cx'); else { rq.textContent = 'まだ信号はありません'; rq.classList.add('done'); }
+    rq.addEventListener('click', () => { if (!rqText || rq.classList.contains('done')) return; rq.classList.add('done'); decode(rq, rqText, 'cx', 1600); });
+  }
+  if (rx && rx.getContext) {
+    const c = rx.getContext('2d'), sig = $('.rx-sig'); let W = 0, H = 0, vis = false, run = false, burst = 0, nextB = 3, lastS = 0;
+    const size = () => { const k = Math.min(devicePixelRatio || 1, 2); W = rx.width = Math.round(rx.clientWidth * k); H = rx.height = Math.round(rx.clientHeight * k); };
+    new ResizeObserver(size).observe(rx); size();
+    const hit = () => { burst = 1; if (st) { st.textContent = '信号を受信！'; st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit'); setTimeout(() => { st.textContent = '受信待機中'; st.classList.remove('hit'); }, 1800); } };
+    rx.addEventListener('click', hit);
+    const draw = (now) => {
+      if (!vis) { run = false; return; } requestAnimationFrame(draw);
+      const t = now / 1000; if (!REDUCE && t > nextB) { hit(); nextB = t + 5 + Math.random() * 6; } burst *= 0.986;
+      c.clearRect(0, 0, W, H); c.strokeStyle = 'rgba(111,182,178,.12)'; c.lineWidth = 1;
+      for (let x = 0; x < W; x += W / 12) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); }
+      for (let y = 0; y < H; y += H / 4) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      c.strokeStyle = '#6fb6b2'; c.lineWidth = Math.max(1.5, W / 400); c.shadowColor = '#6fb6b2'; c.shadowBlur = 8; c.beginPath();
+      for (let x = 0; x <= W; x += 3) { const u = x / W, y = H / 2 + (Math.sin(u * 40 + t * 4) * 0.06 + Math.sin(u * 140 - t * 7) * 0.025 + (Math.random() - 0.5) * 0.04 + burst * Math.sin(u * 90 + t * 26) * 0.34 * Math.exp(-((u - 0.5) ** 2) * 9)) * H; x ? c.lineTo(x, y) : c.moveTo(x, y); }
+      c.stroke(); c.shadowBlur = 0;
+      const sx = ((t * 0.35) % 1) * W; c.fillStyle = 'rgba(230,207,59,.5)'; c.fillRect(sx, 0, 2, H);
+      if (sig && now - lastS > 500) { lastS = now; const n = Math.min(5, 2 + Math.round(Math.random() * 1.6) + (burst > 0.3 ? 2 : 0)); sig.textContent = '▮'.repeat(n) + '▯'.repeat(5 - n); }
+      if (REDUCE) vis = false;
+    };
+    new IntersectionObserver((en) => { vis = en[0].isIntersecting; if (vis && !run) { run = true; requestAnimationFrame(draw); } }).observe(rx);
+  }
 
   // ---------- さがす ----------
   const sq = $('.ar-search input'), hit = $('.ar-hit');
