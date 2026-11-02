@@ -34,7 +34,7 @@ body.mu-in .mu-bar { transform: scaleY(0); }
 .mu-lamp { position: absolute; inset: 0; z-index: 1; pointer-events: none; --lx: 50%; --ly: 30%; --k: 0;
   transition: --lx .9s cubic-bezier(.2, .8, .2, 1), --ly .9s cubic-bezier(.2, .8, .2, 1), --k 1.6s cubic-bezier(.3, 0, .2, 1);
   background: radial-gradient(circle at var(--lx) var(--ly), rgba(var(--mu-warm), .08), rgba(var(--mu-warm), 0) calc(var(--k) * 11cqw)),
-    radial-gradient(circle at var(--lx) var(--ly), rgba(6, 5, 3, .58), rgba(6, 5, 3, .72) calc(var(--k) * 9cqw), rgba(6, 5, 3, .965) calc(var(--k) * 24cqw)); }
+    radial-gradient(circle at var(--lx) var(--ly), rgba(6, 5, 3, .58), rgba(6, 5, 3, .72) calc(var(--k) * 9cqw), rgba(6, 5, 3, .93) calc(var(--k) * 24cqw)); }
 .mu-screen.lamp .mu-lamp { --k: var(--kmax, 1.7); }   /* 光の大きさ（スマホ 1.7・パソコン 1） */
 @media (max-width: 899px) { .mu-full .mu-screen.on { aspect-ratio: var(--ar); } .mu-full .mu-screen video, .mu-full .mu-screen img { object-fit: contain; } }   /* museum.js の PHONE_FULL */
 .mu-ph { margin: 0; text-align: center; font: italic 500 clamp(40px, 12vw, 72px)/.95 var(--mu-serif); letter-spacing: .04em; color: rgba(236, 228, 211, .14); }
