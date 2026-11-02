@@ -87,8 +87,8 @@ const sound = [
     a_title: "おしゃかしゃま",
     a_artist: "RADWIMPS",
     a_url: "https://youtu.be/7MaF-bWeLGw?si=l2WFoK8Nm-iTMA-1",
-    b_title: "FLY AGAIN",
-    b_artist: "MAN WITH A MISSION",
-    b_url: "https://youtu.be/1QEKNvw4DPU?si=hpJxIsh0JPwID5p3",
+    b_title: "whistle snake",
+    b_artist: "XXsniffles",
+    b_url: "https://youtu.be/0iH128h7Yoc?si=ezkdz5LrtHPlnPnv",
   },
 ];
