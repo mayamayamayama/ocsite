@@ -28,4 +28,17 @@ Panel 3:medium shot, 2::A man is holding a woman in his arms, princess-style::,1
 
 clear visual progression, `,
   },
+  {
+    title: "残さずいただきます",
+    image: "kozu2.webp",
+    prompt: `full-body character lying flat on the White plate, top-down overhead view, the character positioned in the center, relaxed lying pose, full body visible, The character is presented like a dish, garnished with a red, blood-like sauce.
+
+ A giant knife and fork are closing in on the character
+
+stylish curated flat-lay arrangement, fashion editorial photography, clean graphic composition, balanced negative space, aesthetically organized objects, polished lifestyle editorial, 90-degree bird's-eye view, perfectly overhead camera, entire character and all belongings fitting inside the frame, A very dark background
+
+Objects are scattered haphazardly around the character, X-ray photograph, Medical record, chair, bone
+
+Tense expression, cold sweat, fear, A pale face`,
+  },
 ];
