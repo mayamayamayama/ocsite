@@ -1,0 +1,143 @@
+/* trail.css — コラム（MT. MAYAMA 山行記録）。地形図みたいな茶色の等高線と、赤い登山道。山のブログの記録ページ */
+:root {
+  --paper: #eef1ed; --card: #f9fbf8; --ink: #1f2b28; --sub: #5b6a64; --brown: #9b6a3c; --trail: #d7332b; --water: #2e7cc0; --line: #cbd3ce; --night: #1f2b28;
+  --jp: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif; --num: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --topo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cg fill='none' stroke='%239b6a3c' stroke-opacity='.13' stroke-width='1.1'%3E%3Cpath d='M60 210c0-90 70-150 160-150s150 70 140 150-80 150-160 150S60 300 60 210z'/%3E%3Cpath d='M100 212c0-64 50-110 118-110s110 50 104 110-58 110-120 110-102-44-102-110z'/%3E%3Cpath d='M140 214c0-38 30-66 76-66s70 30 66 66-36 68-78 68-64-28-64-68z'/%3E%3Cpath d='M182 216c0-16 12-28 32-28s30 14 28 28-16 30-32 30-28-12-28-30z'/%3E%3C/g%3E%3C/svg%3E");
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+html.tr-lock, html.tr-lock body { overflow: hidden; }
+body.tr { --tr-css: 1; margin: 0; min-height: 100vh; overflow-x: hidden; background: var(--paper); color: var(--ink); font: 400 15px/1.8 var(--jp); -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
+h1, h2, h3 { word-break: auto-phrase; }
+
+/* ---------- いちばん上：3D の山なみ ---------- */
+.tr-hero { position: relative; height: 84vh; height: 84svh; min-height: 520px; overflow: hidden; background: linear-gradient(#b7cddb, #dbe5e8 52%, #e7ece9 70%); }
+.tr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.tr-cv:active { cursor: grabbing; }
+.tr-labels { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.tr-flag { position: absolute; left: 0; top: 0; display: grid; max-width: 150px; padding: 4px 9px 5px; border: 0; border-left: 3px solid var(--trail); background: rgba(249, 251, 248, .92); text-align: left; pointer-events: auto; cursor: pointer; box-shadow: 0 4px 12px rgba(31, 43, 40, .18); visibility: hidden; }
+.tr-flag small { font: 600 11px/1.2 var(--num); letter-spacing: .08em; color: var(--sub); }
+.tr-flag b { font-size: 12px; line-height: 1.35; font-weight: 700; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tr-flag.main { border-color: #e5b322; pointer-events: none; }
+.tr-flag.main b { font: 700 14px/1.1 var(--num); letter-spacing: .1em; }
+.tr-hero-t { position: absolute; z-index: 2; left: 20px; right: 90px; top: calc(66px + env(safe-area-inset-top)); pointer-events: none; }
+.tr-k { margin: 0; font: 700 15px/1 var(--num); letter-spacing: .3em; color: var(--trail); }
+.tr-hero-t h1 { margin: 6px 0 0; font: 900 clamp(46px, 14vw, 92px)/1.05 var(--jp); letter-spacing: .04em; text-shadow: 0 2px 0 rgba(255, 255, 255, .5); }
+.tr-sub { margin: 10px 0 0; font-size: 13px; font-weight: 700; line-height: 1.8; color: var(--sub); }
+.tr-hint { position: absolute; z-index: 2; left: 50%; bottom: 16px; transform: translateX(-50%); margin: 0; padding: 6px 14px; border-radius: 999px; background: rgba(31, 43, 40, .55); color: #fff; font-size: 11px; font-weight: 700; line-height: 1.5; text-align: center; white-space: nowrap; pointer-events: none; }
+.tr-flat { background: var(--topo) 0 0 / 420px, linear-gradient(#cfdde4, var(--paper)); }
+.tr-flat .tr-cv, .tr-flat .tr-labels, .tr-flat .tr-hint { display: none; }
+.tr-hero:not(.tr-3d):not(.tr-flat) .tr-hint { opacity: 0; }
+
+/* ---------- 一覧：山行記録のカード ---------- */
+.tr-list { max-width: 1000px; margin: 0 auto; padding: 30px 16px calc(90px + env(safe-area-inset-bottom)); }
+.tr-list-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; border-bottom: 2px solid var(--ink); }
+.tr-list-h h2 { margin: 0; font-size: 22px; font-weight: 900; }
+.tr-list-h p { margin: 0; font-size: 13px; font-weight: 700; } .tr-list-h b { font: 700 26px var(--num); }
+.tr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.tc { display: block; padding: 14px 16px 16px; border: 1px solid var(--line); border-top: 4px solid var(--trail); background: var(--card); text-decoration: none; transition: transform .2s, box-shadow .2s; }
+.tc:hover { transform: translateY(-3px); box-shadow: 0 10px 22px -12px rgba(31, 43, 40, .45); }
+.tc-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; font: 600 14px/1.3 var(--num); letter-spacing: .06em; color: var(--sub); }
+.tc-top span:first-child { color: var(--trail); }
+.wx { display: inline-flex; align-items: center; gap: 4px; font-family: var(--jp); font-size: 12px; letter-spacing: 0; }
+.wx svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.tc h3 { margin: 6px 0 8px; font-size: 19px; font-weight: 900; line-height: 1.45; }
+.tc .pf { display: block; width: 100%; height: 46px; background: var(--topo) 0 0 / 260px; }
+.tc-cov { margin: 10px 0 0; aspect-ratio: 16 / 9; overflow: hidden; }
+.tc-cov img { width: 100%; height: 100%; object-fit: cover; }
+.tc-ex { margin: 8px 0 0; font-size: 13px; color: var(--sub); line-height: 1.7; }
+.tr-empty { grid-column: 1 / -1; margin: 10px 0; padding: 30px 16px; border: 2px dashed var(--line); text-align: center; font-weight: 700; color: var(--sub); }
+.tr-warn { position: fixed; left: 10px; right: 10px; top: calc(80px + env(safe-area-inset-top)); z-index: 95; padding: 12px 14px; background: #fff3b0; font-size: 13px; font-weight: 700; }
+
+/* 数字の表（距離・累積標高・最高地点・コースタイム） */
+.st { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 10px 0 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.st div { padding: 6px 4px 5px 8px; } .st div + div { border-left: 1px solid var(--line); }
+.st dt { font-size: 10px; font-weight: 700; color: var(--sub); white-space: nowrap; }
+.st dd { margin: 0; font: 700 21px/1.1 var(--num); white-space: nowrap; } .st small { margin-left: 1px; font-size: 12px; font-weight: 500; }
+
+/* 標高グラフ */
+.pf-area { fill: rgba(155, 106, 60, .16); } .pf-line { fill: none; stroke: var(--trail); stroke-width: 2.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.pf-grid { stroke: rgba(31, 43, 40, .14); stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.pf-gl, .pf-end { font: 600 11px var(--num); fill: var(--sub); } .pf-end.r { text-anchor: end; }
+.pf-wp line { stroke: rgba(215, 51, 43, .45); stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+.pf-wp circle { fill: var(--trail); stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.pf-wp text { font: 700 10px var(--num); fill: #fff; text-anchor: middle; }
+.pf-me line { stroke: var(--ink); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.pf-me circle { fill: #ffcf3f; stroke: var(--ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+
+/* ---------- 記録を読む ---------- */
+.tr-view { position: fixed; inset: 0; z-index: 40; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--paper) var(--topo) 0 0 / 420px; transform: translateY(100%); transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.tr-view.on { transform: none; }
+.tr-wrap { max-width: 1060px; margin: 0 auto; padding: calc(70px + env(safe-area-inset-top)) 18px calc(120px + env(safe-area-inset-bottom)); }
+.tp-h h1 { margin: 8px 0 4px; font: 900 clamp(28px, 7.6vw, 46px)/1.3 var(--jp); }
+.tp-h .st dd { font-size: 26px; }
+.tp-cov { margin: 14px -18px 0; }
+.tp-prof { margin: 14px 0 0; padding: 8px 0 0; }
+.tp-prof .pf { display: block; width: 100%; height: 150px; }
+.tp-body { position: relative; margin-top: 30px; font-size: 17px; line-height: 2.05; }
+.tp-body p { margin: 0 0 1.5em; }
+.tp-body strong { background: linear-gradient(transparent 62%, rgba(255, 207, 63, .7) 62%); }
+.wp { display: grid; grid-template-columns: 38px 1fr; align-items: center; column-gap: 10px; margin: 2.2em 0 1em; font-size: 22px; font-weight: 900; line-height: 1.45; }
+.wp i { position: relative; isolation: isolate; grid-row: span 2; display: grid; place-items: center; width: 34px; height: 34px; color: #fff; font: 700 15px var(--num); font-style: normal; }
+.wp i::before { content: ""; position: absolute; inset: 5px; z-index: -1; background: var(--trail); transform: rotate(45deg); }
+.wp small { font: 600 13px/1.2 var(--num); letter-spacing: .06em; color: var(--sub); }
+blockquote { margin: 0 0 1.5em; padding: 12px 16px; border-left: 4px solid var(--water); background: rgba(46, 124, 192, .08); font-size: 15px; line-height: 1.9; }
+.tp-body hr { margin: 2em 0; border: 0; border-top: 3px dashed var(--trail); opacity: .5; }
+.tp-img { margin: 0 -18px 1.6em; }
+.tp-img figcaption { margin: 6px 18px 0; font-size: 12px; color: var(--sub); }
+.ph { position: relative; } .ph img { display: block; width: 100%; height: auto; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; } .shield { position: absolute; inset: 0; }
+
+/* 山頂の看板 */
+.tp-end { position: relative; margin-top: 50px; padding-top: 20px; text-align: center; }
+.tp-end::before { content: ""; position: absolute; left: 50%; top: -80px; width: 140%; height: 360px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 196, 92, .45), transparent); opacity: 0; transition: opacity 1.6s; pointer-events: none; }
+.summit .tp-end::before { opacity: 1; }
+.tp-sign { position: relative; display: inline-block; padding-bottom: 70px; opacity: .35; transform: translateY(24px); transition: opacity .6s, transform .6s cubic-bezier(.3, 1.6, .5, 1); }
+.summit .tp-sign { opacity: 1; transform: none; }
+.summit .tp-board { animation: trSway 1.6s ease-out .3s; }
+@keyframes trSway { 20% { transform: rotate(-4deg); } 45% { transform: rotate(2.5deg); } 70% { transform: rotate(-1deg); } }
+.tp-board { position: relative; z-index: 1; display: grid; gap: 2px; min-width: 220px; max-width: 320px; padding: 14px 22px 16px; border-radius: 4px; color: #f6ecd8; text-shadow: 0 -1px 0 rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .15); transform-origin: 50% 0;
+  background: repeating-linear-gradient(176deg, rgba(0, 0, 0, .07) 0 2px, transparent 2px 9px), linear-gradient(#a36c3f, #7c4f2c); box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .18), 0 8px 18px -8px rgba(0, 0, 0, .6); }
+.tp-board small { font-size: 13px; font-weight: 700; letter-spacing: .4em; }
+.tp-board b { font-size: 22px; font-weight: 900; line-height: 1.4; }
+.tp-board span { font: 700 18px var(--num); letter-spacing: .08em; }
+.tp-sign i { position: absolute; bottom: 0; width: 12px; height: 84px; background: linear-gradient(90deg, #6d4526, #8a5a33); }
+.tp-sign i:first-of-type { left: 22%; } .tp-sign i:last-of-type { right: 22%; }
+.tp-done { margin: 16px 0 0; font-weight: 900; opacity: 0; transition: opacity .6s .5s; } .summit .tp-done { opacity: 1; }
+.tp-nav { display: grid; gap: 10px; max-width: 420px; margin: 26px auto 0; }
+.tp-nav button, .tp-nav a { display: grid; padding: 12px 16px; border: 2px solid var(--ink); background: none; font-weight: 900; text-decoration: none; cursor: pointer; }
+.tp-nav .tp-down { background: var(--ink); color: var(--paper); }
+.tp-nav small { font-size: 12px; font-weight: 400; color: var(--sub); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* 標高計（スマホは画面の下、パソコンは右） */
+.tr-track { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "alt pf meta" "at pf meta"; align-items: center; column-gap: 12px;
+  padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); background: rgba(31, 43, 40, .94); color: var(--paper); transition: background .6s; }
+.tr-track.top { background: rgba(176, 40, 33, .96); }
+.tk-alt { grid-area: alt; } .tk-alt b { font: 700 26px/1 var(--num); } .tk-alt small { margin-left: 2px; font: 500 13px var(--num); }
+.tk-at { grid-area: at; max-width: 32vw; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; font-weight: 700; opacity: .85; }
+.tk-pf { grid-area: pf; display: block; width: 100%; height: 46px; }
+.tr-track .pf-area { fill: rgba(255, 255, 255, .13); } .tr-track .pf-line { stroke: #ff6a5c; stroke-width: 2; }
+.tr-track .pf-grid, .tr-track .pf-gl, .tr-track .pf-end, .tr-track .pf-wp text, .tr-track .pf-wp line { display: none; }
+.tr-track .pf-wp circle { fill: #ff6a5c; stroke: none; } .tr-track .pf-me line { stroke: rgba(255, 255, 255, .5); }
+.tk-meta { grid-area: meta; display: grid; justify-items: end; font: 600 13px/1.25 var(--num); letter-spacing: .04em; } .tk-pc { font-size: 22px; font-weight: 700; }
+.tk-wp { display: none; }
+
+@media (min-width: 1000px) {
+  .tr-hero-t { left: 6vw; top: 120px; }
+  .tr-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; padding-top: 96px; }
+  .tr-page { max-width: 700px; }
+  .tp-cov, .tp-img { margin-left: 0; margin-right: 0; } .tp-img figcaption { margin-left: 0; }
+  .tr-track { position: sticky; top: 96px; align-self: start; display: block; padding: 16px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .tr-track.top { background: #fff3ea; }
+  .tk-alt b { font-size: 40px; } .tk-at { max-width: none; margin: 2px 0 10px; font-size: 13px; }
+  .tk-pf { height: 110px; } .tr-track .pf-area { fill: rgba(155, 106, 60, .16); } .tr-track .pf-line { stroke: var(--trail); } .tr-track .pf-wp circle { fill: var(--trail); } .tr-track .pf-me line { stroke: var(--ink); }
+  .tk-meta { display: flex; justify-content: space-between; margin-top: 8px; }
+  .tk-wp { display: block; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); list-style: none; }
+  .tk-wp button { display: flex; gap: 8px; width: 100%; padding: 5px 0; border: 0; background: none; text-align: left; font-size: 13px; font-weight: 700; color: var(--sub); cursor: pointer; }
+  .tk-wp button i { flex: none; display: grid; place-items: center; width: 18px; height: 18px; background: var(--line); color: var(--ink); font: 700 11px var(--num); font-style: normal; }
+  .tk-wp button.on { color: var(--ink); } .tk-wp button.on i { background: var(--trail); color: #fff; }
+}
+@media (prefers-reduced-motion: reduce) { .tr-view, .tp-sign, .tc { transition: none; } .summit .tp-board { animation: none; } }
