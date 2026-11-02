@@ -73,5 +73,22 @@ const sound = [
     b_artist: "Ed Sheeran",
     b_url: "https://youtu.be/EwzD8U4u76k?si=Lris5HP51jC4dCwR",
   },
-
+  {
+    chara: "Nita",
+    a_title: "DARMA GRAND PRIX",
+    a_artist: "RADWIMPS",
+    a_url: "https://youtu.be/pqZqYNPqaL0?si=S9dEaroSvxv3Xoef",
+    b_title: "Azalea",
+    b_artist: "米津玄師",
+    b_url: "https://youtu.be/FqWBQv7h_3I?si=mfC7x0gwcKqX7o7d",
+  },
+  {
+    chara: "Ghazal",
+    a_title: "おしゃかしゃま",
+    a_artist: "RADWIMPS",
+    a_url: "https://youtu.be/7MaF-bWeLGw?si=l2WFoK8Nm-iTMA-1",
+    b_title: "FLY AGAIN",
+    b_artist: "MAN WITH A MISSION",
+    b_url: "https://youtu.be/1QEKNvw4DPU?si=hpJxIsh0JPwID5p3",
+  },
 ];
