@@ -33,9 +33,9 @@ const sound = [
     a_title: "RED OUT",
     a_artist: "米津玄師",
     a_url: "https://youtu.be/mKYpA1-5NNs?si=btEbjfx040chKyR-",
-    b_title: "僕らまだアンダーグラウンド",
-    b_artist: "Eve",
-    b_url: "https://youtu.be/nBteO-bU78Y?si=SJd6EbAPbSmHbuIh",
+    b_title: "リビングデッド・ユース",
+    b_artist: "米津玄師",
+    b_url: "https://youtu.be/A2bFukH-TwA?si=TYCUccxS7hSx64oQ",
   },
   {
     chara: "Arceo",
