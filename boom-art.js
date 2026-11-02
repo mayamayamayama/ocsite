@@ -6,7 +6,7 @@ window.OC_BOOM_ART = (function () {
   // ===== 変えてもいいところ =====
   const INK = '#111111', PAPER = '#f7f4ec';   // 線・紙
   const ACCENT = '#ff8a00', SHADOW = '#d86a00';     // A面の色（オレンジ）と、床の影（少し濃いオレンジ）。boom.css の --bx-bg と合わせる
-  const ACCENT_B = '#3d7bff', SHADOW_B = '#2c5fd4'; // B面の色（青）と、床の影
+  const ACCENT_B = '#2350d0', SHADOW_B = '#183a9c'; // B面の色（青）と、床の影
   const LOGO = 'MAYAMA', BRAND = 'MAYAMA TAPES';   // ラジカセのロゴ・カセットのラベルの上の文字
   // ============================
   const BIG = 'Anton, Impact, "Noto Sans JP", sans-serif', MONO = '"Space Mono", ui-monospace, "Noto Sans JP", monospace';
