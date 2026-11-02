@@ -9,6 +9,7 @@
   // ===== 変えてもいいところ =====
   const LOBBY = ['museum-lobby.mp4', 'museum-lobby.webm', 'museum-lobby.gif', 'museum-lobby.png', 'museum-lobby.jpg'];  // ロビーで流す動画・GIF（この名前でアップロード。前にあるものが先）
   const PHONE_FULL = false;                               // true にすると、スマホでも動画を切らずに全部見せる（そのぶん小さくなる）
+  const LIGHT_AT = [52, 30];                              // 最初にスポットライトが当たっている場所（左から何%、上から何%）
   const MEDIUM = 'NovelAI — Base Prompt';                  // 作品の札の「技法」の行
   // ============================
   const $ = (s, r) => (r || document).querySelector(s), body = document.body, root = document.documentElement;
@@ -38,8 +39,8 @@
       if (vid) { m.muted = m.loop = m.autoplay = m.playsInline = true; ['playsinline', 'muted', 'disablepictureinpicture', 'disableremoteplayback'].forEach((a) => m.setAttribute(a, '')); m.setAttribute('controlslist', 'nodownload'); m.preload = 'auto'; } else { m.alt = ''; m.draggable = false; }
       m.addEventListener(vid ? 'loadeddata' : 'load', () => {
         const w = m.videoWidth || m.naturalWidth, h = m.videoHeight || m.naturalHeight; if (w && h) box.style.setProperty('--ar', w + ' / ' + h);
-        const lamp = document.createElement('i'); lamp.className = 'mu-lamp';
-        box.replaceChildren(m, lamp, shield()); box.classList.add('on'); $('.mu-tap').hidden = false;
+        const lamp = document.createElement('i'); lamp.className = 'mu-lamp'; aim(lamp, LIGHT_AT[0], LIGHT_AT[1]);
+        box.replaceChildren(m, lamp, shield()); box.classList.add('on'); $('.mu-tap').hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('lamp')));   // 暗やみに、光がつく
         if (vid) { const go = () => m.play && m.play().catch(() => {}); go(); new IntersectionObserver((en) => (en[0].isIntersecting ? go() : m.pause())).observe(box); }   // 見えないときは止めておく
       }, { once: true });
       m.addEventListener('error', () => next(i + 1), { once: true }); m.src = u;
@@ -47,14 +48,11 @@
     next(0);
   }
   const shield = () => { const s = document.createElement('i'); s.className = 'mu-shield'; return s; };
-  // タップした場所に、うっすらスポットライト（光のところをもう一度タップすると消える）
-  $('.mu-screen').addEventListener('click', (e) => {
-    const box = e.currentTarget, lamp = $('.mu-lamp', box); if (!lamp) return;
-    const r = box.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * 100, y = ((e.clientY - r.top) / r.height) * 100;
-    const lx = parseFloat(lamp.style.getPropertyValue('--lx')) || 50, ly = parseFloat(lamp.style.getPropertyValue('--ly')) || 50;
-    const near = Math.hypot((x - lx) * r.width, (y - ly) * r.height) / 100 < r.width * 0.12;
-    if (box.classList.contains('lamp') && near) return box.classList.remove('lamp');
-    lamp.style.setProperty('--lx', x.toFixed(1) + '%'); lamp.style.setProperty('--ly', y.toFixed(1) + '%'); box.classList.add('lamp');
+  // タップした場所へ、スポットライトが動く（パソコンは、文字の上をクリックしても動く）
+  const aim = (lamp, x, y) => { lamp.style.setProperty('--lx', x.toFixed(1) + '%'); lamp.style.setProperty('--ly', y.toFixed(1) + '%'); };
+  lob.addEventListener('click', (e) => {
+    const box = $('.mu-screen'), lamp = $('.mu-lamp', box); if (!lamp || e.target.closest('a, button') || !(e.target.closest('.mu-screen') || matchMedia('(min-width: 900px)').matches)) return;
+    const r = box.getBoundingClientRect(); aim(lamp, ((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100);
   });
   if (PHONE_FULL) lob.classList.add('mu-full');
   lobby();
