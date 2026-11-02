@@ -91,4 +91,13 @@ const sound = [
     b_artist: "XXsniffles",
     b_url: "https://youtu.be/0iH128h7Yoc?si=ezkdz5LrtHPlnPnv",
   },
+  {
+    chara: "Gigi",
+    a_title: "或る街のギギ",
+    a_artist: "sasakure.UK",
+    a_url: "https://youtu.be/z7DP5LxKqeM?si=U3VwI--2SF02etWc",
+    b_title: "レプリカ",
+    b_artist: "sasakure.UK",
+    b_url: "https://youtu.be/NZecO3stfmI?si=sYY5VfoU4qGsl0dw",
+  },
 ];
