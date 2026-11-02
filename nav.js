@@ -15,7 +15,7 @@
     ['COMPOSITION', '構図置き場', 'composition.html', 4],
     ['SOUNDTRACK', 'サウンドトラック', 'soundtrack.html', 5],
     ['Q&A', '質問解答', 'qa.html', 6],
-    ['COLUMN', 'コラム', '', 7],
+    ['COLUMN', 'コラム', 'column.html', 7],
   ];
   const RAILWAY = 'MT. MAYAMA RAILWAY';
   const ANNOUNCE = '本日も MT. MAYAMA 登山鉄道をご利用いただき、ありがとうございます ✦ THANK YOU FOR RIDING THE MT. MAYAMA LINE ✦ 工事中の駅には、まだ止まりません ✦ ';
@@ -47,7 +47,7 @@
     raf = jobs.length ? requestAnimationFrame(tick) : 0;
   }
 
-  // ---------- 電車（キャンバスに描く。5両編成。まん中の3両目に、行き先の表示） ----------
+  // ---------- 電車（キャンバス。5両編成。3両目に行き先） ----------
   // 3両目が画面をおおったところで、ページが切りかわります。着いたページでは、ゆっくり加速して走り去ります
   const CARS = 5, MID = 2;   // 車両の数と、行き先の表示がある車両（0 から数える）
   function train(en, jp, top) {
